@@ -1,32 +1,20 @@
-using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Application.Features.Workflows;
 using MediatR;
 
 namespace FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowStage;
 
 public sealed class AddWorkflowStageCommandHandler : IRequestHandler<AddWorkflowStageCommand, Guid>
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IWorkflowRepository _repository;
 
-    public AddWorkflowStageCommandHandler(ApplicationDbContext db) => _db = db;
+    public AddWorkflowStageCommandHandler(IWorkflowRepository repository) => _repository = repository;
 
-    public async Task<Guid> Handle(AddWorkflowStageCommand request, CancellationToken cancellationToken)
-    {
-        var version = await _db.WorkflowVersions.FindAsync(
-            new object[] { request.WorkflowVersionId },
-            cancellationToken);
-
-        if (version is null)
-            throw new KeyNotFoundException("Workflow version was not found.");
-
-        var stage = new WorkflowStage(
+    public Task<Guid> Handle(AddWorkflowStageCommand request, CancellationToken cancellationToken)
+        => _repository.AddStageAsync(
             request.WorkflowVersionId,
             request.Name,
             request.Code,
             request.SortOrder,
-            request.RequiresQualityControl);
-
-        version.AddStage(stage);
-        await _db.SaveChangesAsync(cancellationToken);
-        return stage.Id;
-    }
+            request.RequiresQualityControl,
+            cancellationToken);
 }
