@@ -31,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<IComponentRepository, ComponentRepository>();
         services.AddScoped<IComponentReadRepository, ComponentReadRepository>();
         services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IOrderReadRepository, OrderReadRepository>();
 
         return services;
     }
