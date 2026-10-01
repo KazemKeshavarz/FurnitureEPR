@@ -35,6 +35,24 @@ public sealed class Order
         OrderNumber = orderNumber.Trim();
     }
 
+    public void ReplaceItems(IEnumerable<OrderItem> items)
+    {
+        if (Status != OrderStatus.Draft)
+            throw new InvalidOperationException("Only draft orders can be modified.");
+
+        _items.Clear();
+        foreach (var item in items)
+            AddItem(item);
+    }
+
+    public void ChangeCustomer(Guid customerId)
+    {
+        if (Status != OrderStatus.Draft)
+            throw new InvalidOperationException("Only draft orders can be modified.");
+
+        CustomerId = customerId;
+    }
+
     public void AddItem(OrderItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
