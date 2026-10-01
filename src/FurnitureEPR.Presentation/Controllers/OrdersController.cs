@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
+using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
 using FurnitureEPR.Application.Features.Orders.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,18 @@ public sealed class OrdersController : ControllerBase
     {
         var id = await _sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPost("{id:guid}/finalize")]
+    public async Task<IActionResult> Finalize(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new FinalizeOrderCommand(id),
+            cancellationToken);
+
+        return NoContent();
     }
 
     [HttpGet("{id:guid}")]
