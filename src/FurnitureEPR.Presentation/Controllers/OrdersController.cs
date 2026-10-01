@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
+using FurnitureEPR.Application.Features.Orders.Commands.UpdateDraftOrder;
 using FurnitureEPR.Application.Features.Orders.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,19 @@ public sealed class OrdersController : ControllerBase
     {
         var id = await _sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}/draft")]
+    public async Task<IActionResult> UpdateDraft(
+        Guid id,
+        UpdateDraftOrderCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.OrderId)
+            return BadRequest("Route id and OrderId must match.");
+
+        await _sender.Send(command, cancellationToken);
+        return NoContent();
     }
 
     [HttpPost("{id:guid}/finalize")]
