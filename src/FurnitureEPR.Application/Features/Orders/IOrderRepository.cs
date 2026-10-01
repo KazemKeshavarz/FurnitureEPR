@@ -4,5 +4,5 @@ namespace FurnitureEPR.Application.Features.Orders;
 
 public interface IOrderRepository
 {
-    Task AddAsync(Order order, CancellationToken cancellationToken);
+    Task<Order> CreateAsync(Guid customerId, Guid? createdByUserId, IReadOnlyCollection<Commands.CreateOrder.CreateOrderItem> items, CancellationToken cancellationToken);
 }
