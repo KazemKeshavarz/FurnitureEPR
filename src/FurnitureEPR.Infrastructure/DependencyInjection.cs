@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using FurnitureEPR.Application.Features.Customers;
 using FurnitureEPR.Application.Features.Categories;
 using FurnitureEPR.Application.Features.Products;
+using FurnitureEPR.Application.Features.Components;
 using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +28,9 @@ public static class DependencyInjection
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductReadRepository, ProductReadRepository>();
+        services.AddScoped<IComponentRepository, ComponentRepository>();
+        services.AddScoped<IComponentReadRepository, ComponentReadRepository>();
+        services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
 
         return services;
     }
