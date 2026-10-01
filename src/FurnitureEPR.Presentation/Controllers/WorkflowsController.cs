@@ -1,0 +1,46 @@
+using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowStage;
+using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
+using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace FurnitureEPR.Presentation.Controllers;
+
+[ApiController]
+[Route("api/workflows")]
+public sealed class WorkflowsController : ControllerBase
+{
+    private readonly ISender _sender;
+
+    public WorkflowsController(ISender sender) => _sender = sender;
+
+    [HttpPost]
+    public async Task<ActionResult<Guid>> Create(
+        CreateWorkflowCommand command,
+        CancellationToken cancellationToken)
+        => Ok(await _sender.Send(command, cancellationToken));
+
+    [HttpPost("{workflowId:guid}/versions")]
+    public async Task<ActionResult<Guid>> CreateVersion(
+        Guid workflowId,
+        CreateWorkflowVersionCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (workflowId != command.WorkflowId)
+            return BadRequest("Route id and WorkflowId must match.");
+
+        return Ok(await _sender.Send(command, cancellationToken));
+    }
+
+    [HttpPost("versions/{versionId:guid}/stages")]
+    public async Task<ActionResult<Guid>> AddStage(
+        Guid versionId,
+        AddWorkflowStageCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (versionId != command.WorkflowVersionId)
+            return BadRequest("Route id and WorkflowVersionId must match.");
+
+        return Ok(await _sender.Send(command, cancellationToken));
+    }
+}
