@@ -1,6 +1,5 @@
 using FurnitureEPR.Application.Features.Customers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Application.Features.Customers.Queries.GetCustomer;
 
