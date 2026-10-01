@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IProductComponentRepository, ProductComponentRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderReadRepository, OrderReadRepository>();
+        services.AddScoped<IOrderFinalizationRepository, OrderFinalizationRepository>();
 
         return services;
     }
