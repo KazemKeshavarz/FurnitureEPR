@@ -15,6 +15,29 @@ public sealed class WorkflowRepository : IWorkflowRepository
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<Guid> AddStageAsync(
+        Guid workflowVersionId,
+        string name,
+        string code,
+        int sortOrder,
+        bool requiresQualityControl,
+        CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.FindAsync(
+            new object[] { workflowVersionId },
+            cancellationToken);
+
+        if (version is null)
+            throw new KeyNotFoundException("Workflow version was not found.");
+
+        var stage = new WorkflowStage(
+            workflowVersionId, name, code, sortOrder, requiresQualityControl);
+
+        version.AddStage(stage);
+        await _db.SaveChangesAsync(cancellationToken);
+        return stage.Id;
+    }
+
     public async Task AddVersionAsync(WorkflowVersion version, CancellationToken cancellationToken)
     {
         var exists = await _db.WorkflowDefinitions.FindAsync(
