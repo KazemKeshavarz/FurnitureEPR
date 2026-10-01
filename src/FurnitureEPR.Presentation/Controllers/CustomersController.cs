@@ -1,4 +1,6 @@
 using FurnitureEPR.Application.Features.Customers.Commands.CreateCustomer;
+using FurnitureEPR.Application.Features.Customers.Queries.GetCustomer;
+using FurnitureEPR.Application.Features.Customers.Queries.GetCustomers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,8 +25,26 @@ public sealed class CustomersController : ControllerBase
         var customerId = await _sender.Send(command, cancellationToken);
 
         return CreatedAtAction(
-            nameof(Create),
+            nameof(GetById),
             new { id = customerId },
             customerId);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<CustomerListItemDto>>> GetList(
+        [FromQuery] GetCustomersQuery query,
+        CancellationToken cancellationToken)
+        => Ok(await _sender.Send(query, cancellationToken));
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<CustomerDto>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var customer = await _sender.Send(
+            new GetCustomerQuery(id),
+            cancellationToken);
+
+        return customer is null ? NotFound() : Ok(customer);
     }
 }
