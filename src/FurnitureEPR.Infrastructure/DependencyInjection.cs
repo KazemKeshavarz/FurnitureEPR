@@ -1,6 +1,8 @@
 using FurnitureEPR.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using FurnitureEPR.Application.Features.Customers;
+using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FurnitureEPR.Infrastructure;
@@ -16,6 +18,8 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
 
         return services;
     }
