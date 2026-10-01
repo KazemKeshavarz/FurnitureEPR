@@ -20,6 +20,7 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerReadRepository, CustomerReadRepository>();
 
         return services;
     }
