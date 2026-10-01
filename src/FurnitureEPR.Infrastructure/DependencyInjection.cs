@@ -2,6 +2,8 @@ using FurnitureEPR.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using FurnitureEPR.Application.Features.Customers;
+using FurnitureEPR.Application.Features.Categories;
+using FurnitureEPR.Application.Features.Products;
 using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +23,10 @@ public static class DependencyInjection
 
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ICustomerReadRepository, CustomerReadRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
 
         return services;
     }
