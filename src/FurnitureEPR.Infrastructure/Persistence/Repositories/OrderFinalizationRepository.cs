@@ -18,7 +18,7 @@ public sealed class OrderFinalizationRepository : IOrderFinalizationRepository
         if (order is null)
             throw new KeyNotFoundException("Order was not found.");
 
-        order.SetOrderNumber($"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}"[..22]);
+        order.SetOrderNumber($"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}");
         order.FinalizeOrder();
 
         await _db.SaveChangesAsync(cancellationToken);
