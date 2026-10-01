@@ -7,5 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\FurnitureEPR.Model\FurnitureEPR.Model.csproj" />
     <PackageReference Include="MediatR" Version="14.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
   </ItemGroup>
 </Project>
