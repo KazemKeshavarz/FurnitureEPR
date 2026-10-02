@@ -209,6 +209,57 @@ QC
 
 Reject نباید با تغییر مستقیم `CurrentStageId` انجام شود؛ باید به‌عنوان یک رفتار مشخص Runtime و با History قابل ردیابی پیاده شود.
 
+## QC
+
+اگر یک Stage با `RequiresQualityControl = true` تعریف شده باشد، Runtime اجازه عبور از آن Stage را بدون Approval نمی‌دهد.
+
+فرآیند:
+
+```text
+Current Stage
+     ↓
+Requires QC?
+  ├── No  → Transition
+  └── Yes
+       ↓
+      QC
+    ├── Approve → Transition مجاز
+    └── Reject  → همان Stage
+                    ↓
+                  اصلاح
+                    ↓
+                    QC مجدد
+```
+
+هر بار QC یک `OrderWorkflowQualityCheck` مستقل ثبت می‌کند:
+
+- Stage
+- Result
+- Comment
+- CheckedAtUtc
+- CheckedByUserId
+
+بنابراین اگر یک Stage چند بار Reject و بعد Approve شود، تمام Attemptها قابل مشاهده هستند.
+
+Endpoint فعلی:
+
+`POST /api/orders/{orderId}/workflow/{categoryId}/quality-control`
+
+بدنه شامل نتیجه QC است:
+
+```json
+{
+  "result": "Approved",
+  "comment": "..."
+}
+```
+
+در حالت Reject، CurrentStage تغییر نمی‌کند. Approval فقط آخرین QC همان Stage را معتبر می‌کند و سپس Transition می‌تواند اجرا شود.
+
+فعلاً `CheckedByUserId` از لایه Authorization دریافت نمی‌شود و مقدار آن در Command فعلی خالی است. اتصال آن به کاربر احراز هویت‌شده در مرحله Authorization انجام خواهد شد.
+
+---
+
 ## Parallel Production
 
 بعضی فرآیندهای واقعی ممکن است چند Stage را هم‌زمان اجرا کنند.
@@ -253,6 +304,7 @@ Start ───────┤             ├── Next
 - API اجرای Transition
 - Read API سفارش همراه با Current Stage و History
 - API تکمیل Workflow و تکمیل خودکار Order پس از پایان همه Workflowها
+- QC قابل تکرار با ثبت تمام Attemptها
 - ثبت Repository در DI
 
 ### مرحله بعد
