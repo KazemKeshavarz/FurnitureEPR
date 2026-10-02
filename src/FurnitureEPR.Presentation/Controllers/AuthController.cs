@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FurnitureEPR.Application.Security;
 using FurnitureEPR.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ public sealed class AuthController : ControllerBase
     public ActionResult<CurrentUserResponse> Me()
     {
         return Ok(new CurrentUserResponse(
-            User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier),
-            User.FindFirstValue(System.Security.Claims.ClaimTypes.Name),
-            User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().ToArray(),
+            User.FindFirstValue(ClaimTypes.NameIdentifier),
+            User.FindFirstValue(ClaimTypes.Name),
+            User.FindAll(ClaimTypes.Role).Select(x => x.Value).Distinct().ToArray(),
             User.FindAll(IdentityClaimTypes.RoleId).Select(x => x.Value).Distinct().ToArray()));
     }
 
