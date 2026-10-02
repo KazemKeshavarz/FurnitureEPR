@@ -6,6 +6,7 @@ namespace FurnitureEPR.Model.Workflow;
 public sealed class OrderWorkflowInstance
 {
     private readonly List<OrderWorkflowHistory> _history = new();
+    private readonly List<OrderWorkflowQualityCheck> _qualityChecks = new();
 
     private OrderWorkflowInstance() { }
 
@@ -23,6 +24,7 @@ public sealed class OrderWorkflowInstance
     public WorkflowVersion WorkflowVersion { get; private set; } = null!;
     public WorkflowStage CurrentStage { get; private set; } = null!;
     public IReadOnlyCollection<OrderWorkflowHistory> History => _history.AsReadOnly();
+    public IReadOnlyCollection<OrderWorkflowQualityCheck> QualityChecks => _qualityChecks.AsReadOnly();
 
     // این Instance اجرای یک نسخه مشخص از Workflow را برای یک Order و Category نگه می‌دارد.
     public OrderWorkflowInstance(
@@ -72,6 +74,37 @@ public sealed class OrderWorkflowInstance
             nextStageId,
             transitionId));
     }
+
+    // نتیجه QC مرحله فعلی را ثبت می‌کند. در حالت Reject، Stage تغییر نمی‌کند تا اصلاح انجام شود.
+    public void RecordQualityControl(
+        Guid stageId,
+        QualityControlResult result,
+        string? comment = null,
+        Guid? checkedByUserId = null)
+    {
+        if (Status != OrderWorkflowInstanceStatus.Active)
+            throw new InvalidOperationException("Only active workflow instances can be checked.");
+
+        if (stageId != CurrentStageId)
+            throw new InvalidOperationException("Quality control must be performed on the current stage.");
+
+        _qualityChecks.Add(new OrderWorkflowQualityCheck(
+            Id,
+            stageId,
+            result,
+            comment,
+            checkedByUserId));
+    }
+
+    // برای Stageهای دارای QC، آخرین نتیجه باید Approved باشد تا Transition مجاز شود.
+    public bool IsQualityControlApproved(Guid stageId)
+        => !QualityChecks.Any(x => x.StageId == stageId)
+            ? false
+            : QualityChecks
+                .Where(x => x.StageId == stageId)
+                .OrderByDescending(x => x.CheckedAtUtc)
+                .First()
+                .Result == QualityControlResult.Approved;
 
     // زمانی استفاده می‌شود که Workflow مربوط به این Category به پایان رسیده باشد.
     public void Complete()
