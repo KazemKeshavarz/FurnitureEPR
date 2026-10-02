@@ -1,3 +1,4 @@
+using FurnitureEPR.Application.Features.Categories.Commands.AssignWorkflow;
 using FurnitureEPR.Application.Features.Categories.Commands.CreateCategory;
 using FurnitureEPR.Application.Features.Categories.Queries;
 using MediatR;
@@ -10,6 +11,7 @@ namespace FurnitureEPR.Presentation.Controllers;
 public sealed class CategoriesController : ControllerBase
 {
     private readonly ISender _sender;
+
     public CategoriesController(ISender sender) => _sender = sender;
 
     [HttpPost]
@@ -20,7 +22,9 @@ public sealed class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<CategoryListItemDto>>> GetList([FromQuery] GetCategoriesQuery query, CancellationToken ct)
+    public async Task<ActionResult<PagedResult<CategoryListItemDto>>> GetList(
+        [FromQuery] GetCategoriesQuery query,
+        CancellationToken ct)
         => Ok(await _sender.Send(query, ct));
 
     [HttpGet("{id:guid}")]
@@ -28,5 +32,18 @@ public sealed class CategoriesController : ControllerBase
     {
         var item = await _sender.Send(new GetCategoryQuery(id), ct);
         return item is null ? NotFound() : Ok(item);
+    }
+
+    [HttpPost("{categoryId:guid}/workflow")]
+    public async Task<IActionResult> AssignWorkflow(
+        Guid categoryId,
+        AssignCategoryWorkflowCommand command,
+        CancellationToken ct)
+    {
+        if (categoryId != command.CategoryId)
+            return BadRequest("Route id and CategoryId must match.");
+
+        await _sender.Send(command, ct);
+        return NoContent();
     }
 }
