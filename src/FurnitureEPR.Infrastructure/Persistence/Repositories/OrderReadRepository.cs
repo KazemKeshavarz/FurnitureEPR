@@ -33,6 +33,27 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         c.ComponentId,
                         c.ComponentName,
                         c.Quantity)).ToList()))
+                    .ToList(),
+                x.Workflows.Select(w => new OrderWorkflowInstanceDto(
+                    w.Id,
+                    w.CategoryId,
+                    w.Category.Name,
+                    w.WorkflowVersionId,
+                    w.WorkflowVersion.VersionNumber,
+                    w.CurrentStageId,
+                    w.CurrentStage.Name,
+                    w.Status.ToString(),
+                    w.StartedAtUtc,
+                    w.CompletedAtUtc,
+                    w.History
+                        .OrderBy(h => h.OccurredAtUtc)
+                        .Select(h => new OrderWorkflowHistoryDto(
+                            h.Id,
+                            h.FromStageId,
+                            h.ToStageId,
+                            h.TransitionId,
+                            h.OccurredAtUtc))
+                        .ToList()))
                     .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
 }
