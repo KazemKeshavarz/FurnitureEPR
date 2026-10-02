@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Workflows;
 using FurnitureEPR.Model.Workflow;
+using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Infrastructure.Persistence.Repositories;
 
@@ -55,7 +56,45 @@ public sealed class WorkflowRepository : IWorkflowRepository
         return stage.Id;
     }
 
-    public async Task AddVersionAsync(WorkflowVersion version, CancellationToken cancellationToken)
+    public async Task<Guid> AddTransitionAsync(
+        Guid workflowVersionId,
+        Guid fromStageId,
+        Guid toStageId,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.FindAsync(
+            new object[] { workflowVersionId },
+            cancellationToken);
+
+        if (version is null)
+            throw new KeyNotFoundException("Workflow version was not found.");
+
+        // هر دو مرحله باید متعلق به همان نسخه گردشکار باشند.
+        var stages = await _db.WorkflowStages
+            .Where(x => x.WorkflowVersionId == workflowVersionId)
+            .Where(x => x.Id == fromStageId || x.Id == toStageId)
+            .ToListAsync(cancellationToken);
+
+        if (stages.Count != 2)
+            throw new InvalidOperationException(
+                "Both transition stages must belong to the workflow version.");
+
+        var transition = new WorkflowTransition(
+            workflowVersionId,
+            fromStageId,
+            toStageId,
+            name);
+
+        version.AddTransition(transition);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        return transition.Id;
+    }
+
+    public async Task AddVersionAsync(
+        WorkflowVersion version,
+        CancellationToken cancellationToken)
     {
         var exists = await _db.WorkflowDefinitions.FindAsync(
             new object[] { version.WorkflowDefinitionId },
