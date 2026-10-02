@@ -189,6 +189,34 @@ Stage C
 
 History باعث می‌شود بتوانیم بفهمیم سفارش از چه مسیر واقعی‌ای عبور کرده است.
 
+## Identity و Claims
+
+احراز هویت Runtime بر پایه ASP.NET Core Identity و JWT انجام می‌شود.
+
+Claims اصلی Token:
+
+- `ClaimTypes.NameIdentifier` → شناسه User
+- `ClaimTypes.Name` → نام کاربر
+- `ClaimTypes.Role` → نام Role
+- `role_id` → شناسه Guid همان Role
+
+وجود `role_id` مهم است چون WorkflowStage به‌جای وابستگی به Identity، فقط `ResponsibleRoleId` را نگه می‌دارد.
+
+Runtime هنگام Transition، QC و Complete بررسی می‌کند که Role شناسه‌شده در Claimهای کاربر با `ResponsibleRoleId` مرحله فعلی منطبق باشد.
+
+Endpointهای Identity:
+
+```text
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+`/api/auth/me` برای بررسی Claims فعلی در زمان توسعه در نظر گرفته شده است.
+
+یک Seeder اختیاری نیز برای ساخت Role و Administrator اولیه وجود دارد و با `IdentitySeed:Enabled` فعال می‌شود. Password نباید در Repository نگهداری شود و در محیط واقعی باید از User Secrets یا Environment Variables تأمین شود.
+
+---
+
 ## QC
 
 در Workflow Definition، هر Stage می‌تواند `RequiresQualityControl = true` داشته باشد.
