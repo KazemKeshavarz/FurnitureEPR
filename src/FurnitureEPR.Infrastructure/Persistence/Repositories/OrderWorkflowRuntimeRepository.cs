@@ -52,6 +52,44 @@ public sealed class OrderWorkflowRuntimeRepository
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task CompleteAsync(
+        Guid orderId,
+        Guid categoryId,
+        CancellationToken cancellationToken)
+    {
+        // Instance مربوط به Category را پیدا می‌کنیم تا فقط همان بخش از Workflow کامل شود.
+        var instance = await _db.OrderWorkflowInstances
+            .SingleOrDefaultAsync(
+                x => x.OrderId == orderId
+                    && x.CategoryId == categoryId,
+                cancellationToken);
+
+        if (instance is null)
+            throw new KeyNotFoundException("Order workflow instance was not found.");
+
+        instance.Complete();
+
+        // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
+        var hasIncompleteWorkflow = await _db.OrderWorkflowInstances
+            .AnyAsync(
+                x => x.OrderId == orderId
+                    && x.Status == OrderWorkflowInstanceStatus.Active,
+                cancellationToken);
+
+        if (!hasIncompleteWorkflow)
+        {
+            var order = await _db.Orders
+                .SingleOrDefaultAsync(x => x.Id == orderId, cancellationToken);
+
+            if (order is null)
+                throw new KeyNotFoundException("Order was not found.");
+
+            order.MarkCompleted();
+        }
+
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task MoveAsync(
         Guid orderId,
         Guid categoryId,
