@@ -1,10 +1,12 @@
 using FurnitureEPR.Model.Customers;
+using FurnitureEPR.Model.Workflow;
 
 namespace FurnitureEPR.Model.Orders;
 
 public sealed class Order
 {
     private readonly List<OrderItem> _items = new();
+    private readonly List<OrderWorkflowInstance> _workflows = new();
 
     private Order() { }
 
@@ -18,6 +20,7 @@ public sealed class Order
 
     public Customer Customer { get; private set; } = null!;
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<OrderWorkflowInstance> Workflows => _workflows.AsReadOnly();
 
     public Order(Guid customerId, Guid? createdByUserId = null)
     {
