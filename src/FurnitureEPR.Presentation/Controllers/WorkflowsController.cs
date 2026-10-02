@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowStage;
+using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowTransition;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
 using MediatR;
@@ -36,6 +37,18 @@ public sealed class WorkflowsController : ControllerBase
     public async Task<ActionResult<Guid>> AddStage(
         Guid versionId,
         AddWorkflowStageCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (versionId != command.WorkflowVersionId)
+            return BadRequest("Route id and WorkflowVersionId must match.");
+
+        return Ok(await _sender.Send(command, cancellationToken));
+    }
+
+    [HttpPost("versions/{versionId:guid}/transitions")]
+    public async Task<ActionResult<Guid>> AddTransition(
+        Guid versionId,
+        AddWorkflowTransitionCommand command,
         CancellationToken cancellationToken)
     {
         if (versionId != command.WorkflowVersionId)
