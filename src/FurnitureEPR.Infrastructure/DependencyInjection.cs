@@ -1,8 +1,8 @@
 using FurnitureEPR.Application.Features.Categories;
 using FurnitureEPR.Application.Features.Components;
 using FurnitureEPR.Application.Features.Customers;
-using FurnitureEPR.Application.Features.Products;
 using FurnitureEPR.Application.Features.Orders;
+using FurnitureEPR.Application.Features.Products;
 using FurnitureEPR.Infrastructure.Persistence;
 using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderReadRepository, OrderReadRepository>();
         services.AddScoped<IOrderFinalizationRepository, OrderFinalizationRepository>();
         services.AddScoped<IOrderDraftRepository, OrderDraftRepository>();
+        services.AddScoped<IOrderWorkflowRuntimeRepository, OrderWorkflowRuntimeRepository>();
 
         return services;
     }
