@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Application.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Infrastructure.Persistence.Repositories;
@@ -8,6 +9,7 @@ public sealed class OrderWorkflowRuntimeRepository
     : IOrderWorkflowRuntimeRepository
 {
     private readonly ApplicationDbContext _db;
+    private readonly ICurrentUser _currentUser;
 
     public OrderWorkflowRuntimeRepository(ApplicationDbContext db)
         => _db = db;
@@ -39,6 +41,13 @@ public sealed class OrderWorkflowRuntimeRepository
         if (currentStage is null)
             throw new InvalidOperationException("Current workflow stage was not found.");
 
+        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId
+            && !_currentUser.RoleIds.Contains(responsibleRoleId))
+        {
+            throw new UnauthorizedAccessException(
+                "The current user is not responsible for this workflow stage.");
+        }
+
         if (!currentStage.RequiresQualityControl)
             throw new InvalidOperationException(
                 "Quality control is not required for the current stage.");
@@ -67,7 +76,7 @@ public sealed class OrderWorkflowRuntimeRepository
         if (instance is null)
             throw new KeyNotFoundException("Order workflow instance was not found.");
 
-        instance.Complete();
+        var currentStage = await _db.WorkflowStages\n            .SingleAsync(x => x.Id == instance.CurrentStageId, cancellationToken);\n\n        // تکمیل Workflow نیز باید توسط Role مسئول Stage فعلی انجام شود.\n        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId\n            && !_currentUser.RoleIds.Contains(responsibleRoleId))\n        {\n            throw new UnauthorizedAccessException(\n                "The current user is not responsible for this workflow stage.");\n        }\n\n        instance.Complete();
 
         // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
         var hasIncompleteWorkflow = await _db.OrderWorkflowInstances
