@@ -7,4 +7,5 @@ public sealed record AddWorkflowStageCommand(
     string Name,
     string Code,
     int SortOrder,
-    bool RequiresQualityControl) : IRequest<Guid>;
+    bool RequiresQualityControl,
+    Guid? ResponsibleRoleId) : IRequest<Guid>;
