@@ -29,6 +29,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<WorkflowVersion> WorkflowVersions => Set<WorkflowVersion>();
     public DbSet<WorkflowStage> WorkflowStages => Set<WorkflowStage>();
     public DbSet<WorkflowTransition> WorkflowTransitions => Set<WorkflowTransition>();
+    public DbSet<OrderWorkflowInstance> OrderWorkflowInstances => Set<OrderWorkflowInstance>();
+    public DbSet<OrderWorkflowHistory> OrderWorkflowHistories => Set<OrderWorkflowHistory>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
