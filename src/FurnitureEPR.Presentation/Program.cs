@@ -42,6 +42,8 @@ builder.Services
         };
     });
 
+builder.Services.AddAuthorization();
+
 builder.Services
     .AddIdentityCore<ApplicationUser>()
     .AddRoles<ApplicationRole>()
