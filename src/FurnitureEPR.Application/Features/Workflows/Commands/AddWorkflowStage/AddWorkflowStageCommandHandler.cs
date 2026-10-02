@@ -16,5 +16,6 @@ public sealed class AddWorkflowStageCommandHandler : IRequestHandler<AddWorkflow
             request.Code,
             request.SortOrder,
             request.RequiresQualityControl,
+            request.ResponsibleRoleId,
             cancellationToken);
 }
