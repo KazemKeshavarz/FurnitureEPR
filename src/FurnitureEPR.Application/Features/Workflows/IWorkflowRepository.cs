@@ -24,4 +24,9 @@ public interface IWorkflowRepository
         Guid toStageId,
         string name,
         CancellationToken cancellationToken);
+
+    // بعد از انتشار، ساختار نسخه دیگر قابل تغییر نیست.
+    Task PublishVersionAsync(
+        Guid workflowVersionId,
+        CancellationToken cancellationToken);
 }
