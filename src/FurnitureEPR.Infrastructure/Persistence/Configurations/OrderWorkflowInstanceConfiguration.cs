@@ -22,7 +22,7 @@ public sealed class OrderWorkflowInstanceConfiguration : IEntityTypeConfiguratio
 
         // هر Instance به یک سفارش تعلق دارد و حذف سفارش باید Runtime آن را هم حذف کند.
         builder.HasOne(x => x.Order)
-            .WithMany()
+            .WithMany(x => x.Workflows)
             .HasForeignKey(x => x.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
