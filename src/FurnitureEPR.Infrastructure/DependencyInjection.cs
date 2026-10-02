@@ -1,11 +1,12 @@
+using FurnitureEPR.Application.Features.Categories;
+using FurnitureEPR.Application.Features.Components;
+using FurnitureEPR.Application.Features.Customers;
+using FurnitureEPR.Application.Features.Products;
+using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Infrastructure.Persistence;
+using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using FurnitureEPR.Application.Features.Customers;
-using FurnitureEPR.Application.Features.Categories;
-using FurnitureEPR.Application.Features.Products;
-using FurnitureEPR.Application.Features.Components;
-using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FurnitureEPR.Infrastructure;
