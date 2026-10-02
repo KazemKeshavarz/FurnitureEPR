@@ -85,6 +85,15 @@ public sealed class Order
         FinalizedAtUtc = DateTime.UtcNow;
     }
 
+    // وقتی همه Runtimeهای سفارش تمام شدند، خود سفارش نیز وارد وضعیت Completed می‌شود.
+    public void MarkCompleted()
+    {
+        if (Status != OrderStatus.Active)
+            throw new InvalidOperationException("Only active orders can be completed.");
+
+        Status = OrderStatus.Completed;
+    }
+
     // سفارش تکمیل‌شده قابل لغو نیست، اما سایر وضعیت‌های غیرتکمیل‌شده می‌توانند لغو شوند.
     public void Cancel()
     {
