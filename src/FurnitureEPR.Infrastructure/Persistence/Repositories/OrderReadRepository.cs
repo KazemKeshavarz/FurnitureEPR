@@ -53,6 +53,16 @@ public sealed class OrderReadRepository : IOrderReadRepository
                             h.ToStageId,
                             h.TransitionId,
                             h.OccurredAtUtc))
+                        .ToList(),
+                    w.QualityChecks
+                        .OrderBy(q => q.CheckedAtUtc)
+                        .Select(q => new OrderWorkflowQualityCheckDto(
+                            q.Id,
+                            q.StageId,
+                            q.Result.ToString(),
+                            q.Comment,
+                            q.CheckedAtUtc,
+                            q.CheckedByUserId))
                         .ToList()))
                     .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
