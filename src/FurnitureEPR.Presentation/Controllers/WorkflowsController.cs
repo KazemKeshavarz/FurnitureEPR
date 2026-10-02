@@ -2,6 +2,7 @@ using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowStage;
 using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowTransition;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
+using FurnitureEPR.Application.Features.Workflows.Commands.PublishWorkflowVersion;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,5 +56,17 @@ public sealed class WorkflowsController : ControllerBase
             return BadRequest("Route id and WorkflowVersionId must match.");
 
         return Ok(await _sender.Send(command, cancellationToken));
+    }
+
+    [HttpPost("versions/{versionId:guid}/publish")]
+    public async Task<IActionResult> Publish(
+        Guid versionId,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new PublishWorkflowVersionCommand(versionId),
+            cancellationToken);
+
+        return NoContent();
     }
 }
