@@ -20,6 +20,7 @@ public sealed class WorkflowTransition
         Guid toStageId,
         string name)
     {
+        // Transition باید بین دو Stage متفاوت از همان WorkflowVersion تعریف شود.
         if (fromStageId == toStageId)
             throw new ArgumentException("A transition cannot point to the same stage.");
 
