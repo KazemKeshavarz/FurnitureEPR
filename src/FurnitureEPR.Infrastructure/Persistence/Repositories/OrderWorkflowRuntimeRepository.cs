@@ -17,6 +17,7 @@ public sealed class OrderWorkflowRuntimeRepository
         Guid transitionId,
         CancellationToken cancellationToken)
     {
+        // ابتدا Runtime Instance مشخص سفارش و Category را پیدا می‌کنیم.
         var instance = await _db.OrderWorkflowInstances
             .SingleOrDefaultAsync(
                 x => x.OrderId == orderId
@@ -27,6 +28,7 @@ public sealed class OrderWorkflowRuntimeRepository
             throw new KeyNotFoundException(
                 "Order workflow instance was not found.");
 
+        // Transition باید متعلق به همان نسخه Workflow باشد که سفارش هنگام Finalize گرفته است.
         var transition = await _db.WorkflowTransitions
             .SingleOrDefaultAsync(
                 x => x.Id == transitionId
@@ -37,10 +39,12 @@ public sealed class OrderWorkflowRuntimeRepository
             throw new InvalidOperationException(
                 "The transition does not belong to the workflow version of this order.");
 
+        // سفارش فقط می‌تواند از Stage فعلی خودش حرکت کند.
         if (transition.FromStageId != instance.CurrentStageId)
             throw new InvalidOperationException(
                 "The transition is not valid for the current stage.");
 
+        // Stage مقصد نیز باید در همان نسخه و فعال باشد.
         var targetStageExists = await _db.WorkflowStages
             .AnyAsync(
                 x => x.Id == transition.ToStageId
