@@ -21,6 +21,7 @@ public sealed class WorkflowRepository : IWorkflowRepository
         string code,
         int sortOrder,
         bool requiresQualityControl,
+        Guid? responsibleRoleId,
         CancellationToken cancellationToken)
     {
         var version = await _db.WorkflowVersions.FindAsync(
@@ -30,8 +31,24 @@ public sealed class WorkflowRepository : IWorkflowRepository
         if (version is null)
             throw new KeyNotFoundException("Workflow version was not found.");
 
+        // نقش در Infrastructure به Identity متصل است؛ Domain فقط شناسه آن را می‌شناسد.
+        if (responsibleRoleId.HasValue)
+        {
+            var roleExists = await _db.Roles.AnyAsync(
+                x => x.Id == responsibleRoleId.Value,
+                cancellationToken);
+
+            if (!roleExists)
+                throw new KeyNotFoundException("Responsible role was not found.");
+        }
+
         var stage = new WorkflowStage(
-            workflowVersionId, name, code, sortOrder, requiresQualityControl);
+            workflowVersionId,
+            name,
+            code,
+            sortOrder,
+            requiresQualityControl,
+            responsibleRoleId);
 
         version.AddStage(stage);
         await _db.SaveChangesAsync(cancellationToken);
