@@ -2,6 +2,7 @@ using FurnitureEPR.Application.Features.Orders.Commands.CompleteOrderWorkflow;
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.MoveOrderWorkflow;
+using FurnitureEPR.Application.Features.Orders.Commands.RecordQualityControl;
 using FurnitureEPR.Application.Features.Orders.Commands.UpdateDraftOrder;
 using FurnitureEPR.Application.Features.Orders.Queries;
 using MediatR;
@@ -80,6 +81,21 @@ public sealed class OrdersController : ControllerBase
             new CompleteOrderWorkflowCommand(orderId, categoryId),
             cancellationToken);
 
+        return NoContent();
+    }
+
+    // ثبت نتیجه QC برای Stage فعلی؛ Reject باعث خروج از Stage نمی‌شود و امکان QC مجدد وجود دارد.
+    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/quality-control")]
+    public async Task<IActionResult> RecordQualityControl(
+        Guid orderId,
+        Guid categoryId,
+        RecordQualityControlCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (orderId != command.OrderId || categoryId != command.CategoryId)
+            return BadRequest("Route ids and command ids must match.");
+
+        await _sender.Send(command, cancellationToken);
         return NoContent();
     }
 
