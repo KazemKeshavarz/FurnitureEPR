@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
+using FurnitureEPR.Application.Features.Orders.Commands.MoveOrderWorkflow;
 using FurnitureEPR.Application.Features.Orders.Commands.UpdateDraftOrder;
 using FurnitureEPR.Application.Features.Orders.Queries;
 using MediatR;
@@ -44,6 +45,24 @@ public sealed class OrdersController : ControllerBase
     {
         await _sender.Send(
             new FinalizeOrderCommand(id),
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    // اجرای یک Transition مشخص روی گردشکار Runtime سفارش.
+    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/transitions/{transitionId:guid}")]
+    public async Task<IActionResult> MoveWorkflow(
+        Guid orderId,
+        Guid categoryId,
+        Guid transitionId,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new MoveOrderWorkflowCommand(
+                orderId,
+                categoryId,
+                transitionId),
             cancellationToken);
 
         return NoContent();
