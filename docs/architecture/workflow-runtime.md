@@ -143,6 +143,28 @@ Endpoint فعلی:
 
 این endpoint عمداً Transition را دریافت می‌کند، نه نام مرحله مقصد را؛ بنابراین حرکت سفارش فقط از مسیرهایی انجام می‌شود که Admin در Workflow Definition تعریف کرده است.
 
+## Completion
+
+هر `OrderWorkflowInstance` می‌تواند به‌صورت مستقل کامل شود.
+
+```text
+Workflow Instance
+      ↓
+Complete
+      ↓
+آیا Workflow فعال دیگری برای Order وجود دارد؟
+   ├── بله → Order همچنان Active
+   └── خیر → Order = Completed
+```
+
+Endpoint فعلی:
+
+`POST /api/orders/{orderId}/workflow/{categoryId}/complete`
+
+بنابراین در سفارش‌های دارای چند Category، پایان یک Workflow باعث تکمیل زودهنگام کل Order نمی‌شود.
+
+---
+
 ## History
 
 `OrderWorkflowHistory` برای Audit و پیگیری مسیر سفارش استفاده می‌شود.
@@ -229,6 +251,8 @@ Start ───────┤             ├── Next
 - اجرای Transition
 - ثبت History
 - API اجرای Transition
+- Read API سفارش همراه با Current Stage و History
+- API تکمیل Workflow و تکمیل خودکار Order پس از پایان همه Workflowها
 - ثبت Repository در DI
 
 ### مرحله بعد
