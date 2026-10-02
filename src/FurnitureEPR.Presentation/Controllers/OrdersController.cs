@@ -1,3 +1,4 @@
+using FurnitureEPR.Application.Features.Orders.Commands.CompleteOrderWorkflow;
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.MoveOrderWorkflow;
@@ -63,6 +64,20 @@ public sealed class OrdersController : ControllerBase
                 orderId,
                 categoryId,
                 transitionId),
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    // پایان دادن به Workflow یک Category مشخص؛ خود Order فقط پس از پایان همه Workflowها Completed می‌شود.
+    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/complete")]
+    public async Task<IActionResult> CompleteWorkflow(
+        Guid orderId,
+        Guid categoryId,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new CompleteOrderWorkflowCommand(orderId, categoryId),
             cancellationToken);
 
         return NoContent();
