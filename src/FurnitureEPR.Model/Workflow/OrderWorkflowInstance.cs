@@ -24,6 +24,7 @@ public sealed class OrderWorkflowInstance
     public WorkflowStage CurrentStage { get; private set; } = null!;
     public IReadOnlyCollection<OrderWorkflowHistory> History => _history.AsReadOnly();
 
+    // این Instance اجرای یک نسخه مشخص از Workflow را برای یک Order و Category نگه می‌دارد.
     public OrderWorkflowInstance(
         Guid orderId,
         Guid categoryId,
@@ -50,6 +51,7 @@ public sealed class OrderWorkflowInstance
         StartedAtUtc = DateTime.UtcNow;
     }
 
+    // حرکت بین Stageها فقط از طریق Transition معتبر انجام می‌شود و هم‌زمان در History ثبت می‌گردد.
     public void MoveTo(Guid nextStageId, Guid transitionId)
     {
         if (Status != OrderWorkflowInstanceStatus.Active)
@@ -71,6 +73,7 @@ public sealed class OrderWorkflowInstance
             transitionId));
     }
 
+    // زمانی استفاده می‌شود که Workflow مربوط به این Category به پایان رسیده باشد.
     public void Complete()
     {
         if (Status != OrderWorkflowInstanceStatus.Active)
