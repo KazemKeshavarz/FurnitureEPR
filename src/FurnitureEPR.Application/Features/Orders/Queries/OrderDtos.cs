@@ -20,6 +20,14 @@ public sealed record OrderWorkflowHistoryDto(
     Guid TransitionId,
     DateTime OccurredAtUtc);
 
+public sealed record OrderWorkflowQualityCheckDto(
+    Guid Id,
+    Guid StageId,
+    string Result,
+    string? Comment,
+    DateTime CheckedAtUtc,
+    Guid? CheckedByUserId);
+
 public sealed record OrderWorkflowInstanceDto(
     Guid Id,
     Guid CategoryId,
@@ -31,7 +39,8 @@ public sealed record OrderWorkflowInstanceDto(
     string Status,
     DateTime StartedAtUtc,
     DateTime? CompletedAtUtc,
-    IReadOnlyCollection<OrderWorkflowHistoryDto> History);
+    IReadOnlyCollection<OrderWorkflowHistoryDto> History,
+    IReadOnlyCollection<OrderWorkflowQualityCheckDto> QualityChecks);
 
 public sealed record OrderDto(
     Guid Id,
