@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Security;
+using FurnitureEPR.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,17 @@ public sealed class AuthController : ControllerBase
 
     public AuthController(IIdentityService identityService)
         => _identityService = identityService;
+
+    [Authorize]
+    [HttpGet("me")]
+    public ActionResult<CurrentUserResponse> Me()
+    {
+        return Ok(new CurrentUserResponse(
+            User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier),
+            User.FindFirstValue(System.Security.Claims.ClaimTypes.Name),
+            User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(x => x.Value).Distinct().ToArray(),
+            User.FindAll(IdentityClaimTypes.RoleId).Select(x => x.Value).Distinct().ToArray()));
+    }
 
     [AllowAnonymous]
     [HttpPost("login")]
@@ -40,3 +52,9 @@ public sealed record LoginRequest(
 public sealed record LoginResponse(
     string AccessToken,
     DateTime ExpiresAtUtc);
+
+public sealed record CurrentUserResponse(
+    string? UserId,
+    string? UserName,
+    IReadOnlyCollection<string> Roles,
+    IReadOnlyCollection<string> RoleIds);
