@@ -16,7 +16,7 @@ public sealed class WorkflowRepository : IWorkflowRepository
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task AddStageAsync(
+    public async Task<Guid> AddStageAsync(
         Guid workflowVersionId,
         string name,
         string code,
@@ -53,6 +53,8 @@ public sealed class WorkflowRepository : IWorkflowRepository
 
         version.AddStage(stage);
         await _db.SaveChangesAsync(cancellationToken);
+
+        return stage.Id;
     }
 
     public async Task<Guid> AddTransitionAsync(
