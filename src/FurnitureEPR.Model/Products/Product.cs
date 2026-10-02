@@ -7,7 +7,10 @@ public sealed class Product
     private Product() { }
 
     public Guid Id { get; private set; }
+
+    // هر Product دقیقاً به یک Category تعلق دارد.
     public Guid CategoryId { get; private set; }
+
     public string Name { get; private set; } = null!;
 
     public Category Category { get; private set; } = null!;
