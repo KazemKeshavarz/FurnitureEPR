@@ -11,8 +11,13 @@ public sealed class OrderWorkflowRuntimeRepository
     private readonly ApplicationDbContext _db;
     private readonly ICurrentUser _currentUser;
 
-    public OrderWorkflowRuntimeRepository(ApplicationDbContext db)
-        => _db = db;
+    public OrderWorkflowRuntimeRepository(
+        ApplicationDbContext db,
+        ICurrentUser currentUser)
+    {
+        _db = db;
+        _currentUser = currentUser;
+    }
 
     public async Task RecordQualityControlAsync(
         Guid orderId,
@@ -137,6 +142,14 @@ public sealed class OrderWorkflowRuntimeRepository
             .SingleAsync(
                 x => x.Id == instance.CurrentStageId,
                 cancellationToken);
+
+        // اجرای Transition نیز فقط برای Role مسئول Stage فعلی مجاز است.
+        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId
+            && !_currentUser.RoleIds.Contains(responsibleRoleId))
+        {
+            throw new UnauthorizedAccessException(
+                "The current user is not responsible for this workflow stage.");
+        }
 
         // اگر Stage فعلی نیاز به QC دارد، ابتدا باید آخرین QC آن Approved شده باشد.
         if (currentStage.RequiresQualityControl
