@@ -27,6 +27,7 @@ public sealed class Order
         CreatedAtUtc = DateTime.UtcNow;
     }
 
+    // شماره سفارش قبل از Finalize شدن باید تعیین شود تا سفارش وارد چرخه عملیاتی شود.
     public void SetOrderNumber(string orderNumber)
     {
         if (string.IsNullOrWhiteSpace(orderNumber))
@@ -35,6 +36,7 @@ public sealed class Order
         OrderNumber = orderNumber.Trim();
     }
 
+    // آیتم‌های سفارش فقط تا زمانی قابل تغییر هستند که سفارش Draft باشد.
     public void ReplaceItems(IEnumerable<OrderItem> items)
     {
         if (Status != OrderStatus.Draft)
@@ -45,6 +47,7 @@ public sealed class Order
             AddItem(item);
     }
 
+    // مشتری سفارش نیز فقط در مرحله Draft قابل تغییر است.
     public void ChangeCustomer(Guid customerId)
     {
         if (Status != OrderStatus.Draft)
@@ -63,6 +66,7 @@ public sealed class Order
         _items.Add(item);
     }
 
+    // Finalize مرز بین سفارش قابل ویرایش و سفارش عملیاتی است.
     public void FinalizeOrder()
     {
         if (Status != OrderStatus.Draft)
@@ -78,6 +82,7 @@ public sealed class Order
         FinalizedAtUtc = DateTime.UtcNow;
     }
 
+    // سفارش تکمیل‌شده قابل لغو نیست، اما سایر وضعیت‌های غیرتکمیل‌شده می‌توانند لغو شوند.
     public void Cancel()
     {
         if (Status == OrderStatus.Completed)
