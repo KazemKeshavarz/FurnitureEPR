@@ -6,6 +6,7 @@ using FurnitureEPR.Application.Features.Orders.Commands.RecordQualityControl;
 using FurnitureEPR.Application.Features.Orders.Commands.UpdateDraftOrder;
 using FurnitureEPR.Application.Features.Orders.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FurnitureEPR.Presentation.Controllers;
@@ -53,6 +54,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // اجرای یک Transition مشخص روی گردشکار Runtime سفارش.
+    [Authorize]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/transitions/{transitionId:guid}")]
     public async Task<IActionResult> MoveWorkflow(
         Guid orderId,
@@ -71,6 +73,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // پایان دادن به Workflow یک Category مشخص؛ خود Order فقط پس از پایان همه Workflowها Completed می‌شود.
+    [Authorize]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/complete")]
     public async Task<IActionResult> CompleteWorkflow(
         Guid orderId,
@@ -85,6 +88,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // ثبت نتیجه QC برای Stage فعلی؛ Reject باعث خروج از Stage نمی‌شود و امکان QC مجدد وجود دارد.
+    [Authorize]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/quality-control")]
     public async Task<IActionResult> RecordQualityControl(
         Guid orderId,
