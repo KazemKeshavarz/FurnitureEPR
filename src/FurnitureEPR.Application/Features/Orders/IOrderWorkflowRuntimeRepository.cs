@@ -8,4 +8,10 @@ public interface IOrderWorkflowRuntimeRepository
         Guid categoryId,
         Guid transitionId,
         CancellationToken cancellationToken);
+
+    // گردشکار یک Category را کامل می‌کند و در صورت پایان همه Workflowهای سفارش، خود Order را نیز Completed می‌کند.
+    Task CompleteAsync(
+        Guid orderId,
+        Guid categoryId,
+        CancellationToken cancellationToken);
 }
