@@ -22,6 +22,7 @@ public sealed class WorkflowVersion
         VersionNumber = versionNumber;
     }
 
+    // انتشار یعنی این نسخه برای استفاده Runtime آماده است و دیگر نباید ساختارش تغییر کند.
     public void Publish()
     {
         if (_stages.Count == 0)
@@ -30,6 +31,7 @@ public sealed class WorkflowVersion
         IsPublished = true;
     }
 
+    // Stage فقط قبل از Publish شدن نسخه قابل اضافه شدن است.
     public void AddStage(WorkflowStage stage)
     {
         if (IsPublished)
@@ -39,6 +41,7 @@ public sealed class WorkflowVersion
         _stages.Add(stage);
     }
 
+    // Transition نیز بخشی از ساختار ثابت نسخه Workflow است.
     public void AddTransition(WorkflowTransition transition)
     {
         if (IsPublished)
