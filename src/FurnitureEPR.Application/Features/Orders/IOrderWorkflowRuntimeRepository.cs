@@ -1,3 +1,5 @@
+using FurnitureEPR.Model.Workflow;
+
 namespace FurnitureEPR.Application.Features.Orders;
 
 public interface IOrderWorkflowRuntimeRepository
@@ -13,5 +15,14 @@ public interface IOrderWorkflowRuntimeRepository
     Task CompleteAsync(
         Guid orderId,
         Guid categoryId,
+        CancellationToken cancellationToken);
+
+    // نتیجه QC مرحله فعلی را ثبت می‌کند؛ Reject سفارش را در همان Stage نگه می‌دارد.
+    Task RecordQualityControlAsync(
+        Guid orderId,
+        Guid categoryId,
+        QualityControlResult result,
+        string? comment,
+        Guid? checkedByUserId,
         CancellationToken cancellationToken);
 }
