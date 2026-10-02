@@ -16,4 +16,12 @@ public interface IWorkflowRepository
         bool requiresQualityControl,
         Guid? responsibleRoleId,
         CancellationToken cancellationToken);
+
+    // مسیر حرکت سفارش بین دو مرحله را در نسخه مشخص گردشکار ثبت می‌کند.
+    Task<Guid> AddTransitionAsync(
+        Guid workflowVersionId,
+        Guid fromStageId,
+        Guid toStageId,
+        string name,
+        CancellationToken cancellationToken);
 }
