@@ -20,6 +20,9 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<JwtOptions>(jwtSection);
+builder.Services.Configure<IdentitySeedOptions>(
+    builder.Configuration.GetSection(IdentitySeedOptions.SectionName));
+builder.Services.AddScoped<IdentitySeeder>();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
@@ -58,5 +61,11 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+    await identitySeeder.SeedAsync();
+}
 
 app.Run();
