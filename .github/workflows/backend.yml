@@ -1,0 +1,29 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, feature/project-initialization ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+
+      - name: نصب .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore FurnitureEPR.sln
+
+      - name: Build
+        run: dotnet build FurnitureEPR.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test FurnitureEPR.sln --configuration Release --no-build --verbosity normal
