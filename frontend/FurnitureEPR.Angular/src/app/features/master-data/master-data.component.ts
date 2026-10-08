@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 interface Category { id: string; name: string; }
 interface Product { id: string; name: string; categoryId: string; categoryName?: string; }
 interface ComponentItem { id: string; name: string; }
+interface ProductComponent { id:string; componentId:string; componentName:string; defaultQuantity:number; }
 
 @Component({
   selector: 'app-master-data',
@@ -51,16 +52,17 @@ interface ComponentItem { id: string; name: string; }
     .page{max-width:1000px;margin:0 auto}.heading span{font-size:12px;color:#286f93;font-weight:700}.heading h1{margin:5px 0 18px;color:#102a35;font-size:25px}
     .tab-content{padding:18px 2px}.form-card{padding:18px;border-radius:18px;margin-bottom:14px}.form-card h2{font-size:16px;margin:0 0 14px;color:#102a35}
     form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}.form-card mat-form-field{width:100%}.form-card button{height:56px;background:#286f93;color:#fff}
-    .list{display:grid;gap:9px}.row{padding:14px;display:flex;align-items:center;gap:12px;border-radius:15px}.row mat-icon{color:#286f93}.row strong,.row small{display:block}.row strong{color:#102a35}.row small{color:#839096;font-size:11px;margin-top:3px}.empty{padding:28px;text-align:center;color:#8b989d;background:#fff;border-radius:16px}.error{margin-top:12px;padding:12px;border-radius:12px;background:#fff0f0;color:#a33}
+    .list{display:grid;gap:9px}.row{padding:14px;display:flex;align-items:center;gap:12px;border-radius:15px}.row mat-icon{color:#286f93}.row strong,.row small{display:block}.row strong{color:#102a35}.row small{color:#839096;font-size:11px;margin-top:3px}.empty{padding:28px;text-align:center;color:#8b989d;background:#fff;border-radius:16px}.hint{font-size:12px;color:#839096;margin:-7px 0 15px}.selected-title{font-weight:700;color:#286f93;margin:12px 2px}.error{margin-top:12px;padding:12px;border-radius:12px;background:#fff0f0;color:#a33}
     @media(max-width:700px){.heading h1{font-size:21px}.tab-content{padding-top:12px}form{grid-template-columns:1fr}.form-card button{width:100%;height:50px}.row{min-height:60px}}
   `]
 })
 export class MasterDataComponent {
   private readonly http=inject(HttpClient); private readonly fb=inject(FormBuilder);
-  categories:Category[]=[]; products:Product[]=[]; components:ComponentItem[]=[]; saving=false; error='';
+  categories:Category[]=[]; products:Product[]=[]; components:ComponentItem[]=[]; productComponents:ProductComponent[]=[]; selectedProductName=''; saving=false; error='';
   categoryForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(150)]]});
   productForm=this.fb.nonNullable.group({categoryId:['',Validators.required],name:['',[Validators.required,Validators.maxLength(150)]]});
   componentForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(150)]]});
+  productComponentForm=this.fb.nonNullable.group({productId:['',Validators.required],componentId:['',Validators.required],defaultQuantity:[1,[Validators.required,Validators.min(0.001)]]});
   constructor(){this.loadAll();}
   loadAll():void{
     this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({next:r=>this.categories=r.items??r.data??r,error:()=>this.error='دریافت دسته‌بندی‌ها انجام نشد.'});
@@ -71,4 +73,6 @@ export class MasterDataComponent {
   addProduct():void{if(this.productForm.invalid)return;this.saving=true;this.http.post(`${environment.apiUrl}/products`,this.productForm.getRawValue()).subscribe({next:()=>{this.productForm.reset();this.loadAll();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت محصول انجام نشد.';this.saving=false}})}
   addComponent():void{if(this.componentForm.invalid)return;this.saving=true;this.http.post(`${environment.apiUrl}/components`,this.componentForm.getRawValue()).subscribe({next:()=>{this.componentForm.reset();this.loadAll();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت جزء انجام نشد.';this.saving=false}})}
   categoryName(id:string):string{return this.categories.find(x=>x.id===id)?.name||'بدون دسته‌بندی';}
+  loadProductComponents(id:string):void{this.productComponents=[];const product=this.products.find(x=>x.id===id);this.selectedProductName=product?.name||'';if(!id)return;this.http.get<any>(`${environment.apiUrl}/products/${id}`).subscribe({next:r=>this.productComponents=r.components??[],error:()=>this.error='دریافت اجزای محصول انجام نشد.'});}
+  addProductComponent():void{if(this.productComponentForm.invalid)return;this.saving=true;const value=this.productComponentForm.getRawValue();this.http.post(`${environment.apiUrl}/products/${value.productId}/components`,{componentId:value.componentId,defaultQuantity:value.defaultQuantity}).subscribe({next:()=>{this.loadProductComponents(value.productId);this.productComponentForm.patchValue({componentId:'',defaultQuantity:1});this.saving=false},error:e=>{this.error=e.error?.detail||'افزودن جزء به محصول انجام نشد.';this.saving=false}})}
 }
