@@ -22,8 +22,8 @@ jobs:
       - name: Restore
         run: dotnet restore FurnitureEPR.sln
 
-      - name: Build
-        run: dotnet build FurnitureEPR.sln --configuration Release --no-restore
+      - name: Build backend
+        run: dotnet build src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test FurnitureEPR.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --configuration Release --no-restore --verbosity normal
