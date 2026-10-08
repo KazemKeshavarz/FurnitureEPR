@@ -6,7 +6,7 @@ namespace FurnitureEPR.Presentation.Controllers;
 
 [ApiController]
 [Route("api/identity")]
-[Authorize(Policy = PermissionNames.IdentityManageUsers)]
+[Authorize]
 public sealed class IdentityController : ControllerBase
 {
     private readonly IIdentityManagementService _identityService;
@@ -14,11 +14,13 @@ public sealed class IdentityController : ControllerBase
     public IdentityController(IIdentityManagementService identityService)
         => _identityService = identityService;
 
+    [Authorize(Policy = PermissionNames.IdentityManageUsers)]
     [HttpGet("users")]
     public async Task<ActionResult<IReadOnlyCollection<IdentityUserDto>>> GetUsers(
         CancellationToken cancellationToken)
         => Ok(await _identityService.GetUsersAsync(cancellationToken));
 
+    [Authorize(Policy = PermissionNames.IdentityManageUsers)]
     [HttpGet("users/{userId:guid}")]
     public async Task<ActionResult<IdentityUserDto>> GetUser(
         Guid userId,
@@ -28,12 +30,14 @@ public sealed class IdentityController : ControllerBase
         return user is null ? NotFound() : Ok(user);
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageUsers)]
     [HttpPost("users")]
     public async Task<ActionResult<IdentityUserDto>> CreateUser(
         CreateIdentityUserRequest request,
         CancellationToken cancellationToken)
         => Ok(await _identityService.CreateUserAsync(request, cancellationToken));
 
+    [Authorize(Policy = PermissionNames.IdentityManageRoles)]
     [HttpPost("users/{userId:guid}/roles/{roleId:guid}")]
     public async Task<IActionResult> AssignRole(
         Guid userId,
@@ -44,6 +48,7 @@ public sealed class IdentityController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageRoles)]
     [HttpDelete("users/{userId:guid}/roles/{roleId:guid}")]
     public async Task<IActionResult> RemoveRole(
         Guid userId,
@@ -54,6 +59,7 @@ public sealed class IdentityController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageClaims)]
     [HttpPost("users/{userId:guid}/permissions")]
     public async Task<IActionResult> AddUserPermission(
         Guid userId,
@@ -68,6 +74,7 @@ public sealed class IdentityController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageClaims)]
     [HttpDelete("users/{userId:guid}/permissions")]
     public async Task<IActionResult> RemoveUserPermission(
         Guid userId,
@@ -82,6 +89,7 @@ public sealed class IdentityController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageRoles)]
     [HttpGet("roles")]
     public async Task<ActionResult<IReadOnlyCollection<IdentityRoleDto>>> GetRoles(
         CancellationToken cancellationToken)
