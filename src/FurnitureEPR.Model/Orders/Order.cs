@@ -18,6 +18,11 @@ public sealed class Order
     public DateTime? FinalizedAtUtc { get; private set; }
     public Guid? CreatedByUserId { get; private set; }
 
+    // مبالغ سفارش به‌صورت Snapshot ذخیره می‌شوند تا تغییرات بعدی قیمت محصول، سفارش قبلی را تغییر ندهد.
+    public decimal TotalAmount { get; private set; }
+    public decimal DiscountAmount { get; private set; }
+    public decimal FinalAmount { get; private set; }
+
     public Customer Customer { get; private set; } = null!;
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
     public IReadOnlyCollection<OrderWorkflowInstance> Workflows => _workflows.AsReadOnly();
@@ -30,7 +35,6 @@ public sealed class Order
         CreatedAtUtc = DateTime.UtcNow;
     }
 
-    // شماره سفارش قبل از Finalize شدن باید تعیین شود تا سفارش وارد چرخه عملیاتی شود.
     public void SetOrderNumber(string orderNumber)
     {
         if (string.IsNullOrWhiteSpace(orderNumber))
@@ -39,7 +43,6 @@ public sealed class Order
         OrderNumber = orderNumber.Trim();
     }
 
-    // آیتم‌های سفارش فقط تا زمانی قابل تغییر هستند که سفارش Draft باشد.
     public void ReplaceItems(IEnumerable<OrderItem> items)
     {
         if (Status != OrderStatus.Draft)
@@ -48,9 +51,10 @@ public sealed class Order
         _items.Clear();
         foreach (var item in items)
             AddItem(item);
+
+        RecalculateAmounts(DiscountAmount);
     }
 
-    // مشتری سفارش نیز فقط در مرحله Draft قابل تغییر است.
     public void ChangeCustomer(Guid customerId)
     {
         if (Status != OrderStatus.Draft)
@@ -69,7 +73,21 @@ public sealed class Order
         _items.Add(item);
     }
 
-    // Finalize مرز بین سفارش قابل ویرایش و سفارش عملیاتی است.
+    // تخفیف نباید از مبلغ کل سفارش بیشتر باشد و مبلغ نهایی در سمت سرور محاسبه می‌شود.
+    public void RecalculateAmounts(decimal discountAmount)
+    {
+        if (discountAmount < 0)
+            throw new ArgumentOutOfRangeException(nameof(discountAmount));
+
+        TotalAmount = _items.Sum(x => x.TotalPrice);
+
+        if (discountAmount > TotalAmount)
+            throw new InvalidOperationException("Discount amount cannot be greater than total amount.");
+
+        DiscountAmount = discountAmount;
+        FinalAmount = TotalAmount - DiscountAmount;
+    }
+
     public void FinalizeOrder()
     {
         if (Status != OrderStatus.Draft)
@@ -81,11 +99,11 @@ public sealed class Order
         if (string.IsNullOrWhiteSpace(OrderNumber))
             throw new InvalidOperationException("Order number must be assigned before finalization.");
 
+        RecalculateAmounts(DiscountAmount);
         Status = OrderStatus.Active;
         FinalizedAtUtc = DateTime.UtcNow;
     }
 
-    // وقتی همه Runtimeهای سفارش تمام شدند، خود سفارش نیز وارد وضعیت Completed می‌شود.
     public void MarkCompleted()
     {
         if (Status != OrderStatus.Active)
@@ -94,7 +112,6 @@ public sealed class Order
         Status = OrderStatus.Completed;
     }
 
-    // سفارش تکمیل‌شده قابل لغو نیست، اما سایر وضعیت‌های غیرتکمیل‌شده می‌توانند لغو شوند.
     public void Cancel()
     {
         if (Status == OrderStatus.Completed)
