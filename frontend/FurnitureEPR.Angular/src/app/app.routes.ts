@@ -45,14 +45,12 @@ export const routes: Routes = [
       {
         path: 'admin/users',
         canActivate: [permissionGuard('identity.manage_users')],
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'کاربران', description: 'مدیریت کاربران سامانه در مرحله بعدی تکمیل می‌شود.' }
+        loadComponent: () => import('./features/admin/admin-users.component').then(m => m.AdminUsersComponent)
       },
       {
         path: 'admin/roles',
         canActivate: [permissionGuard('identity.manage_roles')],
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'نقش‌ها و دسترسی‌ها', description: 'مدیریت نقش‌ها و دسترسی‌ها در مرحله بعدی تکمیل می‌شود.' }
+        loadComponent: () => import('./features/admin/admin-roles.component').then(m => m.AdminRolesComponent)
       }
     ]
   },
