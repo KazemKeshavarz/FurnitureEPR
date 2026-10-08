@@ -104,6 +104,21 @@ public sealed class OrdersController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet]
+    public async Task<ActionResult<PagedOrderDto>> Get(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        [FromQuery] FurnitureEPR.Model.Orders.OrderStatus? status = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(
+            new GetOrdersQuery(page, pageSize, search, status),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<OrderDto>> GetById(
         Guid id,
