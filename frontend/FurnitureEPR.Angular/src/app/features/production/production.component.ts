@@ -132,7 +132,7 @@ export class ProductionComponent {
  quality(t:Task,approved:boolean):void{
    this.busy=true;
    this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/quality-control`,{
-     orderId:t.orderId,categoryId:t.categoryId,result:approved?'Approved':'Rejected',comment:this.qcComment.trim()||null
+     orderId:t.orderId,categoryId:t.categoryId,result:approved?0:1,comment:this.qcComment.trim()||null
    }).subscribe({next:()=>{this.qcTaskId='';this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'ثبت کنترل کیفیت انجام نشد.';this.busy=false;}});
  }
  move(t:Task,tr:Transition):void{
