@@ -104,6 +104,21 @@ public sealed class OrdersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
+    [HttpGet("production/tasks")]
+    public async Task<ActionResult<PagedProductionTaskDto>> GetProductionTasks(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(
+            new GetProductionTasksQuery(page, pageSize, search),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
     [HttpGet]
     public async Task<ActionResult<PagedOrderDto>> Get(
         [FromQuery] int page = 1,
