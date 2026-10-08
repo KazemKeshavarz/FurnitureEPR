@@ -16,6 +16,7 @@ public sealed class CreateOrderCommandHandler : IRequestHandler<CreateOrderComma
         var order = await _repository.CreateAsync(
             request.CustomerId,
             request.CreatedByUserId,
+            request.DiscountAmount,
             request.Items,
             cancellationToken);
 
