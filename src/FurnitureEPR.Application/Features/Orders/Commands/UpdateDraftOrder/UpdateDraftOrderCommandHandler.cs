@@ -14,6 +14,7 @@ public sealed class UpdateDraftOrderCommandHandler : IRequestHandler<UpdateDraft
         => _repository.UpdateAsync(
             request.OrderId,
             request.CustomerId,
+            request.DiscountAmount,
             request.Items,
             cancellationToken);
 }
