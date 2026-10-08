@@ -51,8 +51,6 @@ public sealed class Order
         _items.Clear();
         foreach (var item in items)
             AddItem(item);
-
-        RecalculateAmounts(DiscountAmount);
     }
 
     public void ChangeCustomer(Guid customerId)
