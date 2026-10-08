@@ -71,4 +71,50 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         .ToList()))
                     .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
+    public async Task<PagedOrderDto> GetPagedAsync(
+        int page,
+        int pageSize,
+        string? search,
+        FurnitureEPR.Model.Orders.OrderStatus? status,
+        CancellationToken cancellationToken)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _db.Orders.AsNoTracking();
+
+        if (status.HasValue)
+            query = query.Where(x => x.Status == status.Value);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(x =>
+                x.OrderNumber.Contains(term) ||
+                x.Customer.Name.Contains(term));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new OrderListItemDto(
+                x.Id,
+                x.OrderNumber,
+                x.CustomerId,
+                x.Customer.Name,
+                x.Status.ToString(),
+                x.CreatedAtUtc,
+                x.FinalizedAtUtc,
+                x.TotalAmount,
+                x.DiscountAmount,
+                x.FinalAmount,
+                x.Items.Count))
+            .ToListAsync(cancellationToken);
+
+        return new PagedOrderDto(items, page, pageSize, totalCount);
+    }
+
 }
