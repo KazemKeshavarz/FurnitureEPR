@@ -92,6 +92,27 @@ public sealed class OrderWorkflowRuntimeRepository
                 "The current user is not responsible for this workflow stage.");
         }
 
+        // Stage دارای QC فقط بعد از تأیید آخرین QC قابل تکمیل است.
+        if (currentStage.RequiresQualityControl
+            && !instance.IsQualityControlApproved(currentStage.Id))
+        {
+            throw new InvalidOperationException(
+                "Quality control approval is required before completing the current stage.");
+        }
+
+        // Workflow فقط زمانی قابل تکمیل است که Stage فعلی خروجی نداشته باشد.
+        var hasOutgoingTransition = await _db.WorkflowTransitions
+            .AnyAsync(
+                x => x.WorkflowVersionId == instance.WorkflowVersionId
+                    && x.FromStageId == instance.CurrentStageId,
+                cancellationToken);
+
+        if (hasOutgoingTransition)
+        {
+            throw new InvalidOperationException(
+                "The current stage is not a terminal workflow stage.");
+        }
+
         instance.Complete();
 
         // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
