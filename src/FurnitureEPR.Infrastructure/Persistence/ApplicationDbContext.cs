@@ -1,4 +1,5 @@
 using FurnitureEPR.Infrastructure.Identity;
+using FurnitureEPR.Model.Auditing;
 using FurnitureEPR.Model.Categories;
 using FurnitureEPR.Model.Components;
 using FurnitureEPR.Model.Products;
@@ -17,6 +18,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     {
     }
 
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Component> Components => Set<Component>();
