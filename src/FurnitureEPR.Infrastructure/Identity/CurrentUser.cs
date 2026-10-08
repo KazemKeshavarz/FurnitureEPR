@@ -39,4 +39,14 @@ public sealed class CurrentUser : ICurrentUser
             .Select(x => x.Value)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
+
+    public IReadOnlyCollection<string> Permissions
+        => Principal.FindAll(IdentityClaimTypes.Permission)
+            .Select(x => x.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+    public bool HasPermission(string permission)
+        => !string.IsNullOrWhiteSpace(permission)
+            && Permissions.Contains(permission, StringComparer.OrdinalIgnoreCase);
 }
