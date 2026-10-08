@@ -5,8 +5,8 @@ namespace FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 public sealed record CreateOrderItem(
     Guid ProductId,
     decimal Quantity,
-    decimal UnitPrice,
-    IReadOnlyCollection<CreateOrderItemComponent> Components);
+    IReadOnlyCollection<CreateOrderItemComponent> Components,
+    decimal UnitPrice = 0);
 
 public sealed record CreateOrderItemComponent(
     Guid ComponentId,
@@ -15,5 +15,5 @@ public sealed record CreateOrderItemComponent(
 public sealed record CreateOrderCommand(
     Guid CustomerId,
     Guid? CreatedByUserId,
-    decimal DiscountAmount,
-    IReadOnlyCollection<CreateOrderItem> Items) : IRequest<Guid>;
+    IReadOnlyCollection<CreateOrderItem> Items,
+    decimal DiscountAmount = 0) : IRequest<Guid>;
