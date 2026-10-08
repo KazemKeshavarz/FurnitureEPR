@@ -35,11 +35,11 @@ export class AdminRolesComponent {
   roles:Role[]=[]; saving=false; error=''; permissions=PERMISSIONS;
   form=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(100)]]});
   constructor(){this.load();}
-  load():void{this.http.get<Role[]>('${environment.apiUrl}/identity/roles').subscribe({next:r=>this.roles=r,error:()=>this.error='دریافت نقش‌ها انجام نشد.'})}
-  createRole():void{if(this.form.invalid)return;this.saving=true;this.http.post<Role>('${environment.apiUrl}/identity/roles',this.form.getRawValue()).subscribe({next:role=>{this.roles=[...this.roles,role];this.form.reset();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت نقش انجام نشد.';this.saving=false}})}
+  load():void{this.http.get<Role[]>(`${environment.apiUrl}/identity/roles`).subscribe({next:r=>this.roles=r,error:()=>this.error='دریافت نقش‌ها انجام نشد.'})}
+  createRole():void{if(this.form.invalid)return;this.saving=true;this.http.post<Role>(`${environment.apiUrl}/identity/roles`,this.form.getRawValue()).subscribe({next:role=>{this.roles=[...this.roles,role];this.form.reset();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت نقش انجام نشد.';this.saving=false}})}
   toggle(role:Role,permission:string):void{
     const active=role.permissions.includes(permission);
-    const request=active?this.http.delete('${environment.apiUrl}/identity/roles/'+role.id+'/permissions',{body:{permission}}):this.http.post('${environment.apiUrl}/identity/roles/'+role.id+'/permissions',{permission});
+    const request=active?this.http.delete(`${environment.apiUrl}/identity/roles/`+role.id+'/permissions',{body:{permission}}):this.http.post(`${environment.apiUrl}/identity/roles/`+role.id+'/permissions',{permission});
     request.subscribe({next:()=>this.load(),error:e=>this.error=e.error?.detail||'تغییر دسترسی انجام نشد.'});
   }
 }
