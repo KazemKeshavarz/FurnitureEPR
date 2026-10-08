@@ -84,4 +84,38 @@ public sealed class IdentitySeeder
                 string.Join("; ", addRoleResult.Errors.Select(x => x.Description)));
         }
     }
+
+    private async Task EnsureAdministratorPermissionsAsync(ApplicationRole role)
+    {
+        var permissions = new[]
+        {
+            PermissionNames.WorkflowMove,
+            PermissionNames.WorkflowQualityControl,
+            PermissionNames.WorkflowComplete
+        };
+
+        var existingClaims = await _roleManager.GetClaimsAsync(role);
+
+        foreach (var permission in permissions)
+        {
+            if (existingClaims.Any(x =>
+                x.Type == IdentityClaimTypes.Permission
+                && x.Value.Equals(permission, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            var result = await _roleManager.AddClaimAsync(
+                role,
+                new System.Security.Claims.Claim(
+                    IdentityClaimTypes.Permission,
+                    permission));
+
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    string.Join("; ", result.Errors.Select(x => x.Description)));
+            }
+        }
+    }
 }
