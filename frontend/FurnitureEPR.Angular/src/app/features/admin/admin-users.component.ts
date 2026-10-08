@@ -42,10 +42,10 @@ export class AdminUsersComponent {
   form=this.fb.nonNullable.group({userName:['',[Validators.required,Validators.maxLength(100)]],email:['',[Validators.email]],password:['',[Validators.required,Validators.minLength(6)]]});
   constructor(){this.load();}
   load():void{
-    this.http.get<User[]>('${environment.apiUrl}/identity/users').subscribe({next:r=>this.users=r,error:()=>this.error='دریافت کاربران انجام نشد.'});
-    this.http.get<Role[]>('${environment.apiUrl}/identity/roles').subscribe({next:r=>this.roles=r,error:()=>this.error='دریافت نقش‌ها انجام نشد.'});
+    this.http.get<User[]>(`${environment.apiUrl}/identity/users`).subscribe({next:r=>this.users=r,error:()=>this.error='دریافت کاربران انجام نشد.'});
+    this.http.get<Role[]>(`${environment.apiUrl}/identity/roles`).subscribe({next:r=>this.roles=r,error:()=>this.error='دریافت نقش‌ها انجام نشد.'});
   }
-  createUser():void{if(this.form.invalid)return;this.saving=true;this.http.post<User>('${environment.apiUrl}/identity/users',this.form.getRawValue()).subscribe({next:user=>{this.users=[...this.users,user];this.form.reset();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت کاربر انجام نشد.';this.saving=false}})}
-  assignRole(user:User,roleId:string):void{if(!roleId)return;this.http.post('${environment.apiUrl}/identity/users/'+user.id+'/roles/'+roleId,{}).subscribe({next:()=>this.load(),error:e=>this.error=e.error?.detail||'افزودن نقش انجام نشد.'})}
-  removeRole(user:User,roleId:string):void{this.http.delete('${environment.apiUrl}/identity/users/'+user.id+'/roles/'+roleId).subscribe({next:()=>this.load(),error:e=>this.error=e.error?.detail||'حذف نقش انجام نشد.'})}
+  createUser():void{if(this.form.invalid)return;this.saving=true;this.http.post<User>(`${environment.apiUrl}/identity/users`,this.form.getRawValue()).subscribe({next:user=>{this.users=[...this.users,user];this.form.reset();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت کاربر انجام نشد.';this.saving=false}})}
+  assignRole(user:User,roleId:string):void{if(!roleId)return;this.http.post(`${environment.apiUrl}/identity/users/`+user.id+'/roles/'+roleId,{}).subscribe({next:()=>this.load(),error:e=>this.error=e.error?.detail||'افزودن نقش انجام نشد.'})}
+  removeRole(user:User,roleId:string):void{this.http.delete(`${environment.apiUrl}/identity/users/`+user.id+'/roles/'+roleId).subscribe({next:()=>this.load(),error:e=>this.error=e.error?.detail||'حذف نقش انجام نشد.'})}
 }
