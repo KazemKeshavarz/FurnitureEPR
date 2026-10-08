@@ -17,7 +17,17 @@ public sealed class Category
         SetName(name);
     }
 
-    public void AssignWorkflow(Guid workflowVersionId)\n    {\n        if (workflowVersionId == Guid.Empty)\n            throw new ArgumentException("Workflow version is required.", nameof(workflowVersionId));\n\n        WorkflowVersionId = workflowVersionId;\n    }\n\n    public void RemoveWorkflow() => WorkflowVersionId = null;\n\n    public void SetName(string name)
+    public void AssignWorkflow(Guid workflowVersionId)
+    {
+        if (workflowVersionId == Guid.Empty)
+            throw new ArgumentException("Workflow version is required.", nameof(workflowVersionId));
+
+        WorkflowVersionId = workflowVersionId;
+    }
+
+    public void RemoveWorkflow() => WorkflowVersionId = null;
+
+    public void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name is required.", nameof(name));
