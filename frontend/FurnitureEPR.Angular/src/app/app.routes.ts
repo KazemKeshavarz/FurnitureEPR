@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
-import { permissionGuard } from './core/auth/permission.guard';
+import { anyPermissionGuard, permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -41,6 +41,22 @@ export const routes: Routes = [
         path: 'categories',
         loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
         data: { title: 'دسته‌بندی‌ها', description: 'بخش مدیریت دسته‌بندی‌ها در حال آماده‌سازی است.' }
+      },
+      {
+        path: 'admin',
+        canActivate: [anyPermissionGuard(['identity.manage_users', 'identity.manage_roles'])],
+        loadComponent: () => import('./features/admin/admin-home.component').then(m => m.AdminHomeComponent)
+      },
+      {
+        path: 'admin/master-data',
+        canActivate: [anyPermissionGuard(['identity.manage_users', 'identity.manage_roles'])],
+        loadComponent: () => import('./features/master-data/master-data.component').then(m => m.MasterDataComponent)
+      },
+      {
+        path: 'admin/workflows',
+        canActivate: [permissionGuard('workflow.move')],
+        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
+        data: { title: 'فرآیندهای تولید', description: 'سازنده فرآیندهای تولید در مرحله بعدی تکمیل می‌شود.' }
       },
       {
         path: 'admin/users',
