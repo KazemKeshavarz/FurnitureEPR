@@ -19,8 +19,7 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'سفارش‌ها', description: 'بخش ثبت و پیگیری سفارش‌ها در حال آماده‌سازی است.' }
+        loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
       },
       {
         path: 'production',
