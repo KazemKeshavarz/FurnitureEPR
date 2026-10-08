@@ -12,9 +12,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, request).pipe(
-      tap(response => this.storeToken(response))
-    );
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, request).pipe(tap(response => this.storeToken(response)));
   }
 
   me(): Observable<CurrentUser> {
@@ -32,22 +30,21 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-
     const expiration = Number(localStorage.getItem(EXPIRATION_KEY));
-    return Number.isFinite(expiration) && expiration > Date.now();
+    return !!token && Number.isFinite(expiration) && expiration > Date.now();
   }
 
   getPermissions(): string[] {
-    const payload = this.readPayload();
-    return this.toStringArray(payload?.permission);
+    return this.toStringArray(this.readPayload()?.permission);
   }
 
   getRoles(): string[] {
+    return this.toStringArray(this.readPayload()?.role);
+  }
+
+  getUserName(): string {
     const payload = this.readPayload();
-    return this.toStringArray(payload?.role);
+    return this.toStringValue(payload?.unique_name ?? payload?.name) || 'کاربر سامانه';
   }
 
   hasPermission(permission: string): boolean {
@@ -61,20 +58,12 @@ export class AuthService {
 
   private readPayload(): JwtPayload | null {
     const token = this.getToken();
-    if (!token) {
-      return null;
-    }
-
+    if (!token) return null;
     try {
       const payload = token.split('.')[1];
-      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const decoded = decodeURIComponent(
-        atob(normalized)
-          .split('')
-          .map(character => `%${('00' + character.charCodeAt(0).toString(16)).slice(-2)}`)
-          .join('')
-      );
-
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payload.length / 4) * 4, '=');
+      const decoded = decodeURIComponent(atob(normalized).split('').map(character => `%${('00' + character.charCodeAt(0).toString(16)).slice(-2)}`).join(''));
       return JSON.parse(decoded) as JwtPayload;
     } catch {
       return null;
@@ -82,10 +71,10 @@ export class AuthService {
   }
 
   private toStringArray(value: string | string[] | undefined): string[] {
-    if (Array.isArray(value)) {
-      return value;
-    }
+    return Array.isArray(value) ? value : value ? [value] : [];
+  }
 
-    return value ? [value] : [];
+  private toStringValue(value: unknown): string {
+    return typeof value === 'string' ? value : '';
   }
 }
