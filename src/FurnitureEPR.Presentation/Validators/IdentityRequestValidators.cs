@@ -1,5 +1,6 @@
 using FluentValidation;
 using FurnitureEPR.Presentation.Controllers;
+using FurnitureEPR.Application.Security;
 
 namespace FurnitureEPR.Presentation.Validators;
 
@@ -36,5 +37,25 @@ public sealed class PermissionRequestValidator : AbstractValidator<PermissionReq
             .MaximumLength(150)
             .Matches("^[a-z0-9]+([._-][a-z0-9]+)*$")
             .WithMessage("Permission باید با فرمت معتبر ارسال شود.");
+    }
+}
+
+public sealed class CreateIdentityUserRequestValidator : AbstractValidator<CreateIdentityUserRequest>
+{
+    public CreateIdentityUserRequestValidator()
+    {
+        RuleFor(x => x.UserName)
+            .NotEmpty()
+            .MaximumLength(100);
+
+        RuleFor(x => x.Email)
+            .EmailAddress()
+            .MaximumLength(200)
+            .When(x => !string.IsNullOrWhiteSpace(x.Email));
+
+        RuleFor(x => x.Password)
+            .NotEmpty()
+            .MinimumLength(8)
+            .MaximumLength(200);
     }
 }
