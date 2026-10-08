@@ -7,6 +7,7 @@ public interface IOrderDraftRepository
     Task UpdateAsync(
         Guid orderId,
         Guid customerId,
+        decimal discountAmount,
         IReadOnlyCollection<UpdateDraftOrderItem> items,
         CancellationToken cancellationToken);
 }
