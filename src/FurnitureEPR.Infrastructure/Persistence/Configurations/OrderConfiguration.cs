@@ -10,6 +10,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.OrderNumber).HasMaxLength(50).IsRequired(false);
         builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(x => x.CreatedAtUtc).IsRequired();
+        builder.Property(x => x.TotalAmount).HasPrecision(18, 0).IsRequired();
+        builder.Property(x => x.DiscountAmount).HasPrecision(18, 0).IsRequired();
+        builder.Property(x => x.FinalAmount).HasPrecision(18, 0).IsRequired();
         builder.HasIndex(x => x.OrderNumber).IsUnique().HasFilter("[OrderNumber] IS NOT NULL");
         builder.HasIndex(x => new { x.CustomerId, x.CreatedAtUtc });
         builder.HasOne(x => x.Customer).WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
