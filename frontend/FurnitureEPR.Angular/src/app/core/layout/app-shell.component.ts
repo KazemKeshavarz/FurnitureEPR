@@ -73,6 +73,21 @@ import { AuthService } from '../auth/auth.service';
           @if (canManageUsers) {
             <div class="section-title">مدیریت سامانه</div>
 
+            <a mat-list-item routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>settings</mat-icon>
+              <span matListItemTitle>مدیریت و تعاریف</span>
+            </a>
+
+            <a mat-list-item routerLink="/admin/master-data" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>category</mat-icon>
+              <span matListItemTitle>تعاریف محصول</span>
+            </a>
+
+            <a mat-list-item routerLink="/admin/workflows" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>account_tree</mat-icon>
+              <span matListItemTitle>فرآیندهای تولید</span>
+            </a>
+
             <a mat-list-item routerLink="/admin/users" routerLinkActive="active" (click)="closeOnMobile(drawer)">
               <mat-icon matListItemIcon>manage_accounts</mat-icon>
               <span matListItemTitle>کاربران</span>
