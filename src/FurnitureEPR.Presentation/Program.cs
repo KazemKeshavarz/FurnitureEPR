@@ -44,6 +44,15 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy(PermissionNames.IdentityManageUsers, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageUsers));
+
+    options.AddPolicy(PermissionNames.IdentityManageRoles, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageRoles));
+
+    options.AddPolicy(PermissionNames.IdentityManageClaims, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageClaims));
+
     options.AddPolicy(PermissionNames.WorkflowMove, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowMove));
 
@@ -61,7 +70,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services
     .AddIdentityCore<ApplicationUser>()
     .AddRoles<ApplicationRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
