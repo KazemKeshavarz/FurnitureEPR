@@ -8,11 +8,13 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
     {
         RuleFor(x => x.CustomerId).NotEmpty();
         RuleFor(x => x.Items).NotEmpty();
+        RuleFor(x => x.DiscountAmount).GreaterThanOrEqualTo(0);
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {
             item.RuleFor(x => x.ProductId).NotEmpty();
             item.RuleFor(x => x.Quantity).GreaterThan(0);
+            item.RuleFor(x => x.UnitPrice).GreaterThanOrEqualTo(0);
             item.RuleFor(x => x.Components).NotNull();
 
             item.RuleForEach(x => x.Components).ChildRules(component =>
