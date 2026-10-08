@@ -14,3 +14,16 @@ export const permissionGuard = (permission: string): CanActivateFn => () => {
     ? true
     : router.createUrlTree(['/']);
 };
+
+export const anyPermissionGuard = (permissions: string[]): CanActivateFn => () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  return permissions.some(permission => authService.hasPermission(permission))
+    ? true
+    : router.createUrlTree(['/']);
+};
