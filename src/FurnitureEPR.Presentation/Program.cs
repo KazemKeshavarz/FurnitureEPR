@@ -5,6 +5,7 @@ using FurnitureEPR.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using FurnitureEPR.Presentation.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,6 +94,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
