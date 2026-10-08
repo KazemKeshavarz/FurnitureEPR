@@ -19,7 +19,15 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
+        loadComponent: () => import('./features/orders/orders-list.component').then(m => m.OrdersListComponent)
+      },
+      {
+        path: 'orders/new',
         loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () => import('./features/orders/order-details.component').then(m => m.OrderDetailsComponent)
       },
       {
         path: 'production',
