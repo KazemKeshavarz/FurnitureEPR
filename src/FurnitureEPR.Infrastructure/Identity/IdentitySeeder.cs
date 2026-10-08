@@ -1,3 +1,4 @@
+using FurnitureEPR.Application.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -49,6 +50,8 @@ public sealed class IdentitySeeder
                     string.Join("; ", roleResult.Errors.Select(x => x.Description)));
             }
         }
+
+        await EnsureAdministratorPermissionsAsync(role);
 
         var user = await _userManager.FindByNameAsync(_options.AdminUserName);
         if (user is not null)
