@@ -14,6 +14,7 @@ public sealed class OrderRepository : IOrderRepository
     public async Task<Order> CreateAsync(
         Guid customerId,
         Guid? createdByUserId,
+        decimal discountAmount,
         IReadOnlyCollection<CreateOrderItem> items,
         CancellationToken cancellationToken)
     {
@@ -39,7 +40,7 @@ public sealed class OrderRepository : IOrderRepository
         foreach (var item in items)
         {
             var product = products[item.ProductId];
-            var orderItem = new OrderItem(product.Id, product.Name, item.Quantity);
+            var orderItem = new OrderItem(product.Id, product.Name, item.Quantity, item.UnitPrice);
 
             var requestedComponents = item.Components.ToDictionary(
                 x => x.ComponentId,
@@ -69,6 +70,8 @@ public sealed class OrderRepository : IOrderRepository
 
             order.AddItem(orderItem);
         }
+
+        order.RecalculateAmounts(discountAmount);
 
         await _db.Orders.AddAsync(order, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
