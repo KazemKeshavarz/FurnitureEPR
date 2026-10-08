@@ -55,8 +55,7 @@ export const routes: Routes = [
       {
         path: 'admin/workflows',
         canActivate: [permissionGuard('workflow.move')],
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'فرآیندهای تولید', description: 'سازنده فرآیندهای تولید در مرحله بعدی تکمیل می‌شود.' }
+        loadComponent: () => import('./features/admin/admin-workflows.component').then(m => m.AdminWorkflowsComponent)
       },
       {
         path: 'admin/users',
