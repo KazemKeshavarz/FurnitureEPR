@@ -11,6 +11,8 @@ public sealed record OrderItemDto(
     Guid ProductId,
     string ProductName,
     decimal Quantity,
+    decimal UnitPrice,
+    decimal TotalPrice,
     IReadOnlyCollection<OrderItemComponentDto> Components);
 
 public sealed record OrderWorkflowHistoryDto(
@@ -51,5 +53,8 @@ public sealed record OrderDto(
     DateTime CreatedAtUtc,
     DateTime? FinalizedAtUtc,
     Guid? CreatedByUserId,
+    decimal TotalAmount,
+    decimal DiscountAmount,
+    decimal FinalAmount,
     IReadOnlyCollection<OrderItemDto> Items,
     IReadOnlyCollection<OrderWorkflowInstanceDto> Workflows);
