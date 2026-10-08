@@ -6,4 +6,7 @@ public interface ICurrentUser
     Guid? UserId { get; }
     IReadOnlyCollection<Guid> RoleIds { get; }
     IReadOnlyCollection<string> Roles { get; }
+    IReadOnlyCollection<string> Permissions { get; }
+
+    bool HasPermission(string permission);
 }
