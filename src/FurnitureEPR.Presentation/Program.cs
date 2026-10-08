@@ -3,6 +3,7 @@ using FurnitureEPR.Infrastructure;
 using FurnitureEPR.Infrastructure.Identity;
 using FurnitureEPR.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -72,6 +73,14 @@ builder.Services
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // بعد از سه ورود ناموفق، حساب برای 20 دقیقه قفل می‌شود.
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(20);
+    options.Lockout.AllowedForNewUsers = true;
+});
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
