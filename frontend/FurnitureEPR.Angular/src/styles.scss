@@ -1,0 +1,32 @@
+@use '@angular/material' as mat;
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  direction: rtl;
+  background: #f7f9fa;
+  color: #102a35;
+}
+
+body {
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+    typography: (
+      plain-family: 'Vazirmatn',
+      brand-family: 'Vazirmatn'
+    ),
+    density: 0
+  ));
+}
