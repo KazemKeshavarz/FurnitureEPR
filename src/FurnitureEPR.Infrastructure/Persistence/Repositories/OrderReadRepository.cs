@@ -23,11 +23,16 @@ public sealed class OrderReadRepository : IOrderReadRepository
                 x.CreatedAtUtc,
                 x.FinalizedAtUtc,
                 x.CreatedByUserId,
+                x.TotalAmount,
+                x.DiscountAmount,
+                x.FinalAmount,
                 x.Items.Select(i => new OrderItemDto(
                     i.Id,
                     i.ProductId,
                     i.ProductName,
                     i.Quantity,
+                    i.UnitPrice,
+                    i.TotalPrice,
                     i.Components.Select(c => new OrderItemComponentDto(
                         c.Id,
                         c.ComponentId,
