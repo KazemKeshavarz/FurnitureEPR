@@ -1,3 +1,4 @@
+using FurnitureEPR.Application.Security;
 using FurnitureEPR.Application.Features.Orders.Commands.CompleteOrderWorkflow;
 using FurnitureEPR.Application.Features.Orders.Commands.CreateOrder;
 using FurnitureEPR.Application.Features.Orders.Commands.FinalizeOrder;
@@ -54,7 +55,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // اجرای یک Transition مشخص روی گردشکار Runtime سفارش.
-    [Authorize]
+    [Authorize(Policy = PermissionNames.WorkflowMove)]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/transitions/{transitionId:guid}")]
     public async Task<IActionResult> MoveWorkflow(
         Guid orderId,
@@ -73,7 +74,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // پایان دادن به Workflow یک Category مشخص؛ خود Order فقط پس از پایان همه Workflowها Completed می‌شود.
-    [Authorize]
+    [Authorize(Policy = PermissionNames.WorkflowComplete)]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/complete")]
     public async Task<IActionResult> CompleteWorkflow(
         Guid orderId,
@@ -88,7 +89,7 @@ public sealed class OrdersController : ControllerBase
     }
 
     // ثبت نتیجه QC برای Stage فعلی؛ Reject باعث خروج از Stage نمی‌شود و امکان QC مجدد وجود دارد.
-    [Authorize]
+    [Authorize(Policy = PermissionNames.WorkflowQualityControl)]
     [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/quality-control")]
     public async Task<IActionResult> RecordQualityControl(
         Guid orderId,
