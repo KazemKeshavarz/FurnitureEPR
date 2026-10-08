@@ -55,7 +55,22 @@ public sealed class IdentitySeeder
 
         var user = await _userManager.FindByNameAsync(_options.AdminUserName);
         if (user is not null)
+        {
+            if (!await _userManager.IsInRoleAsync(user, AdministratorRole))
+            {
+                var roleResult = await _userManager.AddToRoleAsync(
+                    user,
+                    AdministratorRole);
+
+                if (!roleResult.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        string.Join("; ", roleResult.Errors.Select(x => x.Description)));
+                }
+            }
+
             return;
+        }
 
         user = new ApplicationUser
         {
