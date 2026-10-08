@@ -42,7 +42,21 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PermissionNames.WorkflowMove, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowMove));
+
+    options.AddPolicy(PermissionNames.WorkflowQualityControl, policy =>
+        policy.RequireClaim(
+            IdentityClaimTypes.Permission,
+            PermissionNames.WorkflowQualityControl));
+
+    options.AddPolicy(PermissionNames.WorkflowComplete, policy =>
+        policy.RequireClaim(
+            IdentityClaimTypes.Permission,
+            PermissionNames.WorkflowComplete));
+});
 
 builder.Services
     .AddIdentityCore<ApplicationUser>()
