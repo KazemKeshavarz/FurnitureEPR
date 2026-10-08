@@ -91,7 +91,10 @@ public sealed class IdentitySeeder
         {
             PermissionNames.WorkflowMove,
             PermissionNames.WorkflowQualityControl,
-            PermissionNames.WorkflowComplete
+            PermissionNames.WorkflowComplete,
+            PermissionNames.IdentityManageUsers,
+            PermissionNames.IdentityManageRoles,
+            PermissionNames.IdentityManageClaims
         };
 
         var existingClaims = await _roleManager.GetClaimsAsync(role);
