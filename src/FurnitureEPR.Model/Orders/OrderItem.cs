@@ -20,6 +20,12 @@ public sealed class OrderItem
     public Product Product { get; private set; } = null!;
     public IReadOnlyCollection<OrderItemComponent> Components => _components.AsReadOnly();
 
+    // سازگاری با کدهای قبلی: اگر قیمت هنوز ثبت نشده باشد، قیمت واحد صفر در نظر گرفته می‌شود.
+    public OrderItem(Guid productId, string productName, decimal quantity)
+        : this(productId, productName, quantity, 0)
+    {
+    }
+
     public OrderItem(Guid productId, string productName, decimal quantity, decimal unitPrice)
     {
         if (quantity <= 0)
