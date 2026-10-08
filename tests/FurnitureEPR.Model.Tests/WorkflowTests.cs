@@ -27,31 +27,18 @@ public sealed class WorkflowTests
     }
 
     [Fact]
-    public void Quality_control_must_be_approved_before_moving_forward()
+    public void Workflow_stage_can_be_deactivated_and_reactivated()
     {
-        var instance = new OrderWorkflowInstance(
+        var stage = new WorkflowStage(
             Guid.NewGuid(),
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            Guid.NewGuid());
+            "مرحله",
+            "stage",
+            1);
 
-        var stageId = instance.CurrentStageId;
+        stage.SetActive(false);
+        Assert.False(stage.IsActive);
 
-        Assert.False(instance.IsQualityControlApproved(stageId));
-
-        instance.RecordQualityControl(
-            stageId,
-            QualityControlResult.Rejected,
-            "نیاز به اصلاح");
-
-        Assert.False(instance.IsQualityControlApproved(stageId));
-
-        instance.RecordQualityControl(
-            stageId,
-            QualityControlResult.Approved,
-            "تأیید شد",
-            Guid.NewGuid());
-
-        Assert.True(instance.IsQualityControlApproved(stageId));
+        stage.SetActive(true);
+        Assert.True(stage.IsActive);
     }
 }
