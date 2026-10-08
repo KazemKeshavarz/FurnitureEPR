@@ -4,12 +4,15 @@ using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
 using FurnitureEPR.Application.Features.Workflows.Commands.PublishWorkflowVersion;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FurnitureEPR.Application.Security;
 
 namespace FurnitureEPR.Presentation.Controllers;
 
 [ApiController]
 [Route("api/workflows")]
+[Authorize(Policy = PermissionNames.WorkflowMove)]
 public sealed class WorkflowsController : ControllerBase
 {
     private readonly ISender _sender;
