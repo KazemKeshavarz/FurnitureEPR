@@ -14,6 +14,7 @@ public sealed class OrderDraftRepository : IOrderDraftRepository
     public async Task UpdateAsync(
         Guid orderId,
         Guid customerId,
+        decimal discountAmount,
         IReadOnlyCollection<UpdateDraftOrderItem> items,
         CancellationToken cancellationToken)
     {
@@ -60,7 +61,7 @@ public sealed class OrderDraftRepository : IOrderDraftRepository
                 throw new InvalidOperationException(
                     "An order item contains a component that is not assigned to the selected product.");
 
-            var orderItem = new OrderItem(product.Id, product.Name, item.Quantity);
+            var orderItem = new OrderItem(product.Id, product.Name, item.Quantity, item.UnitPrice);
 
             foreach (var productComponent in product.Components)
             {
@@ -81,6 +82,7 @@ public sealed class OrderDraftRepository : IOrderDraftRepository
 
         order.ChangeCustomer(customerId);
         order.ReplaceItems(replacementItems);
+        order.RecalculateAmounts(discountAmount);
 
         await _db.SaveChangesAsync(cancellationToken);
     }
