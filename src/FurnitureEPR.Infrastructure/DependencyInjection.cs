@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderFinalizationRepository, OrderFinalizationRepository>();
         services.AddScoped<IOrderDraftRepository, OrderDraftRepository>();
         services.AddScoped<IOrderWorkflowRuntimeRepository, OrderWorkflowRuntimeRepository>();
+        services.AddScoped<IProductionReadRepository, ProductionReadRepository>();
         services.AddScoped<IIdentityManagementService, IdentityManagementService>();
 
         return services;
