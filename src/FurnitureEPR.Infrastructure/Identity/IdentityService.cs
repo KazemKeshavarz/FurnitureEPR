@@ -11,16 +11,19 @@ namespace FurnitureEPR.Infrastructure.Identity;
 public sealed class IdentityService : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly JwtOptions _options;
 
     public IdentityService(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
+        SignInManager<ApplicationUser> signInManager,
         IOptions<JwtOptions> options)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _signInManager = signInManager;
         _options = options.Value;
     }
 
@@ -33,7 +36,13 @@ public sealed class IdentityService : IIdentityService
         if (user is null)
             return null;
 
-        if (!await _userManager.CheckPasswordAsync(user, password))
+        // استفاده از SignInManager باعث می‌شود Lockout و شمارش ورودهای ناموفق Identity رعایت شود.
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(
+            user,
+            password,
+            lockoutOnFailure: true);
+
+        if (!signInResult.Succeeded)
             return null;
 
         var roles = await _userManager.GetRolesAsync(user);
