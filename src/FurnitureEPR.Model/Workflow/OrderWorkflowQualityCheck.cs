@@ -32,6 +32,7 @@ public sealed class OrderWorkflowQualityCheck
         if (checkedByUserId == Guid.Empty)
             throw new ArgumentException("Checker user is invalid.", nameof(checkedByUserId));
 
+        Id = Guid.NewGuid();
         OrderWorkflowInstanceId = orderWorkflowInstanceId;
         StageId = stageId;
         Result = result;
