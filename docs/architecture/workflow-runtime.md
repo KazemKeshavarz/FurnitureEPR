@@ -219,26 +219,6 @@ GET  /api/auth/me
 
 ## QC
 
-در Workflow Definition، هر Stage می‌تواند `RequiresQualityControl = true` داشته باشد.
-
-اما منطق QC هنوز در Runtime پیاده‌سازی نشده است.
-
-مرحله بعدی باید این موارد را پوشش دهد:
-
-```text
-Production Stage
-      ↓
-QC
-   ├── Approve → Next Transition
-   └── Reject  → Correction Stage
-                    ↓
-                   QC
-```
-
-Reject نباید با تغییر مستقیم `CurrentStageId` انجام شود؛ باید به‌عنوان یک رفتار مشخص Runtime و با History قابل ردیابی پیاده شود.
-
-## QC
-
 اگر یک Stage با `RequiresQualityControl = true` تعریف شده باشد، Runtime اجازه عبور از آن Stage را بدون Approval نمی‌دهد.
 
 فرآیند:
@@ -284,7 +264,7 @@ Endpoint فعلی:
 
 در حالت Reject، CurrentStage تغییر نمی‌کند. Approval فقط آخرین QC همان Stage را معتبر می‌کند و سپس Transition می‌تواند اجرا شود.
 
-فعلاً `CheckedByUserId` از لایه Authorization دریافت نمی‌شود و مقدار آن در Command فعلی خالی است. اتصال آن به کاربر احراز هویت‌شده در مرحله Authorization انجام خواهد شد.
+**محدودیت فعلی:** `CheckedByUserId` هنوز از هویت کاربر احراز هویت‌شده پر نمی‌شود و باید در مرحله سخت‌سازی Authorization متصل شود. تا زمان تکمیل و آزمون این اتصال، ثبت هویت ممیز برای بهره‌برداری عملیاتی تأییدشده نیست.
 
 ---
 
@@ -318,6 +298,8 @@ Start ───────┤             ├── Next
 
 ## وضعیت پیاده‌سازی
 
+این سند وضعیت کد را توصیف می‌کند، نه تأیید آمادگی بهره‌برداری. CI ساخت بک‌اند و فرانت‌اند در آخرین اجرا موفق بوده است؛ با این حال، آزمون end-to-end روی پایگاه داده و محیط واقعی هنوز باید انجام شود.
+
 ### انجام شده
 
 - `OrderWorkflowInstance`
@@ -335,15 +317,13 @@ Start ───────┤             ├── Next
 - QC قابل تکرار با ثبت تمام Attemptها
 - ثبت Repository در DI
 
-### مرحله بعد
+### باقی‌مانده / نیازمند تأیید
 
-1. Read API برای Current Stage و History
-2. تکمیل Completion سفارش/Workflow
-3. QC Approval / Rejection
-4. مدل Parallel Branch / WorkItem در صورت تأیید نیاز واقعی
-5. Authorization بر اساس Responsible Role
-6. تست‌های Domain و Integration
-7. Migration و تست روی SQL Server
+1. تست‌های Domain و Integration برای Transition، QC، مجوزها و Completion.
+2. اتصال قطعی `CheckedByUserId` به کاربر احراز هویت‌شده و بازبینی مجوزهای هر endpoint حساس.
+3. اجرای migration و آزمون روی SQL Server محیط مقصد.
+4. آزمون end-to-end از ثبت سفارش تا تکمیل تولید و تحویل.
+5. مدل Parallel Branch / WorkItem فقط در صورت تأیید نیاز واقعی کارگاه؛ در حال حاضر اجرای موازی پیاده نشده است.
 
 ## اصل طراحی
 
