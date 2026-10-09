@@ -172,7 +172,7 @@ import { AuthService } from '../auth/auth.service';
       .content { padding: 12px; min-height: calc(100vh - 58px); }
       .page-title span { display: none; }
     }
-  `
+  `]
 })
 export class AppShellComponent {
   private readonly auth = inject(AuthService);
