@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 
 interface Category { id:string; name:string; }
 interface Stage { id:string; name:string; code:string; sortOrder:number; requiresQualityControl:boolean; }
@@ -84,5 +85,5 @@ export class AdminWorkflowsComponent {
   addTransition():void{if(this.transitionForm.invalid)return;const body={workflowVersionId:this.versionId,...this.transitionForm.getRawValue()};this.run(this.http.post<string>(`${environment.apiUrl}/workflows/versions/${this.versionId}/transitions`,body),id=>{this.transitions=[...this.transitions,{id,...this.transitionForm.getRawValue()}];});}
   publishAndAssign():void{if(!this.selectedCategoryId)return;this.busy=true;this.http.post(`${environment.apiUrl}/workflows/versions/${this.versionId}/publish`,{}).subscribe({next:()=>this.http.post(`${environment.apiUrl}/categories/${this.selectedCategoryId}/workflow`,{categoryId:this.selectedCategoryId,workflowVersionId:this.versionId}).subscribe({next:()=>{this.published=true;this.busy=false},error:e=>{this.error=e.error?.detail||'اتصال فرآیند به دسته‌بندی انجام نشد.';this.busy=false}}),error:e=>{this.error=e.error?.detail||'انتشار فرآیند انجام نشد.';this.busy=false}});}
   stageName(id:string):string{return this.stages.find(x=>x.id===id)?.name||'مرحله';}
-  private run<T>(request:any,onSuccess:(value:T)=>void):void{this.busy=true;request.subscribe({next:(value:T)=>{onSuccess(value);this.busy=false},error:(e:any)=>{this.error=e.error?.detail||'عملیات انجام نشد.';this.busy=false}});}
+  private run<T>(request: Observable<T>,onSuccess:(value:T)=>void):void{this.busy=true;request.subscribe({next:(value:T)=>{onSuccess(value);this.busy=false},error:(e:any)=>{this.error=e.error?.detail||'عملیات انجام نشد.';this.busy=false}});}
 }
