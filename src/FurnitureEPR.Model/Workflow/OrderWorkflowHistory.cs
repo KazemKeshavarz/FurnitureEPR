@@ -23,6 +23,7 @@ public sealed class OrderWorkflowHistory
         Guid toStageId,
         Guid transitionId)
     {
+        Id = Guid.NewGuid();
         OrderWorkflowInstanceId = orderWorkflowInstanceId;
         FromStageId = fromStageId;
         ToStageId = toStageId;
