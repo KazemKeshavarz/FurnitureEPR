@@ -86,22 +86,139 @@ interface ProductComponent { id:string; componentId:string; componentName:string
   `]
 })
 export class MasterDataComponent {
-  private readonly http=inject(HttpClient); private readonly fb=inject(FormBuilder);
-  categories:Category[]=[]; products:Product[]=[]; components:ComponentItem[]=[]; productComponents:ProductComponent[]=[]; selectedProductName=''; saving=false; error='';
-  categoryForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(150)]]});
-  productForm=this.fb.nonNullable.group({categoryId:['',Validators.required],name:['',[Validators.required,Validators.maxLength(150)]]});
-  componentForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(150)]]});
-  productComponentForm=this.fb.nonNullable.group({productId:['',Validators.required],componentId:['',Validators.required],defaultQuantity:[1,[Validators.required,Validators.min(0.001)]]});
-  constructor(){this.loadAll();}
-  loadAll():void{
-    this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({next:r=>this.categories=r.items??r.data??r,error:()=>this.error='دریافت دسته‌بندی‌ها انجام نشد.'});
-    this.http.get<any>(`${environment.apiUrl}/products?page=1&pageSize=100`).subscribe({next:r=>this.products=r.items??r.data??r,error:()=>this.error='دریافت محصولات انجام نشد.'});
-    this.http.get<any>(`${environment.apiUrl}/components?page=1&pageSize=100`).subscribe({next:r=>this.components=r.items??r.data??r,error:()=>this.error='دریافت اجزا انجام نشد.'});
+  private readonly http = inject(HttpClient);
+  private readonly fb = inject(FormBuilder);
+
+  categories: Category[] = [];
+  products: Product[] = [];
+  components: ComponentItem[] = [];
+  productComponents: ProductComponent[] = [];
+  selectedProductName = '';
+  saving = false;
+  error = '';
+
+  categoryForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.maxLength(150)]]
+  });
+  productForm = this.fb.nonNullable.group({
+    categoryId: ['', Validators.required],
+    name: ['', [Validators.required, Validators.maxLength(150)]]
+  });
+  componentForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.maxLength(150)]]
+  });
+  productComponentForm = this.fb.nonNullable.group({
+    productId: ['', Validators.required],
+    componentId: ['', Validators.required],
+    defaultQuantity: [1, [Validators.required, Validators.min(0.001)]]
+  });
+
+  constructor() { this.loadAll(); }
+
+  loadAll(): void {
+    this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({
+      next: response => this.categories = this.unwrap<Category>(response),
+      error: () => this.error = 'دریافت دسته‌بندی‌ها انجام نشد.'
+    });
+    this.http.get<any>(`${environment.apiUrl}/products?page=1&pageSize=100`).subscribe({
+      next: response => this.products = this.unwrap<Product>(response),
+      error: () => this.error = 'دریافت محصولات انجام نشد.'
+    });
+    this.http.get<any>(`${environment.apiUrl}/components?page=1&pageSize=100`).subscribe({
+      next: response => this.components = this.unwrap<ComponentItem>(response),
+      error: () => this.error = 'دریافت اجزا انجام نشد.'
+    });
   }
-  addCategory():void{if(this.categoryForm.invalid)return;this.saving=true;this.http.post(`${environment.apiUrl}/categories`,this.categoryForm.getRawValue()).subscribe({next:()=>{this.categoryForm.reset();this.loadAll();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت دسته‌بندی انجام نشد.';this.saving=false}})}
-  addProduct():void{if(this.productForm.invalid)return;this.saving=true;this.http.post(`${environment.apiUrl}/products`,this.productForm.getRawValue()).subscribe({next:()=>{this.productForm.reset();this.loadAll();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت محصول انجام نشد.';this.saving=false}})}
-  addComponent():void{if(this.componentForm.invalid)return;this.saving=true;this.http.post(`${environment.apiUrl}/components`,this.componentForm.getRawValue()).subscribe({next:()=>{this.componentForm.reset();this.loadAll();this.saving=false},error:e=>{this.error=e.error?.detail||'ثبت جزء انجام نشد.';this.saving=false}})}
-  categoryName(id:string):string{return this.categories.find(x=>x.id===id)?.name||'بدون دسته‌بندی';}
-  loadProductComponents(id:string):void{this.productComponents=[];const product=this.products.find(x=>x.id===id);this.selectedProductName=product?.name||'';if(!id)return;this.http.get<any>(`${environment.apiUrl}/products/${id}`).subscribe({next:r=>this.productComponents=r.components??[],error:()=>this.error='دریافت اجزای محصول انجام نشد.'});}
-  addProductComponent():void{if(this.productComponentForm.invalid)return;this.saving=true;const value=this.productComponentForm.getRawValue();this.http.post(`${environment.apiUrl}/products/${value.productId}/components`,{componentId:value.componentId,defaultQuantity:value.defaultQuantity}).subscribe({next:()=>{this.loadProductComponents(value.productId);this.productComponentForm.patchValue({componentId:'',defaultQuantity:1});this.saving=false},error:e=>{this.error=e.error?.detail||'افزودن جزء به محصول انجام نشد.';this.saving=false}})}
+
+  private unwrap<T>(response: any): T[] {
+    if (Array.isArray(response)) return response as T[];
+    return (response?.items ?? response?.data ?? []) as T[];
+  }
+
+  addCategory(): void {
+    if (this.categoryForm.invalid || this.saving) return;
+    this.saving = true;
+    this.error = '';
+    this.http.post(`${environment.apiUrl}/categories`, this.categoryForm.getRawValue()).subscribe({
+      next: () => {
+        this.categoryForm.reset({ name: '' });
+        this.loadAll();
+        this.saving = false;
+      },
+      error: response => {
+        this.error = response.error?.detail || 'ثبت دسته‌بندی انجام نشد.';
+        this.saving = false;
+      }
+    });
+  }
+
+  addProduct(): void {
+    if (this.productForm.invalid || this.saving) return;
+    this.saving = true;
+    this.error = '';
+    this.http.post(`${environment.apiUrl}/products`, this.productForm.getRawValue()).subscribe({
+      next: () => {
+        this.productForm.reset({ categoryId: '', name: '' });
+        this.loadAll();
+        this.saving = false;
+      },
+      error: response => {
+        this.error = response.error?.detail || 'ثبت محصول انجام نشد.';
+        this.saving = false;
+      }
+    });
+  }
+
+  addComponent(): void {
+    if (this.componentForm.invalid || this.saving) return;
+    this.saving = true;
+    this.error = '';
+    this.http.post(`${environment.apiUrl}/components`, this.componentForm.getRawValue()).subscribe({
+      next: () => {
+        this.componentForm.reset({ name: '' });
+        this.loadAll();
+        this.saving = false;
+      },
+      error: response => {
+        this.error = response.error?.detail || 'ثبت جزء انجام نشد.';
+        this.saving = false;
+      }
+    });
+  }
+
+  categoryName(id: string): string {
+    return this.categories.find(item => item.id === id)?.name || 'بدون دسته‌بندی';
+  }
+
+  loadProductComponents(id: string): void {
+    this.productComponents = [];
+    const product = this.products.find(item => item.id === id);
+    this.selectedProductName = product?.name || '';
+    if (!id) return;
+    this.http.get<any>(`${environment.apiUrl}/products/${id}`).subscribe({
+      next: response => this.productComponents = response.components ?? [],
+      error: () => this.error = 'دریافت اجزای محصول انجام نشد.'
+    });
+  }
+
+  addProductComponent(): void {
+    if (this.productComponentForm.invalid || this.saving) return;
+    this.saving = true;
+    this.error = '';
+    const value = this.productComponentForm.getRawValue();
+    this.http.post(
+      `${environment.apiUrl}/products/${value.productId}/components`,
+      { componentId: value.componentId, defaultQuantity: value.defaultQuantity }
+    ).subscribe({
+      next: () => {
+        this.loadProductComponents(value.productId);
+        this.productComponentForm.patchValue({ componentId: '', defaultQuantity: 1 });
+        this.saving = false;
+      },
+      error: response => {
+        this.error = response.error?.detail || 'افزودن جزء به محصول انجام نشد.';
+        this.saving = false;
+      }
+    });
+  }
 }
