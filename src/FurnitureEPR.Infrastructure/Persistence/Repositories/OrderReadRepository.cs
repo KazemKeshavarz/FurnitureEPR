@@ -55,8 +55,11 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         .Select(h => new OrderWorkflowHistoryDto(
                             h.Id,
                             h.FromStageId,
+                            h.FromStage.Name,
                             h.ToStageId,
+                            h.ToStage.Name,
                             h.TransitionId,
+                            h.Transition.Name,
                             h.OccurredAtUtc))
                         .ToList(),
                     w.QualityChecks
@@ -64,6 +67,7 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         .Select(q => new OrderWorkflowQualityCheckDto(
                             q.Id,
                             q.StageId,
+                            q.Stage.Name,
                             q.Result.ToString(),
                             q.Comment,
                             q.CheckedAtUtc,
