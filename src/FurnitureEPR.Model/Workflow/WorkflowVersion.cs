@@ -18,6 +18,7 @@ public sealed class WorkflowVersion
 
     public WorkflowVersion(Guid workflowDefinitionId, int versionNumber)
     {
+        Id = Guid.NewGuid();
         WorkflowDefinitionId = workflowDefinitionId;
         VersionNumber = versionNumber;
     }
