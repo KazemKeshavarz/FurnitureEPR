@@ -45,6 +45,7 @@ public sealed class OrderWorkflowInstance
         if (initialStageId == Guid.Empty)
             throw new ArgumentException("Initial stage is required.", nameof(initialStageId));
 
+        Id = Guid.NewGuid();
         OrderId = orderId;
         CategoryId = categoryId;
         WorkflowVersionId = workflowVersionId;
