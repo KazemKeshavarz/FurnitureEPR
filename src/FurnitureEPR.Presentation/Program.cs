@@ -1,3 +1,4 @@
+using FurnitureEPR.Application;
 using FurnitureEPR.Application.Security;
 using FurnitureEPR.Infrastructure;
 using FurnitureEPR.Infrastructure.Identity;
