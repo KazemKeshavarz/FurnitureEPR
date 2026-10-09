@@ -31,8 +31,7 @@ export const routes: Routes = [
       },
       {
         path: 'production',
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'تولید و مراحل کار', description: 'بخش اجرای مراحل تولید و کنترل کیفیت در حال آماده‌سازی است.' }
+        loadComponent: () => import('./features/production/production.component').then(m => m.ProductionComponent)
       },
       {
         path: 'customers',
