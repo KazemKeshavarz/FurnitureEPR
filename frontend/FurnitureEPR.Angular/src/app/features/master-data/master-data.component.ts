@@ -45,6 +45,35 @@ interface ProductComponent { id:string; componentId:string; componentName:string
           </form></mat-card>
           <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
         </div></mat-tab>
+        <mat-tab label="اجزای محصولات"><div class="tab-content">
+          <mat-card class="form-card"><h2>تعریف اجزای هر محصول</h2>
+            <p class="hint">برای هر محصول، اجزای موردنیاز و تعداد پیش‌فرض آن‌ها را مشخص کنید.</p>
+            <form [formGroup]="productComponentForm" (ngSubmit)="addProductComponent()">
+              <mat-form-field appearance="outline"><mat-label>محصول</mat-label>
+                <select matNativeControl formControlName="productId" (change)="loadProductComponents($any($event.target).value)">
+                  <option value="">انتخاب محصول</option>
+                  @for (item of products; track item.id) {<option [value]="item.id">{{item.name}}</option>}
+                </select>
+              </mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>جزء</mat-label>
+                <select matNativeControl formControlName="componentId">
+                  <option value="">انتخاب جزء</option>
+                  @for (item of components; track item.id) {<option [value]="item.id">{{item.name}}</option>}
+                </select>
+              </mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>تعداد پیش‌فرض</mat-label><input matInput type="number" min="0.001" step="0.001" formControlName="defaultQuantity"></mat-form-field>
+              <button mat-flat-button type="submit" [disabled]="productComponentForm.invalid || saving">افزودن جزء به محصول</button>
+            </form>
+          </mat-card>
+          @if(selectedProductName){
+            <div class="selected-title">اجزای محصول «{{selectedProductName}}»</div>
+            <div class="list">
+              @for (item of productComponents; track item.id) {
+                <mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.componentName}}</strong><small>تعداد پیش‌فرض: {{item.defaultQuantity}}</small></div></mat-card>
+              } @empty {<div class="empty">برای این محصول هنوز جزئی تعریف نشده است.</div>}
+            </div>
+          }
+        </div></mat-tab>
       </mat-tab-group>
       @if(error){<div class="error">{{error}}</div>}
     </section>`,
