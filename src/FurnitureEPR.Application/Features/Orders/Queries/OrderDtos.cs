@@ -15,16 +15,21 @@ public sealed record OrderItemDto(
     decimal TotalPrice,
     IReadOnlyCollection<OrderItemComponentDto> Components);
 
+// نام مراحل و Transition را هم نگه می‌داریم تا تاریخچه برای کاربر نهایی قابل فهم باشد.
 public sealed record OrderWorkflowHistoryDto(
     Guid Id,
     Guid FromStageId,
+    string FromStageName,
     Guid ToStageId,
+    string ToStageName,
     Guid TransitionId,
+    string TransitionName,
     DateTime OccurredAtUtc);
 
 public sealed record OrderWorkflowQualityCheckDto(
     Guid Id,
     Guid StageId,
+    string StageName,
     string Result,
     string? Comment,
     DateTime CheckedAtUtc,
