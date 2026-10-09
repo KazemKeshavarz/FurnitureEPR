@@ -4,6 +4,7 @@ using FurnitureEPR.Application.Features.Customers;
 using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Application.Features.Products;
 using FurnitureEPR.Application.Security;
+using FurnitureEPR.Infrastructure.Identity;
 using FurnitureEPR.Infrastructure.Persistence;
 using FurnitureEPR.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
