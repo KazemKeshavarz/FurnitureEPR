@@ -14,6 +14,7 @@ public sealed class WorkflowDefinition
 
     public WorkflowDefinition(string name, string code)
     {
+        Id = Guid.NewGuid();
         SetName(name);
         SetCode(code);
     }
