@@ -24,6 +24,7 @@ public sealed class WorkflowTransition
         if (fromStageId == toStageId)
             throw new ArgumentException("A transition cannot point to the same stage.");
 
+        Id = Guid.NewGuid();
         WorkflowVersionId = workflowVersionId;
         FromStageId = fromStageId;
         ToStageId = toStageId;
