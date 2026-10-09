@@ -29,6 +29,7 @@ public sealed class WorkflowStage
         if (responsibleRoleId == Guid.Empty)
             throw new ArgumentException("Responsible role is invalid.", nameof(responsibleRoleId));
 
+        Id = Guid.NewGuid();
         Name = Required(name, nameof(name));
         Code = Required(code, nameof(code));
         WorkflowVersionId = workflowVersionId;
