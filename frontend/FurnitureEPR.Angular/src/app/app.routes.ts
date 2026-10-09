@@ -36,8 +36,7 @@ export const routes: Routes = [
       },
       {
         path: 'customers',
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'مشتریان', description: 'بخش مدیریت مشتریان در حال آماده‌سازی است.' }
+        loadComponent: () => import('./features/customers/customers.component').then(m => m.CustomersComponent)
       },
       {
         path: 'products',
