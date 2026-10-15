@@ -47,6 +47,13 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
+    // تمام APIها به‌صورت پیش‌فرض نیازمند ورود هستند؛ endpoint عمومی باید صریحاً AllowAnonymous داشته باشد.
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.AddPolicy(PermissionNames.WorkflowManage, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowManage));
     options.AddPolicy(PermissionNames.IdentityManageUsers, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageUsers));
 
