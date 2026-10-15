@@ -59,7 +59,7 @@ export const routes: Routes = [
       },
       {
         path: 'admin/workflows',
-        canActivate: [permissionGuard('workflow.move')],
+        canActivate: [permissionGuard('workflow.manage')],
         loadComponent: () => import('./features/admin/admin-workflows.component').then(m => m.AdminWorkflowsComponent)
       },
       {
