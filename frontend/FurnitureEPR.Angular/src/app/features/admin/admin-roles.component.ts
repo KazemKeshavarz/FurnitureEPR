@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 
 interface Role { id:string; name:string; permissions:string[]; }
 const PERMISSIONS=[
+  {key:'workflow.manage',label:'مدیریت تعریف فرآیندها'},
   {key:'workflow.move',label:'جابجایی در فرآیند تولید'},
   {key:'workflow.quality_control',label:'تأیید کنترل کیفیت'},
   {key:'workflow.complete',label:'تکمیل مرحله تولید'},
