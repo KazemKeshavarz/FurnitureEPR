@@ -3,6 +3,8 @@ using FurnitureEPR.Application.Features.Categories.Commands.CreateCategory;
 using FurnitureEPR.Application.Features.Categories.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using FurnitureEPR.Application.Security;
 
 namespace FurnitureEPR.Presentation.Controllers;
 
@@ -34,6 +36,7 @@ public sealed class CategoriesController : ControllerBase
         return item is null ? NotFound() : Ok(item);
     }
 
+    [Authorize(Policy = PermissionNames.WorkflowManage)]
     [HttpPost("{categoryId:guid}/workflow")]
     public async Task<IActionResult> AssignWorkflow(
         Guid categoryId,
