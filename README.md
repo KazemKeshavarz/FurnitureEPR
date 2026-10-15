@@ -7,7 +7,7 @@
 - بک‌اند ASP.NET Core / .NET 10 با معماری لایه‌ای و CQRS.
 - فرانت‌اند Angular 20 و Angular Material، فارسی و RTL.
 - بررسی خودکار ساخت بک‌اند و فرانت‌اند در GitHub Actions فعال است.
-- آخرین بررسی کامل بک‌اند در شاخهٔ کاری موفق بوده است؛ پس از تغییرات امنیتی و ارتقای وابستگی‌ها، CI باید دوباره موفق شود. CI به‌تنهایی جایگزین آزمون انتهابه‌انتها روی محیط عملیاتی نیست.
+- پس از تغییرات امنیتی و ارتقای وابستگی‌ها، ساخت بک‌اند و فرانت‌اند در GitHub Actions موفق شده‌اند. این نتیجه به‌تنهایی جایگزین آزمون انتهابه‌انتها روی محیط عملیاتی نیست.
 
 ## محدوده سامانه
 
@@ -91,7 +91,8 @@ npm start
 
 ## CI
 
-- Frontend CI: نصب وابستگی‌ها و اجرای `npm run build`.
-- Backend CI: Restore، Build بک‌اند و اجرای پروژه تست `FurnitureEPR.Model.Tests`.
+- Frontend CI: نصب وابستگی‌ها و اجرای `npm run build`؛ آخرین اجرا موفق بوده است.
+- Backend CI: Restore، Build بک‌اند و اجرای پروژه تست `FurnitureEPR.Model.Tests`؛ آخرین اجرا موفق بوده است.
+- وابستگی‌های ASP.NET Core و EF Core به نسخهٔ سرویس‌دهی `10.0.13` ارتقا یافته‌اند.
 
-اجرای جاری را در بخش Actions مخزن GitHub ببینید.
+[مشاهده اجرای فرانت‌اند](https://github.com/KazemKeshavarz/FurnitureEPR/actions/runs/38698717421) · [مشاهده اجرای بک‌اند](https://github.com/KazemKeshavarz/FurnitureEPR/actions/runs/38698729592)
