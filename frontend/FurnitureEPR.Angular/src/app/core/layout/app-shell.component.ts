@@ -83,11 +83,6 @@ import { AuthService } from '../auth/auth.service';
               <span matListItemTitle>تعاریف محصول</span>
             </a>
 
-            <a mat-list-item routerLink="/admin/workflows" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-              <mat-icon matListItemIcon>account_tree</mat-icon>
-              <span matListItemTitle>فرآیندهای تولید</span>
-            </a>
-
             <a mat-list-item routerLink="/admin/users" routerLinkActive="active" (click)="closeOnMobile(drawer)">
               <mat-icon matListItemIcon>manage_accounts</mat-icon>
               <span matListItemTitle>کاربران</span>
@@ -96,6 +91,14 @@ import { AuthService } from '../auth/auth.service';
             <a mat-list-item routerLink="/admin/roles" routerLinkActive="active" (click)="closeOnMobile(drawer)">
               <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
               <span matListItemTitle>نقش‌ها و دسترسی‌ها</span>
+            </a>
+          }
+
+          @if (canManageWorkflows) {
+            <div class="section-title">مدیریت تولید</div>
+            <a mat-list-item routerLink="/admin/workflows" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>account_tree</mat-icon>
+              <span matListItemTitle>فرآیندهای تولید</span>
             </a>
           }
         </mat-nav-list>
@@ -197,6 +200,10 @@ export class AppShellComponent {
 
   get canManageUsers(): boolean {
     return this.auth.hasPermission('identity.manage_users') || this.auth.hasPermission('identity.manage_roles');
+  }
+
+  get canManageWorkflows(): boolean {
+    return this.auth.hasPermission('workflow.manage');
   }
 
   closeOnMobile(drawer: { close: () => void }): void {
