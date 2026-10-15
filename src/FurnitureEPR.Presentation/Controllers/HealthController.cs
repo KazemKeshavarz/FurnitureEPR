@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FurnitureEPR.Presentation.Controllers;
 
@@ -6,6 +7,7 @@ namespace FurnitureEPR.Presentation.Controllers;
 [Route("api/health")]
 public sealed class HealthController : ControllerBase
 {
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult Get() => Ok(new { status = "Healthy" });
 }
