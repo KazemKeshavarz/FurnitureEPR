@@ -43,7 +43,7 @@ dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --con
 
 ### تنظیمات امن بک‌اند
 
-پیش از اجرا، کلید JWT واقعی و تصادفی با حداقل 32 کاراکتر را از User Secrets یا متغیر محیطی `Jwt__Key` تنظیم کنید. مقدار placeholder موجود در `appsettings.json` عمداً توسط برنامه رد می‌شود. برای ساخت اولین مدیر، `IdentitySeed__Enabled=true` و مقادیر امن `IdentitySeed__AdminUserName`، `IdentitySeed__AdminEmail` و `IdentitySeed__AdminPassword` را فقط از متغیرهای محیطی یا Secret Store فراهم کنید؛ رمز مدیر را در مخزن ثبت نکنید. همهٔ endpointها به‌صورت پیش‌فرض نیازمند احراز هویت هستند؛ `/api/auth/login` و `/api/health` عمومی‌اند. تعریف گردش‌کار و اتصال آن به دسته‌بندی به مجوز `workflow.manage` نیاز دارد.
+پیش از اجرا، کلید JWT واقعی و تصادفی با حداقل 32 کاراکتر را از User Secrets یا متغیر محیطی `Jwt__Key` تنظیم کنید. مقدار placeholder موجود در `appsettings.json` عمداً توسط برنامه رد می‌شود. برای ساخت اولین مدیر، `IdentitySeed__Enabled=true` و مقادیر امن `IdentitySeed__AdminUserName`، `IdentitySeed__AdminEmail` و `IdentitySeed__AdminPassword` را فقط از متغیرهای محیطی یا Secret Store فراهم کنید؛ رمز مدیر را در مخزن ثبت نکنید. در محیط غیرتوسعه، مبدأهای مجاز فرانت‌اند را با `Cors__AllowedOrigins__0` (و در صورت نیاز اندیس‌های بعدی) تنظیم کنید؛ برنامه در صورت نبودن این تنظیمات در محیط غیرتوسعه اجرا نمی‌شود. همهٔ endpointها به‌صورت پیش‌فرض نیازمند احراز هویت هستند؛ `/api/auth/login` و `/api/health` عمومی‌اند. تعریف گردش‌کار و اتصال آن به دسته‌بندی به مجوز `workflow.manage` نیاز دارد.
 
 ## اجرای فرانت‌اند
 
@@ -87,7 +87,7 @@ npm start
 4. بررسی رابط کاربری روی موبایل با نقش‌های واقعی کاربران کارگاه.
 5. افزودن تست‌های یکپارچه برای سفارش، انتقال مراحل، QC و تکمیل گردش‌کار.
 6. مشخص‌کردن فرآیند واقعی کارگاه؛ اجرای موازی هنوز پشتیبانی نمی‌شود و نباید پیش از مدل‌سازی دقیق وعده داده شود.
-7. تعیین CORS originهای محیط استقرار و اجرای آزمون نهایی روی دستگاه موبایل.
+7. پیکربندی CORS originهای محیط استقرار و اجرای آزمون نهایی روی دستگاه موبایل.
 
 ## CI
 
