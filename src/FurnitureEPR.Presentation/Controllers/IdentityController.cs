@@ -89,7 +89,7 @@ public sealed class IdentityController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = PermissionNames.IdentityManageRoles)]
+    [Authorize(Policy = "identity.read_roles")]
     [HttpGet("roles")]
     public async Task<ActionResult<IReadOnlyCollection<IdentityRoleDto>>> GetRoles(
         CancellationToken cancellationToken)
