@@ -191,7 +191,7 @@ History باعث می‌شود بتوانیم بفهمیم سفارش از چه 
 
 ## Identity و Claims
 
-احراز هویت Runtime بر پایه ASP.NET Core Identity و JWT انجام می‌شود.
+احراز هویت Runtime بر پایه ASP.NET Core Identity و JWT انجام می‌شود. همهٔ endpointها به‌صورت پیش‌فرض نیازمند کاربر احراز هویت‌شده‌اند، به‌جز endpointهایی که صریحاً عمومی شده‌اند. تعریف/انتشار گردش‌کار و اتصال آن به دسته‌بندی نیازمند مجوز `workflow.manage` است؛ انتقال مرحله، QC و تکمیل هر کدام مجوز جداگانه دارند.
 
 Claims اصلی Token:
 
@@ -202,7 +202,7 @@ Claims اصلی Token:
 
 وجود `role_id` مهم است چون WorkflowStage به‌جای وابستگی به Identity، فقط `ResponsibleRoleId` را نگه می‌دارد.
 
-Runtime هنگام Transition، QC و Complete بررسی می‌کند که Role شناسه‌شده در Claimهای کاربر با `ResponsibleRoleId` مرحله فعلی منطبق باشد.
+Runtime و handlerهای مربوط به Transition، QC و Complete باید نقش مسئول مرحله را نیز اعمال کنند؛ این قانون باید با تست یکپارچه روی کاربران و نقش‌های واقعی تأیید شود.
 
 Endpointهای Identity:
 
@@ -294,7 +294,8 @@ Start ───────┤             ├── Next
 8. Transition فقط در صورتی اجرا می‌شود که از CurrentStage شروع شود.
 9. مسیر Transition باید متعلق به همان WorkflowVersion باشد.
 10. History حرکت‌های Runtime را ثبت می‌کند.
-11. QC و Parallel هنوز لایه بعدی توسعه هستند.
+11. QC در مدل Runtime پیاده شده است؛ آزمون end-to-end آن هنوز باقی است.
+12. اجرای موازی هنوز پیاده نشده است.
 
 ## وضعیت پیاده‌سازی
 
@@ -315,6 +316,8 @@ Start ───────┤             ├── Next
 - Read API سفارش همراه با Current Stage و History
 - API تکمیل Workflow و تکمیل خودکار Order پس از پایان همه Workflowها
 - QC قابل تکرار با ثبت تمام Attemptها
+- مجوزهای جداگانه برای مدیریت گردش‌کار، انتقال، QC و تکمیل
+- احراز هویت پیش‌فرض برای endpointهای API
 - ثبت Repository در DI
 
 ### باقی‌مانده / نیازمند تأیید
