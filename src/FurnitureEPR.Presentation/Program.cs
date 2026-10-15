@@ -96,12 +96,27 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.AllowedForNewUsers = true;
 });
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
+if (allowedOrigins is null || allowedOrigins.Length == 0)
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            "Cors:AllowedOrigins must be configured for non-development environments.");
+    }
+
+    allowedOrigins = ["http://localhost:4200", "https://localhost:4200"];
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularDevelopment", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
