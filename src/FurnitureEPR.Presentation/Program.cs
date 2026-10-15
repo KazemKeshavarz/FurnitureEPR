@@ -15,8 +15,13 @@ var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
 var jwtOptions = jwtSection.Get<JwtOptions>()
     ?? throw new InvalidOperationException("Jwt configuration is missing.");
 
-if (string.IsNullOrWhiteSpace(jwtOptions.Key))
-    throw new InvalidOperationException("Jwt:Key is required.");
+if (string.IsNullOrWhiteSpace(jwtOptions.Key)
+    || jwtOptions.Key.Length < 32
+    || jwtOptions.Key.Contains("CHANGE_THIS", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        "Jwt:Key must be a real random secret of at least 32 characters. Configure it with user-secrets or the Jwt__Key environment variable.");
+}
 
 builder.Services.AddApplication();
 
