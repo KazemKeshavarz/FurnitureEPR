@@ -65,6 +65,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(PermissionNames.IdentityManageRoles, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageRoles));
 
+    // مدیر نقش‌ها یا مدیر گردش‌کار باید بتواند نقش‌ها را برای تخصیص به مراحل مشاهده کند.
+    options.AddPolicy("identity.read_roles", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageRoles)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowManage)));
+
     options.AddPolicy(PermissionNames.IdentityManageClaims, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageClaims));
 
