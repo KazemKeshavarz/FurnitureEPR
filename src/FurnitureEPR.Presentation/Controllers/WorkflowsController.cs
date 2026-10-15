@@ -12,7 +12,7 @@ namespace FurnitureEPR.Presentation.Controllers;
 
 [ApiController]
 [Route("api/workflows")]
-[Authorize(Policy = PermissionNames.WorkflowMove)]
+[Authorize(Policy = PermissionNames.WorkflowManage)]
 public sealed class WorkflowsController : ControllerBase
 {
     private readonly ISender _sender;
