@@ -113,7 +113,7 @@ if (allowedOrigins is null || allowedOrigins.Length == 0)
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AngularDevelopment", policy =>
+    options.AddPolicy("AngularClient", policy =>
     {
         policy
             .WithOrigins(allowedOrigins)
@@ -133,7 +133,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AngularDevelopment");
+app.UseCors("AngularClient");
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseMiddleware<AuditLogMiddleware>();
 app.UseAuthentication();
