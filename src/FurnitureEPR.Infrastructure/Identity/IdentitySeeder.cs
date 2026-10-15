@@ -104,6 +104,7 @@ public sealed class IdentitySeeder
     {
         var permissions = new[]
         {
+            PermissionNames.WorkflowManage,
             PermissionNames.WorkflowMove,
             PermissionNames.WorkflowQualityControl,
             PermissionNames.WorkflowComplete,
