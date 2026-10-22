@@ -76,7 +76,8 @@ public sealed class IdentitySeeder
         {
             UserName = _options.AdminUserName,
             Email = _options.AdminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            PasswordHash=_options.AdminPassword
         };
 
         var userResult = await _userManager.CreateAsync(
