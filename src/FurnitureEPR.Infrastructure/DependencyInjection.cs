@@ -3,6 +3,7 @@ using FurnitureEPR.Application.Features.Components;
 using FurnitureEPR.Application.Features.Customers;
 using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Application.Features.Products;
+using FurnitureEPR.Application.Features.Workflows;
 using FurnitureEPR.Application.Security;
 using FurnitureEPR.Infrastructure.Identity;
 using FurnitureEPR.Infrastructure.Persistence;
@@ -40,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderDraftRepository, OrderDraftRepository>();
         services.AddScoped<IOrderWorkflowRuntimeRepository, OrderWorkflowRuntimeRepository>();
         services.AddScoped<IProductionReadRepository, ProductionReadRepository>();
+        services.AddScoped<IWorkflowRepository, WorkflowRepository>();
         services.AddScoped<IIdentityManagementService, IdentityManagementService>();
 
         return services;
