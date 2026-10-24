@@ -1,0 +1,126 @@
+  <section class="page">
+    <div class="heading">
+      <span>عملیات فروش</span>
+      <h1>ثبت سفارش جدید</h1>
+      <p>مراحل را ساده و به‌ترتیب انجام دهید.</p>
+    </div>
+
+    <mat-card class="step">
+      <div class="step-title"><b>۱</b><div><strong>مشتری</strong><small>مشتری سفارش را انتخاب کنید.</small></div></div>
+      <div class="customer-actions">
+        <mat-form-field appearance="outline">
+          <mat-label>انتخاب مشتری</mat-label>
+          <select matNativeControl [value]="customerId" (change)="customerId=$any($event.target).value">
+            <option value="">انتخاب کنید</option>
+            @for(c of customers; track c.id){<option [value]="c.id">{{c.name}}{{c.phoneNumber ? ' - '+c.phoneNumber : ''}}</option>}
+          </select>
+        </mat-form-field>
+        <button mat-stroked-button type="button" (click)="showNewCustomer=!showNewCustomer">
+          <mat-icon>person_add</mat-icon> مشتری جدید
+        </button>
+      </div>
+
+      @if(showNewCustomer){
+        <form [formGroup]="customerForm" (ngSubmit)="createCustomer()" class="new-customer">
+          <mat-form-field appearance="outline"><mat-label>نام مشتری</mat-label><input matInput formControlName="name"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>شماره تماس</mat-label><input matInput formControlName="phoneNumber" inputmode="tel"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>آدرس</mat-label><input matInput formControlName="address"></mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="customerForm.invalid || busy">ثبت و انتخاب مشتری</button>
+        </form>
+      }
+    </mat-card>
+
+    @if(customerId){
+      <mat-card class="step">
+        <div class="step-title"><b>۲</b><div><strong>افزودن محصول</strong><small>دسته‌بندی، محصول و تعداد را انتخاب کنید.</small></div></div>
+
+        <div class="product-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>دسته‌بندی</mat-label>
+            <select matNativeControl [value]="categoryId" (change)="selectCategory($any($event.target).value)">
+              <option value="">انتخاب کنید</option>
+              @for(c of categories; track c.id){<option [value]="c.id">{{c.name}}</option>}
+            </select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>محصول</mat-label>
+            <select matNativeControl [value]="productId" (change)="selectProduct($any($event.target).value)" [disabled]="!categoryId">
+              <option value="">انتخاب کنید</option>
+              @for(p of products; track p.id){<option [value]="p.id">{{p.name}}</option>}
+            </select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>تعداد</mat-label>
+            <input matInput type="number" min="0.001" step="1" [value]="itemQuantity" (input)="itemQuantity=+$any($event.target).value" inputmode="decimal">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>قیمت واحد (ریال)</mat-label>
+            <input matInput type="number" min="0" step="1000" [value]="itemUnitPrice" (input)="itemUnitPrice=+$any($event.target).value" inputmode="numeric">
+          </mat-form-field>
+        </div>
+
+        @if(selectedProduct){
+          <div class="component-box">
+            <div class="box-title"><mat-icon>construction</mat-icon><strong>اجزای محصول</strong><small>مقادیر پیش‌فرض را در صورت نیاز تغییر دهید.</small></div>
+            @for(c of selectedComponents; track c.componentId){
+              <div class="component-row">
+                <div><strong>{{c.componentName}}</strong><small>مقدار پیش‌فرض: {{c.defaultQuantity}}</small></div>
+                <input type="number" min="0" step="0.001" [value]="c.quantity" (input)="c.quantity=+$any($event.target).value">
+              </div>
+            }
+            @empty {<div class="empty-inline">برای این محصول جزء پیش‌فرض تعریف نشده است.</div>}
+          </div>
+
+          <button mat-flat-button class="add-product" type="button" [disabled]="!canAddItem()" (click)="addItem()">
+            <mat-icon>add_shopping_cart</mat-icon> افزودن به سفارش
+          </button>
+        }
+      </mat-card>
+    }
+
+    @if(items.length){
+      <mat-card class="step">
+        <div class="step-title"><b>۳</b><div><strong>اقلام سفارش</strong><small>قیمت و تعداد هر قلم را بررسی کنید.</small></div></div>
+        <div class="cart">
+          @for(item of items; track $index){
+            <div class="cart-item">
+              <div class="cart-head">
+                <div><strong>{{item.productName}}</strong><small>{{item.quantity}} عدد × {{format(item.unitPrice)}} ریال</small></div>
+                <button mat-icon-button type="button" aria-label="حذف" (click)="removeItem($index)"><mat-icon>delete_outline</mat-icon></button>
+              </div>
+              <div class="cart-total">{{format(item.quantity * item.unitPrice)}} ریال</div>
+            </div>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="summary">
+        <div class="summary-row"><span>مبلغ کل سفارش</span><strong>{{format(totalAmount)}} ریال</strong></div>
+        <div class="discount-row">
+          <mat-form-field appearance="outline">
+            <mat-label>تخفیف (ریال)</mat-label>
+            <input matInput type="number" min="0" [value]="discountAmount" (input)="discountAmount=+$any($event.target).value" inputmode="numeric">
+          </mat-form-field>
+        </div>
+        <div class="final-row"><span>مبلغ نهایی</span><strong>{{format(finalAmount)}} ریال</strong></div>
+        @if(discountAmount > totalAmount){<div class="error-inline">مبلغ تخفیف نمی‌تواند بیشتر از مبلغ کل باشد.</div>}
+        <button mat-flat-button class="save" type="button" [disabled]="busy || !canSave()" (click)="saveOrder()">
+          <mat-icon>check_circle</mat-icon> ثبت و نهایی‌سازی سفارش
+        </button>
+      </mat-card>
+    }
+
+    @if(success){
+      <mat-card class="success-card">
+        <mat-icon>task_alt</mat-icon>
+        <strong>سفارش با موفقیت ثبت شد.</strong>
+        <span>شماره سفارش: {{successOrderNumber}}</span>
+        <button mat-stroked-button type="button" (click)="newOrder()">ثبت سفارش جدید</button>
+      </mat-card>
+    }
+
+    @if(error){<div class="error">{{error}}</div>}
+  </section>
