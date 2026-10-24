@@ -1,0 +1,16 @@
+    <section class="page">
+      <div class="heading"><span>مدیریت سامانه</span><h1>کاربران</h1><p>کاربران سامانه را ایجاد کنید و نقش مناسب را به هر کاربر بدهید.</p></div>
+      <mat-card class="form-card"><h2>افزودن کاربر</h2><form [formGroup]="form" (ngSubmit)="createUser()">
+        <mat-form-field appearance="outline"><mat-label>نام کاربری</mat-label><input matInput formControlName="userName"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>ایمیل</mat-label><input matInput type="email" formControlName="email"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>رمز عبور</mat-label><input matInput type="password" formControlName="password"></mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="form.invalid || saving"><mat-icon>person_add</mat-icon>ثبت کاربر</button>
+      </form></mat-card>
+      @if(error){<div class="error">{{error}}</div>}
+      <div class="list">@for(user of users; track user.id){<mat-card class="user-card">
+        <div class="user-main"><div class="avatar"><mat-icon>person</mat-icon></div><div class="identity"><strong>{{user.userName}}</strong><small>{{user.email || 'ایمیل ثبت نشده'}}</small></div>@if(user.lockedOut){<span class="locked">قفل شده</span>}</div>
+        <div class="roles">@for(role of user.roles; track role.id){<span>{{role.name}}</span>}@empty{<small>هنوز نقشی تعیین نشده</small>}</div>
+        <div class="actions"><mat-form-field appearance="outline"><mat-label>افزودن نقش</mat-label><mat-select (selectionChange)="assignRole(user,$event.value)">@for(role of roles; track role.id){<mat-option [value]="role.id">{{role.name}}</mat-option>}</mat-select></mat-form-field>
+        @for(role of user.roles; track role.id){<button mat-stroked-button type="button" (click)="removeRole(user,role.id)"><mat-icon>close</mat-icon>{{role.name}}</button>}</div>
+      </mat-card>}@empty{<div class="empty">هنوز کاربری ثبت نشده است.</div>}</div>
+    </section>
