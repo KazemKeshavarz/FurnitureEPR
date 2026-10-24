@@ -1,0 +1,18 @@
+    <section class="dashboard">
+      <div class="page-heading">
+        <span>صفحه اصلی</span>
+        <h1>داشبورد</h1>
+      </div>
+
+      <section class="welcome">
+        <p>خوش آمدید</p>
+        <h2>{{ userName }}</h2>
+        <small>از اینجا می‌توانید سفارش‌ها و مراحل تولید را به‌سادگی پیگیری کنید.</small>
+      </section>
+
+      <section class="cards">
+        <a mat-card routerLink="/orders"><div class="icon">📋</div><strong>سفارش‌ها</strong><span>ثبت و پیگیری سفارش‌های مشتریان</span></a>
+        <a mat-card routerLink="/production"><div class="icon">🏭</div><strong>تولید</strong><span>مشاهده مرحله فعلی هر سفارش</span></a>
+        <a mat-card routerLink="/customers"><div class="icon">👥</div><strong>مشتریان</strong><span>مدیریت اطلاعات مشتریان</span></a>
+      </section>
+    </section>
