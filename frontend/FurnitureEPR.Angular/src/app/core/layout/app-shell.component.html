@@ -1,0 +1,120 @@
+    <mat-sidenav-container class="shell">
+      <mat-sidenav
+        #drawer
+        class="sidenav"
+        [mode]="isMobile ? 'over' : 'side'"
+        [opened]="!isMobile">
+
+        <div class="brand">
+          <div class="brand-mark">EPR</div>
+          <div>
+            <strong>Furniture EPR</strong>
+            <small>مدیریت سفارش و تولید</small>
+          </div>
+        </div>
+
+        <mat-divider />
+
+        <mat-nav-list class="menu">
+          <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>dashboard</mat-icon>
+            <span matListItemTitle>داشبورد</span>
+          </a>
+
+          <div class="section-title">عملیات</div>
+
+          <a mat-list-item routerLink="/orders" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>receipt_long</mat-icon>
+            <span matListItemTitle>سفارش‌ها</span>
+          </a>
+
+          <a mat-list-item routerLink="/production" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>precision_manufacturing</mat-icon>
+            <span matListItemTitle>تولید و مراحل کار</span>
+          </a>
+
+          <a mat-list-item routerLink="/customers" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>people</mat-icon>
+            <span matListItemTitle>مشتریان</span>
+          </a>
+
+          <div class="section-title">تعریف اطلاعات</div>
+
+          <a mat-list-item routerLink="/products" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>chair</mat-icon>
+            <span matListItemTitle>محصولات</span>
+          </a>
+
+          <a mat-list-item routerLink="/categories" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+            <mat-icon matListItemIcon>category</mat-icon>
+            <span matListItemTitle>دسته‌بندی‌ها</span>
+          </a>
+
+          @if (canManageUsers) {
+            <div class="section-title">مدیریت سامانه</div>
+
+            <a mat-list-item routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>settings</mat-icon>
+              <span matListItemTitle>مدیریت و تعاریف</span>
+            </a>
+
+            <a mat-list-item routerLink="/admin/master-data" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>category</mat-icon>
+              <span matListItemTitle>تعاریف محصول</span>
+            </a>
+
+            <a mat-list-item routerLink="/admin/users" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>manage_accounts</mat-icon>
+              <span matListItemTitle>کاربران</span>
+            </a>
+
+            <a mat-list-item routerLink="/admin/roles" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+              <span matListItemTitle>نقش‌ها و دسترسی‌ها</span>
+            </a>
+          }
+
+          @if (canManageWorkflows) {
+            <div class="section-title">مدیریت تولید</div>
+            <a mat-list-item routerLink="/admin/workflows" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>account_tree</mat-icon>
+              <span matListItemTitle>فرآیندهای تولید</span>
+            </a>
+          }
+        </mat-nav-list>
+
+        <div class="sidenav-footer">
+          <div class="user-box">
+            <div class="avatar">{{ userInitial }}</div>
+            <div class="user-info">
+              <strong>{{ userName }}</strong>
+              <small>کاربر سامانه</small>
+            </div>
+          </div>
+          <button mat-button class="logout-button" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            خروج از سامانه
+          </button>
+        </div>
+      </mat-sidenav>
+
+      <mat-sidenav-content>
+        <mat-toolbar class="topbar">
+          <button mat-icon-button class="menu-button" aria-label="باز کردن منو" (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <div class="page-title">
+            <strong>Furniture EPR</strong>
+            <span>سامانه مدیریت سفارش و تولید</span>
+          </div>
+          <span class="toolbar-spacer"></span>
+          <button mat-icon-button class="desktop-logout" aria-label="خروج" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </mat-toolbar>
+
+        <main class="content">
+          <router-outlet />
+        </main>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
