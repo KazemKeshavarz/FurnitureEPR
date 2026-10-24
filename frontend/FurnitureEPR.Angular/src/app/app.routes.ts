@@ -39,13 +39,13 @@ export const routes: Routes = [
       },
       {
         path: 'products',
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'محصولات', description: 'بخش مدیریت محصولات در حال آماده‌سازی است.' }
+        loadComponent: () => import('./features/master-data/master-data.component').then(m => m.MasterDataComponent),
+        data: { initialTabIndex: 1 }
       },
       {
         path: 'categories',
-        loadComponent: () => import('./features/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
-        data: { title: 'دسته‌بندی‌ها', description: 'بخش مدیریت دسته‌بندی‌ها در حال آماده‌سازی است.' }
+        loadComponent: () => import('./features/master-data/master-data.component').then(m => m.MasterDataComponent),
+        data: { initialTabIndex: 0 }
       },
       {
         path: 'admin',
