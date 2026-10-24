@@ -1,0 +1,38 @@
+    <main class="login-page">
+      <section class="login-brand">
+        <div class="brand-mark">E</div>
+        <span class="eyebrow">Furniture EPR</span>
+        <h1>مدیریت هوشمند تولید و سفارش</h1>
+        <p>مدیریت سفارش‌ها، فرآیند تولید و کنترل کیفیت در یک پنل یکپارچه.</p>
+      </section>
+      <mat-card class="login-card">
+        <mat-card-header>
+          <mat-card-title>ورود به سامانه</mat-card-title>
+          <mat-card-subtitle>اطلاعات حساب کاربری خود را وارد کنید.</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <mat-form-field appearance="outline">
+              <mat-label>نام کاربری</mat-label>
+              <input matInput formControlName="userName" autocomplete="username">
+              @if (form.controls.userName.hasError('required') && form.controls.userName.touched) {
+                <mat-error>نام کاربری الزامی است.</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>رمز عبور</mat-label>
+              <input matInput type="password" formControlName="password" autocomplete="current-password">
+              @if (form.controls.password.hasError('required') && form.controls.password.touched) {
+                <mat-error>رمز عبور الزامی است.</mat-error>
+              }
+            </mat-form-field>
+            @if (errorMessage) {
+              <div class="error">{{ errorMessage }}</div>
+            }
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading">
+              {{ loading ? 'در حال ورود...' : 'ورود' }}
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </main>
