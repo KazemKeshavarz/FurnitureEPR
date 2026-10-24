@@ -1,0 +1,80 @@
+    <section class="page" dir="rtl">
+      <header class="page-heading">
+        <div>
+          <span class="eyebrow">اطلاعات پایه</span>
+          <h1>مشتریان</h1>
+          <p>اطلاعات تماس مشتریان سفارش‌ها را مدیریت کنید.</p>
+        </div>
+        <button mat-flat-button class="new-button" (click)="toggleForm()">
+          <mat-icon>{{ showForm ? 'close' : 'person_add' }}</mat-icon>
+          {{ showForm ? 'بستن فرم' : 'مشتری جدید' }}
+        </button>
+      </header>
+
+      @if (showForm) {
+        <mat-card class="form-card">
+          <h2>ثبت مشتری جدید</h2>
+          <form [formGroup]="form" (ngSubmit)="createCustomer()">
+            <mat-form-field appearance="outline">
+              <mat-label>نام و نام خانوادگی / نام شرکت</mat-label>
+              <input matInput formControlName="name" autocomplete="name" placeholder="مثلاً علی رضایی">
+              @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+                <mat-error>نام مشتری الزامی است.</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>شماره تماس</mat-label>
+              <input matInput formControlName="phoneNumber" inputmode="tel" autocomplete="tel" placeholder="09...">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>آدرس</mat-label>
+              <textarea matInput formControlName="address" rows="2" placeholder="آدرس مشتری (اختیاری)"></textarea>
+            </mat-form-field>
+            <button mat-flat-button class="save-button" type="submit" [disabled]="form.invalid || saving">
+              {{ saving ? 'در حال ثبت...' : 'ثبت مشتری' }}
+            </button>
+          </form>
+        </mat-card>
+      }
+
+      <div class="search-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>جست‌وجوی مشتری</mat-label>
+          <input matInput [value]="search" (input)="onSearch($any($event.target).value)" placeholder="نام یا شماره تماس">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+        <button mat-stroked-button class="refresh-button" (click)="loadCustomers()">
+          <mat-icon>refresh</mat-icon><span>بروزرسانی</span>
+        </button>
+      </div>
+
+      @if (error) {
+        <div class="error-message" role="alert">{{ error }}</div>
+      }
+      @if (loading) {
+        <div class="state-card"><mat-icon>hourglass_top</mat-icon><span>در حال دریافت مشتریان...</span></div>
+      } @else if (customers.length === 0) {
+        <div class="state-card empty">
+          <mat-icon>group</mat-icon>
+          <strong>{{ search ? 'مشتری‌ای با این مشخصات پیدا نشد.' : 'هنوز مشتری ثبت نشده است.' }}</strong>
+          <span>برای شروع، مشتری جدید را ثبت کنید.</span>
+        </div>
+      } @else {
+        <div class="customer-list">
+          @for (customer of customers; track customer.id) {
+            <mat-card class="customer-card">
+              <div class="avatar"><mat-icon>person</mat-icon></div>
+              <div class="customer-info">
+                <strong>{{ customer.name }}</strong>
+                <span class="phone" dir="ltr">{{ customer.phoneNumber || 'شماره تماس ثبت نشده' }}</span>
+                @if (customer.address) { <span class="address">{{ customer.address }}</span> }
+              </div>
+              <button mat-icon-button aria-label="نمایش اطلاعات مشتری" [disabled]="!customer.address" (click)="showAddress(customer)">
+                <mat-icon>location_on</mat-icon>
+              </button>
+            </mat-card>
+          }
+        </div>
+        <div class="list-footer">نمایش {{ customers.length }} مشتری</div>
+      }
+    </section>
