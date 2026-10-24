@@ -1,0 +1,57 @@
+    <section class="page">
+      <div class="heading"><span>مدیریت اطلاعات پایه</span><h1>تعاریف سامانه</h1></div>
+      <mat-tab-group [selectedIndex]="initialTabIndex">
+        <mat-tab label="دسته‌بندی‌ها"><div class="tab-content">
+          <mat-card class="form-card"><h2>دسته‌بندی جدید</h2><form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
+            <mat-form-field appearance="outline"><mat-label>نام دسته‌بندی</mat-label><input matInput formControlName="name" placeholder="مثلاً مبلمان"></mat-form-field>
+            <button mat-flat-button type="submit" [disabled]="categoryForm.invalid || saving">ثبت دسته‌بندی</button>
+          </form></mat-card>
+          <div class="list">@for (item of categories; track item.id) {<mat-card class="row"><mat-icon>category</mat-icon><div><strong>{{item.name}}</strong><small>دسته‌بندی محصول</small></div></mat-card>} @empty {<div class="empty">هنوز دسته‌بندی‌ای ثبت نشده است.</div>}</div>
+        </div></mat-tab>
+        <mat-tab label="محصولات"><div class="tab-content">
+          <mat-card class="form-card"><h2>محصول جدید</h2><form [formGroup]="productForm" (ngSubmit)="addProduct()">
+            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>نام محصول</mat-label><input matInput formControlName="name" placeholder="مثلاً مبل بوچلی"></mat-form-field>
+            <button mat-flat-button type="submit" [disabled]="productForm.invalid || saving">ثبت محصول</button>
+          </form></mat-card>
+          <div class="list">@for (item of products; track item.id) {<mat-card class="row"><mat-icon>chair</mat-icon><div><strong>{{item.name}}</strong><small>{{categoryName(item.categoryId)}}</small></div></mat-card>} @empty {<div class="empty">هنوز محصولی ثبت نشده است.</div>}</div>
+        </div></mat-tab>
+        <mat-tab label="اجزای محصول"><div class="tab-content">
+          <mat-card class="form-card"><h2>جزء جدید</h2><form [formGroup]="componentForm" (ngSubmit)="addComponent()">
+            <mat-form-field appearance="outline"><mat-label>نام جزء</mat-label><input matInput formControlName="name" placeholder="مثلاً پایه مبل"></mat-form-field>
+            <button mat-flat-button type="submit" [disabled]="componentForm.invalid || saving">ثبت جزء</button>
+          </form></mat-card>
+          <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
+        </div></mat-tab>
+        <mat-tab label="اجزای محصولات"><div class="tab-content">
+          <mat-card class="form-card"><h2>تعریف اجزای هر محصول</h2>
+            <p class="hint">برای هر محصول، اجزای موردنیاز و تعداد پیش‌فرض آن‌ها را مشخص کنید.</p>
+            <form [formGroup]="productComponentForm" (ngSubmit)="addProductComponent()">
+              <mat-form-field appearance="outline"><mat-label>محصول</mat-label>
+                <select matNativeControl formControlName="productId" (change)="loadProductComponents($any($event.target).value)">
+                  <option value="">انتخاب محصول</option>
+                  @for (item of products; track item.id) {<option [value]="item.id">{{item.name}}</option>}
+                </select>
+              </mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>جزء</mat-label>
+                <select matNativeControl formControlName="componentId">
+                  <option value="">انتخاب جزء</option>
+                  @for (item of components; track item.id) {<option [value]="item.id">{{item.name}}</option>}
+                </select>
+              </mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>تعداد پیش‌فرض</mat-label><input matInput type="number" min="0.001" step="0.001" formControlName="defaultQuantity"></mat-form-field>
+              <button mat-flat-button type="submit" [disabled]="productComponentForm.invalid || saving">افزودن جزء به محصول</button>
+            </form>
+          </mat-card>
+          @if(selectedProductName){
+            <div class="selected-title">اجزای محصول «{{selectedProductName}}»</div>
+            <div class="list">
+              @for (item of productComponents; track item.id) {
+                <mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.componentName}}</strong><small>تعداد پیش‌فرض: {{item.defaultQuantity}}</small></div></mat-card>
+              } @empty {<div class="empty">برای این محصول هنوز جزئی تعریف نشده است.</div>}
+            </div>
+          }
+        </div></mat-tab>
+      </mat-tab-group>
+      @if(error){<div class="error">{{error}}</div>}
+    </section>
