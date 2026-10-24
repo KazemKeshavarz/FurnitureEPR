@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule],
+  imports: [MatCardModule, RouterLink],
   template: `
     <section class="dashboard">
       <div class="page-heading">
@@ -20,9 +21,9 @@ import { AuthService } from '../../core/auth/auth.service';
       </section>
 
       <section class="cards">
-        <mat-card><div class="icon">📋</div><strong>سفارش‌ها</strong><span>ثبت و پیگیری سفارش‌های مشتریان</span></mat-card>
-        <mat-card><div class="icon">🏭</div><strong>تولید</strong><span>مشاهده مرحله فعلی هر سفارش</span></mat-card>
-        <mat-card><div class="icon">📊</div><strong>گزارش‌ها</strong><span>گزارش وضعیت سفارش‌ها و تولید</span></mat-card>
+        <a mat-card routerLink="/orders"><div class="icon">📋</div><strong>سفارش‌ها</strong><span>ثبت و پیگیری سفارش‌های مشتریان</span></a>
+        <a mat-card routerLink="/production"><div class="icon">🏭</div><strong>تولید</strong><span>مشاهده مرحله فعلی هر سفارش</span></a>
+        <a mat-card routerLink="/customers"><div class="icon">👥</div><strong>مشتریان</strong><span>مدیریت اطلاعات مشتریان</span></a>
       </section>
     </section>
   `,
@@ -35,7 +36,7 @@ import { AuthService } from '../../core/auth/auth.service';
     .welcome h2 { margin: 0 0 8px; font-size: 24px; }
     .welcome small { opacity: .78; line-height: 1.9; }
     .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    mat-card { padding: 20px; border-radius: 18px; box-shadow: 0 3px 16px rgba(16,42,53,.05); }
+    mat-card { padding: 20px; border-radius: 18px; box-shadow: 0 3px 16px rgba(16,42,53,.05); text-decoration: none; display: block; transition: transform .15s ease, box-shadow .15s ease; }\n    a[mat-card] { cursor: pointer; }\n    a[mat-card]:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(16,42,53,.09); }
     .icon { font-size: 26px; margin-bottom: 12px; }
     mat-card strong { display: block; color: #102a35; font-size: 17px; margin-bottom: 7px; }
     mat-card span { color: #68777d; line-height: 1.8; font-size: 13px; }
