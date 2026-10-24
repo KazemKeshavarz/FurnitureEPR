@@ -20,71 +20,8 @@ interface ProductComponent { id:string; componentId:string; componentName:string
   selector: 'app-master-data',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatTabsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCardModule],
-  template: `
-    <section class="page">
-      <div class="heading"><span>مدیریت اطلاعات پایه</span><h1>تعاریف سامانه</h1></div>
-      <mat-tab-group [selectedIndex]="initialTabIndex">
-        <mat-tab label="دسته‌بندی‌ها"><div class="tab-content">
-          <mat-card class="form-card"><h2>دسته‌بندی جدید</h2><form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
-            <mat-form-field appearance="outline"><mat-label>نام دسته‌بندی</mat-label><input matInput formControlName="name" placeholder="مثلاً مبلمان"></mat-form-field>
-            <button mat-flat-button type="submit" [disabled]="categoryForm.invalid || saving">ثبت دسته‌بندی</button>
-          </form></mat-card>
-          <div class="list">@for (item of categories; track item.id) {<mat-card class="row"><mat-icon>category</mat-icon><div><strong>{{item.name}}</strong><small>دسته‌بندی محصول</small></div></mat-card>} @empty {<div class="empty">هنوز دسته‌بندی‌ای ثبت نشده است.</div>}</div>
-        </div></mat-tab>
-        <mat-tab label="محصولات"><div class="tab-content">
-          <mat-card class="form-card"><h2>محصول جدید</h2><form [formGroup]="productForm" (ngSubmit)="addProduct()">
-            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>نام محصول</mat-label><input matInput formControlName="name" placeholder="مثلاً مبل بوچلی"></mat-form-field>
-            <button mat-flat-button type="submit" [disabled]="productForm.invalid || saving">ثبت محصول</button>
-          </form></mat-card>
-          <div class="list">@for (item of products; track item.id) {<mat-card class="row"><mat-icon>chair</mat-icon><div><strong>{{item.name}}</strong><small>{{categoryName(item.categoryId)}}</small></div></mat-card>} @empty {<div class="empty">هنوز محصولی ثبت نشده است.</div>}</div>
-        </div></mat-tab>
-        <mat-tab label="اجزای محصول"><div class="tab-content">
-          <mat-card class="form-card"><h2>جزء جدید</h2><form [formGroup]="componentForm" (ngSubmit)="addComponent()">
-            <mat-form-field appearance="outline"><mat-label>نام جزء</mat-label><input matInput formControlName="name" placeholder="مثلاً پایه مبل"></mat-form-field>
-            <button mat-flat-button type="submit" [disabled]="componentForm.invalid || saving">ثبت جزء</button>
-          </form></mat-card>
-          <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
-        </div></mat-tab>
-        <mat-tab label="اجزای محصولات"><div class="tab-content">
-          <mat-card class="form-card"><h2>تعریف اجزای هر محصول</h2>
-            <p class="hint">برای هر محصول، اجزای موردنیاز و تعداد پیش‌فرض آن‌ها را مشخص کنید.</p>
-            <form [formGroup]="productComponentForm" (ngSubmit)="addProductComponent()">
-              <mat-form-field appearance="outline"><mat-label>محصول</mat-label>
-                <select matNativeControl formControlName="productId" (change)="loadProductComponents($any($event.target).value)">
-                  <option value="">انتخاب محصول</option>
-                  @for (item of products; track item.id) {<option [value]="item.id">{{item.name}}</option>}
-                </select>
-              </mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>جزء</mat-label>
-                <select matNativeControl formControlName="componentId">
-                  <option value="">انتخاب جزء</option>
-                  @for (item of components; track item.id) {<option [value]="item.id">{{item.name}}</option>}
-                </select>
-              </mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>تعداد پیش‌فرض</mat-label><input matInput type="number" min="0.001" step="0.001" formControlName="defaultQuantity"></mat-form-field>
-              <button mat-flat-button type="submit" [disabled]="productComponentForm.invalid || saving">افزودن جزء به محصول</button>
-            </form>
-          </mat-card>
-          @if(selectedProductName){
-            <div class="selected-title">اجزای محصول «{{selectedProductName}}»</div>
-            <div class="list">
-              @for (item of productComponents; track item.id) {
-                <mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.componentName}}</strong><small>تعداد پیش‌فرض: {{item.defaultQuantity}}</small></div></mat-card>
-              } @empty {<div class="empty">برای این محصول هنوز جزئی تعریف نشده است.</div>}
-            </div>
-          }
-        </div></mat-tab>
-      </mat-tab-group>
-      @if(error){<div class="error">{{error}}</div>}
-    </section>`,
-  styles: [`
-    .page{max-width:1000px;margin:0 auto}.heading span{font-size:12px;color:#286f93;font-weight:700}.heading h1{margin:5px 0 18px;color:#102a35;font-size:25px}
-    .tab-content{padding:18px 2px}.form-card{padding:18px;border-radius:18px;margin-bottom:14px}.form-card h2{font-size:16px;margin:0 0 14px;color:#102a35}
-    form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}.form-card mat-form-field{width:100%}.form-card button{height:56px;background:#286f93;color:#fff}
-    .list{display:grid;gap:9px}.row{padding:14px;display:flex;align-items:center;gap:12px;border-radius:15px}.row mat-icon{color:#286f93}.row strong,.row small{display:block}.row strong{color:#102a35}.row small{color:#839096;font-size:11px;margin-top:3px}.empty{padding:28px;text-align:center;color:#8b989d;background:#fff;border-radius:16px}.hint{font-size:12px;color:#839096;margin:-7px 0 15px}.selected-title{font-weight:700;color:#286f93;margin:12px 2px}.error{margin-top:12px;padding:12px;border-radius:12px;background:#fff0f0;color:#a33}
-    @media(max-width:700px){.heading h1{font-size:21px}.tab-content{padding-top:12px}form{grid-template-columns:1fr}.form-card button{width:100%;height:50px}.row{min-height:60px}}
-  `]
+  templateUrl: './master-data.component.html',
+  styleUrl: './master-data.component.scss'
 })
 export class MasterDataComponent {
   private readonly http = inject(HttpClient);
