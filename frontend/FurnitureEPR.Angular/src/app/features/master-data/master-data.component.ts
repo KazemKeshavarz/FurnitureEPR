@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,7 +23,7 @@ interface ProductComponent { id:string; componentId:string; componentName:string
   template: `
     <section class="page">
       <div class="heading"><span>مدیریت اطلاعات پایه</span><h1>تعاریف سامانه</h1></div>
-      <mat-tab-group>
+      <mat-tab-group [selectedIndex]="initialTabIndex">
         <mat-tab label="دسته‌بندی‌ها"><div class="tab-content">
           <mat-card class="form-card"><h2>دسته‌بندی جدید</h2><form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
             <mat-form-field appearance="outline"><mat-label>نام دسته‌بندی</mat-label><input matInput formControlName="name" placeholder="مثلاً مبلمان"></mat-form-field>
@@ -88,6 +89,9 @@ interface ProductComponent { id:string; componentId:string; componentName:string
 export class MasterDataComponent {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly initialTabIndex = Number(this.route.snapshot.data['initialTabIndex'] ?? 0);
 
   categories: Category[] = [];
   products: Product[] = [];
