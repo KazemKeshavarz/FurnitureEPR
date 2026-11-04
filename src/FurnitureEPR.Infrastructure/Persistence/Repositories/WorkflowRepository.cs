@@ -1,6 +1,5 @@
 using FurnitureEPR.Application.Features.Workflows;
 using FurnitureEPR.Application.Features.Workflows.Queries;
-using FurnitureEPR.Model.Categories;
 using FurnitureEPR.Model.Workflow;
 using Microsoft.EntityFrameworkCore;
 
@@ -83,10 +82,15 @@ public sealed class WorkflowRepository : IWorkflowRepository
         if (definition is null)
             return null;
 
-        var assignedCategoryIds = await _db.Categories
+        var assignedCategories = await _db.Categories
             .AsNoTracking()
             .Where(x => x.WorkflowVersion != null && x.WorkflowVersion.WorkflowDefinitionId == id)
-            .Select(x => x.Id)
+            .Select(x => new WorkflowCategoryAssignmentDto(
+                x.Id,
+                x.Name,
+                x.WorkflowVersion!.Id,
+                x.WorkflowVersion.VersionNumber))
+            .OrderBy(x => x.CategoryName)
             .ToArrayAsync(cancellationToken);
 
         var versions = definition.Versions
@@ -120,7 +124,7 @@ public sealed class WorkflowRepository : IWorkflowRepository
             definition.Id,
             definition.Name,
             definition.Code,
-            assignedCategoryIds,
+            assignedCategories,
             versions);
     }
 
