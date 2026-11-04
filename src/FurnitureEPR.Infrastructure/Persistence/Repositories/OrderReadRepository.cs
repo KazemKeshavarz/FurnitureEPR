@@ -37,7 +37,9 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         c.Id,
                         c.ComponentId,
                         c.ComponentName,
-                        c.Quantity)).ToList()))
+                        c.Quantity)).ToList(),
+                    i.WarehouseAllocations.Select(a => new OrderItemWarehouseAllocationDto(
+                        a.Id, a.WarehouseId, a.Warehouse.Name, a.Warehouse.Code, a.Quantity)).ToList()))
                     .ToList(),
                 x.Workflows.Select(w => new OrderWorkflowInstanceDto(
                     w.Id,
