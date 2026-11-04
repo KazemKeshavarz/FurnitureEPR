@@ -74,7 +74,7 @@
       }
       <div class="stage-list">
         @for(stage of stages; track stage.id){
-          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}</div>
+          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}@if(canEditVersion){<div class="row-actions"><button mat-icon-button type="button" aria-label="ویرایش مرحله" [disabled]="busy" (click)="editStage(stage)"><mat-icon>edit</mat-icon></button><button mat-icon-button type="button" aria-label="حذف مرحله" [disabled]="busy" (click)="deleteStage(stage)"><mat-icon>delete</mat-icon></button></div>}</div>
         }@empty{<div class="empty-inline">هنوز مرحله‌ای اضافه نشده است.</div>}
       </div>
     </mat-card>
@@ -92,7 +92,7 @@
         }
         @if(canEditVersion && invalidTransition && transitionForm.controls.fromStageId.value && transitionForm.controls.toStageId.value){<p class="field-error">مبدأ و مقصد باید متفاوت باشند و مسیر تکراری نباشد.</p>}
         <div class="transition-list">
-          @for(item of transitions; track item.id){<div class="transition"><span>{{stageName(item.fromStageId)}}</span><mat-icon>arrow_back</mat-icon><span>{{stageName(item.toStageId)}}</span><small>{{item.name}}</small></div>}
+          @for(item of transitions; track item.id){<div class="transition"><span>{{stageName(item.fromStageId)}}</span><mat-icon>arrow_back</mat-icon><span>{{stageName(item.toStageId)}}</span><small>{{item.name}}</small>@if(canEditVersion){<div class="row-actions"><button mat-icon-button type="button" aria-label="ویرایش مسیر" [disabled]="busy" (click)="editTransition(item)"><mat-icon>edit</mat-icon></button><button mat-icon-button type="button" aria-label="حذف مسیر" [disabled]="busy" (click)="deleteTransition(item)"><mat-icon>delete</mat-icon></button></div>}</div>}
           @empty{<div class="empty-inline">هنوز مسیری تعریف نشده است.</div>}
         </div>
       </mat-card>
