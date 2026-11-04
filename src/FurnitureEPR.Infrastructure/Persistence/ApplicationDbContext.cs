@@ -30,6 +30,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<OrderItemComponent> OrderItemComponents => Set<OrderItemComponent>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<OrderItemWarehouseAllocation> OrderItemWarehouseAllocations => Set<OrderItemWarehouseAllocation>();
+    public DbSet<OrderItemProductionBatch> OrderItemProductionBatches => Set<OrderItemProductionBatch>();
     public DbSet<OrderTransfer> OrderTransfers => Set<OrderTransfer>();
     public DbSet<OrderTransferLine> OrderTransferLines => Set<OrderTransferLine>();
     public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
