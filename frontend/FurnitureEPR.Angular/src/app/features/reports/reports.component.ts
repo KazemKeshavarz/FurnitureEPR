@@ -63,6 +63,15 @@ export class ReportsComponent {
     return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(value ?? 0);
   }
 
+  duration(minutes: number | null | undefined): string {
+    const totalMinutes = Math.max(0, Math.round(minutes ?? 0));
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    if (hours === 0) return `${this.number(remainingMinutes)} دقیقه`;
+    if (remainingMinutes === 0) return `${this.number(hours)} ساعت`;
+    return `${this.number(hours)} ساعت و ${this.number(remainingMinutes)} دقیقه`;
+  }
+
   date(value: string): string {
     return value ? new Intl.DateTimeFormat('fa-IR').format(new Date(value)) : '—';
   }
