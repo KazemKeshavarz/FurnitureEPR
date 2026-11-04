@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
 interface OrderSummary { id:string; orderNumber:string; customerName:string; status:string; }
 interface Allocation { id:string; warehouseId:string; warehouseName:string; warehouseCode:string; quantity:number; }
 interface OrderLine { id:string; productId:string; categoryId:string; productName:string; quantity:number; components:{componentId:string;quantity:number}[]; warehouseAllocations:Allocation[]; }
-interface OrderDetail { id:string; orderNumber:string; customerName:string; status:string; items:OrderLine[]; workflows:{categoryId:string;status:string}[]; }
+interface OrderDetail { id:string; orderNumber:string; customerName:string; status:string; items:OrderLine[]; workflows:{categoryId:string;currentStageCode:string;status:string}[]; }
 interface DraftLine { sourceOrderItemId:string; targetOrderItemId:string; warehouseId:string; quantity:number; productName:string; warehouseName:string; }
 interface TransferRequest { id:string; sourceOrderNumber:string; sourceCustomerName:string; targetOrderNumber:string; targetCustomerName:string; reason:string; status:string; requestedAtUtc:string; lines:{id:string;sourceProductName:string;targetProductName:string;warehouseName:string;quantity:number}[]; }
 
@@ -67,7 +67,7 @@ export class OrderTransfersComponent {
     });
   }
 
-  get eligibleSourceItems():OrderLine[]{return this.source?.items.filter(item=>item.warehouseAllocations.length>0&&this.source!.workflows.some(w=>w.categoryId===item.categoryId&&w.status==='Completed'))??[];}
+  get eligibleSourceItems():OrderLine[]{return this.source?.items.filter(item=>item.warehouseAllocations.length>0&&this.source!.workflows.some(w=>w.categoryId===item.categoryId&&w.currentStageCode==='WAREHOUSE'&&w.status!=='Cancelled'))??[];}
   get sourceItem():OrderLine|undefined{return this.eligibleSourceItems.find(x=>x.id===this.selectedSourceItemId);}
   get targetCandidates():OrderLine[]{
     if(!this.sourceItem||!this.target)return [];
