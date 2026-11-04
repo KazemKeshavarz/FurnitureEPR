@@ -16,7 +16,6 @@ public sealed class CompleteOrderWorkflowCommandHandler
         CompleteOrderWorkflowCommand request,
         CancellationToken cancellationToken)
         => _repository.CompleteAsync(
-            request.OrderId,
-            request.CategoryId,
+            request.WorkflowInstanceId,
             cancellationToken);
 }
