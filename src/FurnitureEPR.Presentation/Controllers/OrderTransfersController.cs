@@ -75,7 +75,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             return NotFound("سفارش مبدأ یا مقصد پیدا نشد.");
         if (sourceOrder.Id == targetOrder.Id)
             return BadRequest("سفارش مبدأ و مقصد نمی‌توانند یکسان باشند.");
-        if (sourceOrder.Status != OrderStatus.Completed)
+        if (sourceOrder.Status is not (OrderStatus.Completed or OrderStatus.HasShortage))
             return Conflict("فقط از سفارش تکمیل‌شده می‌توان کالای آماده انتقال داد.");
         if (targetOrder.Status != OrderStatus.Active)
             return Conflict("سفارش مقصد باید در وضعیت در حال انجام باشد.");
@@ -140,7 +140,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
 
         var sourceOrder = await db.Orders.SingleAsync(x => x.Id == transfer.SourceOrderId, cancellationToken);
         var targetOrder = await db.Orders.SingleAsync(x => x.Id == transfer.TargetOrderId, cancellationToken);
-        if (sourceOrder.Status != OrderStatus.Completed || targetOrder.Status != OrderStatus.Active)
+        if (sourceOrder.Status is not (OrderStatus.Completed or OrderStatus.HasShortage) || targetOrder.Status != OrderStatus.Active)
             return Conflict("وضعیت سفارش مبدأ یا مقصد پس از ثبت درخواست تغییر کرده است.");
 
         var sourceItemIds = transfer.Lines.Select(x => x.SourceOrderItemId).Distinct().ToArray();
