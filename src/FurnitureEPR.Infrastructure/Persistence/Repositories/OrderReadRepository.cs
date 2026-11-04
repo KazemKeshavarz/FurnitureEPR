@@ -40,7 +40,7 @@ public sealed class OrderReadRepository : IOrderReadRepository
                         c.ComponentName,
                         c.Quantity)).ToList(),
                     i.WarehouseAllocations.Select(a => new OrderItemWarehouseAllocationDto(
-                        a.Id, a.WarehouseId, a.Warehouse.Name, a.Warehouse.Code, a.Quantity)).ToList()))
+                        a.Id, a.WarehouseId, a.Warehouse.Name, a.Warehouse.Code, a.Quantity)).ToList(),\n                    i.ProductionBatches.Select(b => new OrderItemProductionBatchDto(\n                        b.Id, b.Quantity, b.Origin.ToString(), b.Status.ToString(), b.CreatedAtUtc, b.ReadyAtUtc)).ToList()))
                     .ToList(),
                 x.Workflows.Select(w => new OrderWorkflowInstanceDto(
                     w.Id,
