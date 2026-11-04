@@ -2,6 +2,7 @@ using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Application.Security;
 using FurnitureEPR.Model.Workflow;
 using FurnitureEPR.Model.Orders;
+using FurnitureEPR.Model.Warehouses;
 using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Infrastructure.Persistence.Repositories;
