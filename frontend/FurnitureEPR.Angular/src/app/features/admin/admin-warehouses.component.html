@@ -1,0 +1,36 @@
+<section class="page">
+  <header class="heading">
+    <span>مدیریت اطلاعات پایه</span>
+    <h1>مدیریت انبارها</h1>
+    <p>انبارهای مجموعه را تعریف کنید تا هنگام آماده‌شدن محصولات، محل نگهداری آن‌ها ثبت شود.</p>
+  </header>
+
+  @if(error){<div class="error">{{error}}</div>}
+  @if(notice){<div class="notice">{{notice}}</div>}
+
+  <section class="card">
+    <h2>{{editingId ? 'ویرایش انبار' : 'تعریف انبار جدید'}}</h2>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <label>نام انبار<input formControlName="name" placeholder="مثلاً انبار شماره یک"></label>
+      <label>کد انبار<input formControlName="code" placeholder="مثلاً WH-01" dir="ltr"></label>
+      <div class="actions">
+        <button type="submit" [disabled]="form.invalid || busy">{{editingId ? 'ذخیره تغییرات' : 'ثبت انبار'}}</button>
+        @if(editingId){<button type="button" class="secondary" (click)="cancelEdit()">انصراف</button>}
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>فهرست انبارها</h2>
+    @if(!warehouses.length){<div class="empty">هنوز انباری تعریف نشده است.</div>}
+    @for(item of warehouses; track item.id){
+      <div class="warehouse-row">
+        <div class="warehouse-icon">انبار</div>
+        <div class="details"><strong>{{item.name}}</strong><small>{{item.code}}</small></div>
+        <span class="status" [class.inactive]="!item.isActive">{{item.isActive ? 'فعال' : 'غیرفعال'}}</span>
+        <button type="button" class="text-button" [disabled]="busy" (click)="edit(item)">ویرایش</button>
+        <button type="button" class="text-button" [disabled]="busy" (click)="toggle(item)">{{item.isActive ? 'غیرفعال‌سازی' : 'فعال‌سازی'}}</button>
+      </div>
+    }
+  </section>
+</section>
