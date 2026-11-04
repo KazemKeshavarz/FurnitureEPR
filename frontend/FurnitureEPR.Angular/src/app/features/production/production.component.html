@@ -44,7 +44,7 @@
              </div>
            }
 
-           @if(qcTaskId===task.workflowInstanceId){
+           @if(qcTaskId===task.workflowInstanceId && canQualityControl){
              <div class="qc-form">
                <mat-form-field appearance="outline">
                  <mat-label>توضیح کنترل کیفیت (اختیاری)</mat-label>
@@ -55,11 +55,11 @@
                  <button mat-flat-button type="button" class="approve" [disabled]="busy" (click)="quality(task,true)">تأیید</button>
                </div>
              </div>
-           } @else if(task.requiresQualityControl && !task.qualityControlApproved) {
+           } @else if(task.requiresQualityControl && !task.qualityControlApproved && canQualityControl) {
              <button mat-stroked-button class="full" type="button" (click)="startQc(task)"><mat-icon>fact_check</mat-icon> ثبت کنترل کیفیت</button>
            }
 
-           @if(task.transitions.length && task.canMove){
+           @if(task.transitions.length && task.canMove && canMoveWorkflow){
              <div class="next-title">مرحله بعد</div>
              <div class="actions">
                @for(t of task.transitions; track t.id){
@@ -70,7 +70,7 @@
              </div>
            }
 
-           @if(task.canComplete){
+           @if(task.canComplete && canCompleteWorkflow){
              <button mat-flat-button class="complete" type="button" [disabled]="busy" (click)="complete(task)">
                <mat-icon>task_alt</mat-icon> پایان این فرآیند
              </button>
