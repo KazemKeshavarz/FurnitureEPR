@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Model.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Infrastructure.Persistence.Repositories;
@@ -29,6 +30,9 @@ public sealed class OrderFinalizationRepository : IOrderFinalizationRepository
             .GroupBy(x => x.Id)
             .Select(x => x.First())
             .ToList();
+
+        foreach (var item in order.Items)
+            item.AddProductionBatch(new OrderItemProductionBatch(item.Id, item.Quantity, ProductionBatchOrigin.Production));
 
         foreach (var category in categories)
         {
