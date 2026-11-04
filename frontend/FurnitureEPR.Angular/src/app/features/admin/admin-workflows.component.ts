@@ -27,7 +27,8 @@ interface WorkflowVersion {
 }
 interface WorkflowDetail {
   id: string; name: string; code: string;
-  assignedCategoryIds: string[]; versions: WorkflowVersion[];
+  assignedCategories: { categoryId: string; categoryName: string; workflowVersionId: string; workflowVersionNumber: number }[];
+  versions: WorkflowVersion[];
 }
 
 @Component({
@@ -134,7 +135,7 @@ export class AdminWorkflowsComponent {
         this.stages = [];
         this.transitions = [];
         this.published = false;
-        this.selectedCategoryId = detail.assignedCategoryIds[0] || '';
+        this.selectedCategoryId = detail.assignedCategories[0]?.categoryId || '';
         const latest = [...detail.versions].sort((a, b) => b.versionNumber - a.versionNumber)[0];
         this.versionForm.reset({ versionNumber: latest ? latest.versionNumber + 1 : 1 });
         this.busy = false;
@@ -154,6 +155,9 @@ export class AdminWorkflowsComponent {
     this.stages = version ? [...version.stages] : [];
     this.transitions = version ? [...version.transitions] : [];
     this.published = version?.isPublished ?? false;
+    this.selectedCategoryId = version
+      ? this.selectedWorkflow?.assignedCategories.find(item => item.workflowVersionId === version.id)?.categoryId || ''
+      : '';
     this.clearMessages();
     if (version) this.notice = this.published
       ? 'این نسخه منتشر شده و فقط قابل مشاهده است. برای تغییرات، نسخه جدید بسازید.'
@@ -310,12 +314,7 @@ export class AdminWorkflowsComponent {
           { categoryId: this.selectedCategoryId, workflowVersionId: this.versionId }
         ).subscribe({
           next: () => {
-            if (this.selectedWorkflow && !this.selectedWorkflow.assignedCategoryIds.includes(this.selectedCategoryId)) {
-              this.selectedWorkflow = {
-                ...this.selectedWorkflow,
-                assignedCategoryIds: [...this.selectedWorkflow.assignedCategoryIds, this.selectedCategoryId]
-              };
-            }
+            this.addLocalCategoryAssignment();
             this.busy = false;
             this.notice = 'نسخه منتشر و به دسته‌بندی انتخاب‌شده متصل شد.';
             this.loadWorkflows();
@@ -343,12 +342,7 @@ export class AdminWorkflowsComponent {
       { categoryId: this.selectedCategoryId, workflowVersionId: this.versionId }
     ).subscribe({
       next: () => {
-        if (this.selectedWorkflow && !this.selectedWorkflow.assignedCategoryIds.includes(this.selectedCategoryId)) {
-          this.selectedWorkflow = {
-            ...this.selectedWorkflow,
-            assignedCategoryIds: [...this.selectedWorkflow.assignedCategoryIds, this.selectedCategoryId]
-          };
-        }
+        this.addLocalCategoryAssignment();
         this.busy = false;
         this.notice = 'نسخه منتشرشده به دسته‌بندی متصل شد.';
         this.loadWorkflows();
@@ -358,6 +352,23 @@ export class AdminWorkflowsComponent {
         this.error = error.error?.detail || 'اتصال نسخه به دسته‌بندی انجام نشد.';
       }
     });
+  }
+
+  private addLocalCategoryAssignment(): void {
+    if (!this.selectedWorkflow || !this.selectedVersion) return;
+    const exists = this.selectedWorkflow.assignedCategories.some(item =>
+      item.categoryId === this.selectedCategoryId && item.workflowVersionId === this.versionId);
+    if (exists) return;
+    const category = this.categories.find(item => item.id === this.selectedCategoryId);
+    this.selectedWorkflow = {
+      ...this.selectedWorkflow,
+      assignedCategories: [...this.selectedWorkflow.assignedCategories, {
+        categoryId: this.selectedCategoryId,
+        categoryName: category?.name || 'دسته‌بندی',
+        workflowVersionId: this.versionId,
+        workflowVersionNumber: this.selectedVersion.versionNumber
+      }]
+    };
   }
 
   stageName(id: string): string {
