@@ -3,6 +3,7 @@ using FurnitureEPR.Application.Security;
 using FurnitureEPR.Infrastructure.Persistence;
 using FurnitureEPR.Model.Orders;
 using FurnitureEPR.Model.Warehouses;
+using FurnitureEPR.Model.Workflow;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -309,10 +310,11 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         }
 
         // مقدار آماده از سفارش مبدأ کم و همان مقدار به‌صورت کار تولید مجدد ثبت می‌شود.
-        foreach (var group in transfer.Lines.GroupBy(x => x.SourceOrderItemId))
+        foreach (var group in transfer.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
-            var source = itemMap[group.Key];
-            var remaining = group.Sum(x => x.Quantity);
+            var source = itemMap[group.Key.SourceOrderItemId];
+            var quantity = group.Sum(x => x.Quantity);
+            var remaining = quantity;
             foreach (var batch in source.ProductionBatches.Where(x => x.Status == ProductionBatchStatus.Ready).ToList())
             {
                 var take = Math.Min(batch.Quantity, remaining);
@@ -321,7 +323,26 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
                 remaining -= take;
                 if (remaining == 0) break;
             }
-            source.AddProductionBatch(new OrderItemProductionBatch(source.Id, group.Sum(x => x.Quantity), ProductionBatchOrigin.Production));
+
+            // برای مقدار کسری، گردش‌کار مستقل با همان نسخه قبلی محصول ساخته می‌شود.
+            var workflowVersionId = await db.OrderWorkflowInstances
+                .Where(x => x.OrderId == sourceOrder.Id && x.CategoryId == source.Product.CategoryId)
+                .OrderByDescending(x => x.StartedAtUtc)
+                .Select(x => x.WorkflowVersionId)
+                .FirstAsync(cancellationToken);
+            var initialStageId = await db.WorkflowStages
+                .Where(x => x.WorkflowVersionId == workflowVersionId && x.IsActive)
+                .OrderBy(x => x.SortOrder)
+                .Select(x => x.Id)
+                .FirstAsync(cancellationToken);
+
+            var replenishment = new OrderItemProductionBatch(
+                source.Id, quantity, ProductionBatchOrigin.Production,
+                ProductionBatchStatus.Planned, replenishmentWarehouseId: group.Key.WarehouseId);
+            source.AddProductionBatch(replenishment);
+            db.OrderWorkflowInstances.Add(new OrderWorkflowInstance(
+                sourceOrder.Id, source.Product.CategoryId, workflowVersionId,
+                initialStageId, replenishment.Id));
         }
 
         // در مقصد، مقدار برنامه‌ریزی‌شده کاهش می‌یابد و مقدار دریافتی آماده محسوب می‌شود.
