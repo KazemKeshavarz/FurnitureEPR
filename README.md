@@ -36,14 +36,17 @@
 پیش‌نیاز: .NET SDK 10.0.402 یا جدیدتر از شاخهٔ 10، SQL Server و پیکربندی امن محیط اجرا. **پروژه هنوز migration اولیهٔ EF Core ندارد**؛ ایجاد/به‌روزرسانی schema پایگاه داده باید قبل از اجرای کامل سامانه آماده شود.
 
 ```bash
-dotnet restore FurnitureEPR.sln
-dotnet build src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj --configuration Release
-dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --configuration Release
+dotnet restore src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj
+dotnet restore tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj
+dotnet build src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj --configuration Release --no-restore
+dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --configuration Release --no-restore
 ```
+
+در حال حاضر فایل Solution یک ورودی قدیمی از نوع ASP.NET Website برای پوشه Angular دارد؛ به همین دلیل در CI لینوکس، Restore کل Solution انجام نمی‌شود و پروژه‌های واقعی بک‌اند و تست جداگانه Restore می‌شوند.
 
 ### تنظیمات امن بک‌اند
 
-پیش از اجرا، کلید JWT واقعی و تصادفی با حداقل 32 کاراکتر را از User Secrets یا متغیر محیطی `Jwt__Key` تنظیم کنید. مقدار placeholder موجود در `appsettings.json` عمداً توسط برنامه رد می‌شود. برای ساخت اولین مدیر، `IdentitySeed__Enabled=true` و مقادیر امن `IdentitySeed__AdminUserName`، `IdentitySeed__AdminEmail` و `IdentitySeed__AdminPassword` را فقط از متغیرهای محیطی یا Secret Store فراهم کنید؛ رمز مدیر را در مخزن ثبت نکنید. در محیط غیرتوسعه، مبدأهای مجاز فرانت‌اند را با `Cors__AllowedOrigins__0` (و در صورت نیاز اندیس‌های بعدی) تنظیم کنید؛ برنامه در صورت نبودن این تنظیمات در محیط غیرتوسعه اجرا نمی‌شود. همهٔ endpointها به‌صورت پیش‌فرض نیازمند احراز هویت هستند؛ `/api/auth/login` و `/api/health` عمومی‌اند. تعریف گردش‌کار و اتصال آن به دسته‌بندی به مجوز `workflow.manage` نیاز دارد.
+پیش از اجرا، کلید JWT واقعی و تصادفی با حداقل 32 کاراکتر را از User Secrets یا متغیر محیطی `Jwt__Key` تنظیم کنید. مقدار placeholder موجود در `appsettings.json` عمداً توسط برنامه رد می‌شود. برای ساخت اولین مدیر، `IdentitySeed__Enabled=true` و مقادیر امن `IdentitySeed__AdminUserName`، `IdentitySeed__AdminEmail` و `IdentitySeed__AdminPassword` را فقط از متغیرهای محیطی یا Secret Store فراهم کنید؛ رمز مدیر را در مخزن ثبت نکنید. در محیط غیرتوسعه، مبدأهای مجاز فرانت‌اند را با `Cors__AllowedOrigins__0` (و در صورت نیاز اندیس‌های بعدی) تنظیم کنید؛ برنامه در صورت نبودن این تنظیمات در محیط غیرتوسعه اجرا نمی‌شود. همهٔ endpointها به‌صورت پیش‌فرض نیازمند احراز هویت هستند؛ `/api/auth/login` و `/api/health` عمومی‌اند. تعریف گردش‌کار و اتصال آن به دسته‌بندی به مجوز `workflow.manage` نیاز دارد. کنترل دسترسی صفحه‌های تعاریف محصول و دسته‌بندی در حال حاضر در Angular انجام می‌شود؛ برای امنیت کامل باید مجوز اختصاصی این عملیات در خود API نیز اعمال شود.
 
 ## اجرای فرانت‌اند
 
@@ -91,8 +94,9 @@ npm start
 
 ## CI
 
-- Frontend CI: نصب وابستگی‌ها و اجرای `npm run build`؛ آخرین اجرا موفق بوده است.
-- Backend CI: Restore، Build بک‌اند و اجرای پروژه تست `FurnitureEPR.Model.Tests`؛ آخرین اجرا موفق بوده است.
+- Frontend CI: نصب وابستگی‌ها و اجرای `npm run build`.
+- Backend CI: Restore مستقل پروژه‌های بک‌اند و تست، Build بک‌اند و اجرای پروژه تست `FurnitureEPR.Model.Tests`.
+- اجرای CI روی آخرین تغییرات باید از وضعیت شاخه `feature/project-initialization` بررسی شود؛ وضعیت موفق یک Commit قدیمی، جایگزین نتیجه Commit جدید نیست.
 - وابستگی‌های ASP.NET Core و EF Core به نسخهٔ سرویس‌دهی `10.0.13` ارتقا یافته‌اند.
 
 [مشاهده اجرای فرانت‌اند](https://github.com/KazemKeshavarz/FurnitureEPR/actions/runs/38698717421) · [مشاهده اجرای بک‌اند](https://github.com/KazemKeshavarz/FurnitureEPR/actions/runs/38698729592)
