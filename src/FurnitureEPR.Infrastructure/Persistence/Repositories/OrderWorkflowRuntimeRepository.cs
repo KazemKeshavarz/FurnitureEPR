@@ -22,7 +22,7 @@ public sealed class OrderWorkflowRuntimeRepository
 
     public async Task RecordQualityControlAsync(
         Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         QualityControlResult result,
         string? comment,
         Guid? checkedByUserId,
@@ -31,8 +31,7 @@ public sealed class OrderWorkflowRuntimeRepository
         // QC فقط روی Runtime Instance فعال همان سفارش و Category ثبت می‌شود.
         var instance = await _db.OrderWorkflowInstances
             .SingleOrDefaultAsync(
-                x => x.OrderId == orderId
-                    && x.CategoryId == categoryId,
+                x => x.Id == workflowInstanceId,
                 cancellationToken);
 
         if (instance is null)
@@ -69,10 +68,10 @@ public sealed class OrderWorkflowRuntimeRepository
 
     public async Task CompleteAsync(
         Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         CancellationToken cancellationToken)
     {
-        // Instance مربوط به Category را پیدا می‌کنیم تا فقط همان بخش از Workflow کامل شود.
+        // اجرای هر بخش تولید با شناسه مستقل گردش‌کار انجام می‌شود.
         var instance = await _db.OrderWorkflowInstances
             .SingleOrDefaultAsync(
                 x => x.OrderId == orderId
@@ -117,13 +116,23 @@ public sealed class OrderWorkflowRuntimeRepository
         instance.Complete();
 
         // پس از پایان گردش تولید، مقدارهای برنامه‌ریزی‌شده این دسته آماده انبار می‌شوند.
-        var orderItems = await _db.OrderItems
-            .Where(x => x.OrderId == orderId && x.Product.CategoryId == categoryId)
-            .Include(x => x.ProductionBatches)
-            .ToListAsync(cancellationToken);
-        foreach (var batch in orderItems.SelectMany(x => x.ProductionBatches)
-                     .Where(x => x.Status == ProductionBatchStatus.Planned || x.Status == ProductionBatchStatus.InProgress))
-            batch.MarkReady();
+        if (instance.ProductionBatchId is Guid batchId)
+        {
+            var batch = await _db.OrderItemProductionBatches
+                .SingleAsync(x => x.Id == batchId, cancellationToken);
+            if (batch.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress)
+                batch.MarkReady();
+        }
+        else
+        {
+            var orderItems = await _db.OrderItems
+                .Where(x => x.OrderId == instance.OrderId && x.Product.CategoryId == instance.CategoryId)
+                .Include(x => x.ProductionBatches)
+                .ToListAsync(cancellationToken);
+            foreach (var batch in orderItems.SelectMany(x => x.ProductionBatches)
+                         .Where(x => x.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress))
+                batch.MarkReady();
+        }
 
         // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
         var hasIncompleteWorkflow = await _db.OrderWorkflowInstances
@@ -148,7 +157,7 @@ public sealed class OrderWorkflowRuntimeRepository
 
     public async Task MoveAsync(
         Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         Guid transitionId,
         CancellationToken cancellationToken)
     {
