@@ -13,6 +13,7 @@ public sealed class OrderWorkflowInstance
     public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public Guid CategoryId { get; private set; }
+    public Guid? ProductionBatchId { get; private set; }
     public Guid WorkflowVersionId { get; private set; }
     public Guid CurrentStageId { get; private set; }
     public OrderWorkflowInstanceStatus Status { get; private set; }
@@ -31,7 +32,8 @@ public sealed class OrderWorkflowInstance
         Guid orderId,
         Guid categoryId,
         Guid workflowVersionId,
-        Guid initialStageId)
+        Guid initialStageId,
+        Guid? productionBatchId = null)
     {
         if (orderId == Guid.Empty)
             throw new ArgumentException("Order is required.", nameof(orderId));
@@ -49,6 +51,7 @@ public sealed class OrderWorkflowInstance
         OrderId = orderId;
         CategoryId = categoryId;
         WorkflowVersionId = workflowVersionId;
+        ProductionBatchId = productionBatchId;
         CurrentStageId = initialStageId;
         Status = OrderWorkflowInstanceStatus.Active;
         StartedAtUtc = DateTime.UtcNow;
