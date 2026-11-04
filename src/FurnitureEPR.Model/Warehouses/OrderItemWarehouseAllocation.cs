@@ -25,4 +25,16 @@ public sealed class OrderItemWarehouseAllocation
         Quantity = quantity;
         AssignedAtUtc = DateTime.UtcNow;
     }
+
+    public void IncreaseQuantity(decimal quantity)
+    {
+        if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
+        Quantity += quantity;
+    }
+
+    public void DecreaseQuantity(decimal quantity)
+    {
+        if (quantity <= 0 || quantity > Quantity) throw new ArgumentOutOfRangeException(nameof(quantity));
+        Quantity -= quantity;
+    }
 }
