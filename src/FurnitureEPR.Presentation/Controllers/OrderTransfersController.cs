@@ -96,6 +96,22 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         if (sourceItems.Count != sourceIds.Length || targetItems.Count != targetIds.Length)
             return BadRequest("یکی از اقلام انتخاب‌شده متعلق به سفارش مبدأ یا مقصد نیست.");
 
+        foreach (var group in request.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
+        {
+            var allocation = sourceItems[group.Key.SourceOrderItemId].WarehouseAllocations
+                .SingleOrDefault(x => x.WarehouseId == group.Key.WarehouseId);
+            if (allocation is null || allocation.Quantity < group.Sum(x => x.Quantity))
+                return Conflict("مجموع تعداد درخواستی از موجودی انبار مبدأ بیشتر است.");
+        }
+
+        foreach (var group in request.Lines.GroupBy(x => x.TargetOrderItemId))
+        {
+            var target = targetItems[group.Key];
+            var alreadyAllocated = target.WarehouseAllocations.Sum(x => x.Quantity);
+            if (alreadyAllocated + group.Sum(x => x.Quantity) > target.Quantity)
+                return Conflict("مجموع انتقال از نیاز باقی‌مانده قلم مقصد بیشتر است.");
+        }
+
         var transfer = new OrderTransfer(sourceOrder.Id, targetOrder.Id, userId, request.Reason);
         foreach (var line in request.Lines)
         {
@@ -151,6 +167,24 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             .Include(x => x.WarehouseAllocations)
             .ToListAsync(cancellationToken);
         var itemMap = items.ToDictionary(x => x.Id);
+
+        foreach (var group in transfer.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
+        {
+            if (!itemMap.TryGetValue(group.Key.SourceOrderItemId, out var source))
+                return Conflict("قلم مبدأ دیگر در دسترس نیست.");
+            var allocation = source.WarehouseAllocations.SingleOrDefault(x => x.WarehouseId == group.Key.WarehouseId);
+            if (allocation is null || allocation.Quantity < group.Sum(x => x.Quantity))
+                return Conflict("موجودی انبار مبدأ برای مجموع این انتقال کافی نیست.");
+        }
+
+        foreach (var group in transfer.Lines.GroupBy(x => x.TargetOrderItemId))
+        {
+            if (!itemMap.TryGetValue(group.Key, out var target))
+                return Conflict("قلم مقصد دیگر در دسترس نیست.");
+            var allocated = target.WarehouseAllocations.Sum(x => x.Quantity);
+            if (allocated + group.Sum(x => x.Quantity) > target.Quantity)
+                return Conflict("ظرفیت باقی‌مانده قلم مقصد برای مجموع این انتقال کافی نیست.");
+        }
 
         foreach (var line in transfer.Lines)
         {
