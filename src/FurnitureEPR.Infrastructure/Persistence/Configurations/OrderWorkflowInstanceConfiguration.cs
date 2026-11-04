@@ -15,7 +15,8 @@ public sealed class OrderWorkflowInstanceConfiguration : IEntityTypeConfiguratio
             .HasMaxLength(30)
             .IsRequired();
 
-        builder.HasIndex(x => new { x.OrderId, x.CategoryId }).IsUnique();
+        builder.HasIndex(x => new { x.OrderId, x.CategoryId });
+        builder.HasIndex(x => x.ProductionBatchId).IsUnique().HasFilter("[ProductionBatchId] IS NOT NULL");
         builder.HasIndex(x => x.WorkflowVersionId);
         builder.HasIndex(x => x.CurrentStageId);
         builder.HasIndex(x => new { x.Status, x.CurrentStageId });
