@@ -33,6 +33,10 @@ dotnet tool update --global dotnet-ef --version 10.0.0
 - مقدار `IdentitySeed:AdminPassword` نیز فقط از Secret یا Environment Variable خوانده شود.
 - Seed اولیه Admin در محیط Production فقط در صورت داشتن فرآیند کنترل‌شده فعال شود.
 
-## تغییرات جدید مدل داده\n\nمدل فعلی علاوه بر سفارش و انبار، شامل جداول `OrderTransfers` و `OrderTransferLines` برای نگهداری درخواست‌های انتقال و سوابق اقلام آن است. وضعیت `HasShortage` نیز به وضعیت‌های سفارش اضافه شده است. پس از دریافت آخرین تغییرات، فرمان `InitialCreate` را اجرا کنید تا جداول انبار و انتقال نیز در Migration اولیه ثبت شوند. اگر Migration اولیه از قبل در محیطی اعمال شده است، به‌جای بازنویسی آن یک Migration جدید با نام `AddOrderTransfers` بسازید.\n\n## وضعیت این Repository
+## تغییرات جدید مدل داده
+
+مدل فعلی علاوه بر سفارش و انبار، شامل جداول `OrderTransfers` و `OrderTransferLines` برای نگهداری درخواست‌های انتقال و سوابق اقلام آن است. وضعیت `HasShortage` نیز به وضعیت‌های سفارش اضافه شده است. پس از دریافت آخرین تغییرات، فرمان `InitialCreate` را اجرا کنید تا جداول انبار و انتقال نیز در Migration اولیه ثبت شوند. اگر Migration اولیه از قبل در محیطی اعمال شده است، به‌جای بازنویسی آن یک Migration جدید با نام `AddOrderTransfers` بسازید.
+
+## وضعیت این Repository
 
 Migration فایل‌محور هنوز در Repository تولید نشده است، چون تولید آن نیازمند اجرای واقعی EF CLI و دسترسی به SDK/Package Restore است. این مستندات فرمان دقیق و قابل اجرای محلی را نگه می‌دارند تا Migration بدون حدس و بدون تولید دستی SQL ساخته شود.
