@@ -26,8 +26,7 @@ public sealed class RecordQualityControlCommandHandler
             throw new UnauthorizedAccessException("Authenticated user is required.");
 
         return _repository.RecordQualityControlAsync(
-            request.OrderId,
-            request.CategoryId,
+            request.WorkflowInstanceId,
             request.Result,
             request.Comment,
             _currentUser.UserId,
