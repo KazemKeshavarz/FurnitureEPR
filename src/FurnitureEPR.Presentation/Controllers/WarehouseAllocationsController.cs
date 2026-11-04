@@ -53,7 +53,7 @@ public sealed class WarehouseAllocationsController(ApplicationDbContext db) : Co
             .Where(x => warehouseIds.Contains(x.Id) && x.IsActive)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
-        if (activeWarehouseIds.Length != warehouseIds.Distinct().Count())
+        if (activeWarehouseIds.Count != warehouseIds.Distinct().Count())
             return BadRequest("یکی از انبارهای انتخاب‌شده وجود ندارد یا غیرفعال است.");
 
         db.OrderItemWarehouseAllocations.RemoveRange(item.WarehouseAllocations);
