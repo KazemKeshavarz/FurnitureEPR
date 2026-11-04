@@ -13,12 +13,13 @@ public sealed class OrderItemProductionBatch
     public ProductionBatchOrigin Origin { get; private set; }
     public ProductionBatchStatus Status { get; private set; }
     public Guid? SourceTransferLineId { get; private set; }
+    public Guid? ReplenishmentWarehouseId { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime? ReadyAtUtc { get; private set; }
 
     public OrderItem OrderItem { get; private set; } = null!;
 
-    public OrderItemProductionBatch(Guid orderItemId, decimal quantity, ProductionBatchOrigin origin, ProductionBatchStatus status = ProductionBatchStatus.Planned, Guid? sourceTransferLineId = null)
+    public OrderItemProductionBatch(Guid orderItemId, decimal quantity, ProductionBatchOrigin origin, ProductionBatchStatus status = ProductionBatchStatus.Planned, Guid? sourceTransferLineId = null, Guid? replenishmentWarehouseId = null)
     {
         if (orderItemId == Guid.Empty) throw new ArgumentException("قلم سفارش الزامی است.", nameof(orderItemId));
         if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
@@ -31,6 +32,7 @@ public sealed class OrderItemProductionBatch
         Origin = origin;
         Status = status;
         SourceTransferLineId = sourceTransferLineId;
+        ReplenishmentWarehouseId = replenishmentWarehouseId;
         CreatedAtUtc = DateTime.UtcNow;
         if (status == ProductionBatchStatus.Ready) ReadyAtUtc = DateTime.UtcNow;
     }
