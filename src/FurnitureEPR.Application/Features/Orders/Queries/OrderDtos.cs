@@ -8,7 +8,7 @@ public sealed record OrderItemComponentDto(
 
 public sealed record OrderItemWarehouseAllocationDto(Guid Id, Guid WarehouseId, string WarehouseName, string WarehouseCode, decimal Quantity);
 
-public sealed record OrderItemDto(
+public sealed record OrderItemProductionBatchDto(Guid Id, decimal Quantity, string Origin, string Status, DateTime CreatedAtUtc, DateTime? ReadyAtUtc);\n\npublic sealed record OrderItemDto(
     Guid Id,
     Guid ProductId,
     Guid CategoryId,
@@ -17,7 +17,7 @@ public sealed record OrderItemDto(
     decimal UnitPrice,
     decimal TotalPrice,
     IReadOnlyCollection<OrderItemComponentDto> Components,
-    IReadOnlyCollection<OrderItemWarehouseAllocationDto> WarehouseAllocations);
+    IReadOnlyCollection<OrderItemWarehouseAllocationDto> WarehouseAllocations,\n    IReadOnlyCollection<OrderItemProductionBatchDto> ProductionBatches);
 
 // نام مراحل و Transition را هم نگه می‌داریم تا تاریخچه برای کاربر نهایی قابل فهم باشد.
 public sealed record OrderWorkflowHistoryDto(
