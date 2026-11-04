@@ -1,9 +1,17 @@
 # Database Migration
 
-## ایجاد Migration اولیه
+## اعمال Migrationهای موجود
+
+Migrationهای اولیه و `AddWarehouseTransferAndProductionBatches` در مخزن ثبت شده‌اند. برای ساخت دیتابیس جدید یا به‌روزرسانی دیتابیس موجود، از دستور زیر استفاده کنید:
 
 ```powershell
-dotnet ef migrations add InitialCreate --project src/FurnitureEPR.Infrastructure --startup-project src/FurnitureEPR.Presentation --output-dir Persistence/Migrations
+dotnet ef database update --project src/FurnitureEPR.Infrastructure --startup-project src/FurnitureEPR.Presentation
+```
+
+برای مشاهده فهرست Migrationها:
+
+```powershell
+dotnet ef migrations list --project src/FurnitureEPR.Infrastructure --startup-project src/FurnitureEPR.Presentation
 ```
 
 ## اعمال Migration روی SQL Server
@@ -35,8 +43,8 @@ dotnet tool update --global dotnet-ef --version 10.0.0
 
 ## تغییرات جدید مدل داده
 
-مدل فعلی علاوه بر سفارش و انبار، شامل جداول `OrderTransfers` و `OrderTransferLines` برای نگهداری درخواست‌های انتقال و سوابق اقلام آن است. همچنین `OrderItemProductionBatches` تعداد هر قلم را به بخش‌های مستقل تولیدی/انتقالی تقسیم می‌کند تا مقدار آماده، در حال تولید و باقی‌مانده جداگانه قابل محاسبه باشد. وضعیت `HasShortage` نیز به وضعیت‌های سفارش اضافه شده است. پس از دریافت آخرین تغییرات، فرمان `InitialCreate` را اجرا کنید تا جداول انبار و انتقال نیز در Migration اولیه ثبت شوند. اگر Migration اولیه از قبل در محیطی اعمال شده است، به‌جای بازنویسی آن یک Migration جدید با نام `AddOrderTransfers` بسازید.
+مدل فعلی علاوه بر سفارش و انبار، شامل جداول `OrderTransfers` و `OrderTransferLines` برای نگهداری درخواست‌های انتقال و سوابق اقلام آن است. همچنین `OrderItemProductionBatches` تعداد هر قلم را به بخش‌های مستقل تولیدی/انتقالی تقسیم می‌کند تا مقدار آماده، در حال تولید و باقی‌مانده جداگانه قابل محاسبه باشد. وضعیت `HasShortage` نیز به وضعیت‌های سفارش اضافه شده است. Migration `AddWarehouseTransferAndProductionBatches` جداول انبار، تخصیص، درخواست انتقال، ردیف‌های انتقال و بخش‌های تولید را ایجاد می‌کند. همچنین امکان اجرای چند گردش‌کار برای یک دسته‌بندی سفارش را فراهم می‌کند تا مقدار جبرانی، مستقل از تولید اولیه پیگیری شود. این Migration را روی دیتابیس موجود با `database update` اعمال کنید؛ Migration اولیه را بازنویسی نکنید.
 
-## وضعیت این Repository
+## بررسی پس از اعمال
 
-Migration فایل‌محور هنوز در Repository تولید نشده است، چون تولید آن نیازمند اجرای واقعی EF CLI و دسترسی به SDK/Package Restore است. این مستندات فرمان دقیق و قابل اجرای محلی را نگه می‌دارند تا Migration بدون حدس و بدون تولید دستی SQL ساخته شود.
+پس از اجرای Migration، وجود جداول `Warehouses`، `OrderItemWarehouseAllocations`، `OrderTransfers`، `OrderTransferLines` و `OrderItemProductionBatches` و ستون nullable به نام `ProductionBatchId` در `OrderWorkflowInstances` را بررسی کنید. اجرای موفق Build/Tests در CI به معنی اعمال Migration روی SQL Server نیست؛ ابتدا روی دیتابیس آزمایشی اعمال و سپس روی محیط اصلی اجرا شود.
