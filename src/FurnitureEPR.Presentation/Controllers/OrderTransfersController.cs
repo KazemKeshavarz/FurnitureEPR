@@ -16,6 +16,44 @@ namespace FurnitureEPR.Presentation.Controllers;
 [Route("api/order-transfers")]
 public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUser currentUser) : ControllerBase
 {
+    [HttpGet("orders/{orderId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> GetForOrder(Guid orderId, CancellationToken cancellationToken)
+    {
+        var orderExists = await db.Orders.AnyAsync(x => x.Id == orderId, cancellationToken);
+        if (!orderExists) return NotFound();
+
+        var history = await db.OrderTransfers
+            .AsNoTracking()
+            .Where(x => x.SourceOrderId == orderId || x.TargetOrderId == orderId)
+            .OrderByDescending(x => x.RequestedAtUtc)
+            .Select(x => new
+            {
+                x.Id,
+                x.SourceOrderId,
+                SourceOrderNumber = x.SourceOrder.OrderNumber,
+                x.TargetOrderId,
+                TargetOrderNumber = x.TargetOrder.OrderNumber,
+                x.Reason,
+                Status = x.Status.ToString(),
+                x.RequestedAtUtc,
+                x.ReviewedAtUtc,
+                IsOutgoing = x.SourceOrderId == orderId,
+                Lines = x.Lines.Select(line => new
+                {
+                    line.SourceOrderItemId,
+                    SourceProductName = line.SourceOrderItem.ProductName,
+                    line.TargetOrderItemId,
+                    TargetProductName = line.TargetOrderItem.ProductName,
+                    WarehouseName = line.Warehouse.Name,
+                    line.Quantity
+                }).ToList()
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(history);
+    }
+
     [HttpGet]
     [Authorize(Policy = PermissionNames.WorkflowManage)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
