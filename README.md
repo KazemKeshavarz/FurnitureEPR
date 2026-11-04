@@ -35,7 +35,7 @@
 
 ## اجرای بک‌اند
 
-پیش‌نیاز: .NET SDK 10.0.402 یا جدیدتر از شاخهٔ 10، SQL Server و پیکربندی امن محیط اجرا. **پروژه هنوز migration اولیهٔ EF Core ندارد**؛ ایجاد/به‌روزرسانی schema پایگاه داده باید قبل از اجرای کامل سامانه آماده شود.
+پیش‌نیاز: .NET SDK 10.0.402 یا جدیدتر از شاخهٔ 10، SQL Server و پیکربندی امن محیط اجرا. Migration اولیهٔ EF Core در مخزن موجود است. پیش از اجرای محیط، migrationها را با فرمان‌های مستندشده در `docs/database-migration.md` روی SQL Server اعمال و نتیجه را بررسی کنید.
 
 ```bash
 dotnet restore src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj
@@ -43,6 +43,8 @@ dotnet restore tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj
 dotnet build src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj --configuration Release --no-restore
 dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --configuration Release --no-restore
 ```
+
+مدل تولید از بخش‌های مستقل تعداد استفاده می‌کند؛ برای مقدار جبرانی سفارش مبدأ، گردش‌کار جداگانه ساخته می‌شود و اپراتور فقط تعداد قابل انجام را در صف تولید می‌بیند. پس از تکمیل تولید مجدد، تعداد به محل انبار قبلی برمی‌گردد و کسری سفارش فقط وقتی بسته می‌شود که تعداد آماده و تخصیص‌یافته کامل باشد.
 
 در حال حاضر فایل Solution یک ورودی قدیمی از نوع ASP.NET Website برای پوشه Angular دارد؛ به همین دلیل در CI لینوکس، Restore کل Solution انجام نمی‌شود و پروژه‌های واقعی بک‌اند و تست جداگانه Restore می‌شوند.
 
@@ -79,7 +81,10 @@ npm start
 | کارهای تولید | `GET /api/orders/production/tasks` |
 | انبارها | `GET/POST /api/warehouses`, `PUT /api/warehouses/{id}`, `PATCH /api/warehouses/{id}/active` |
 | تخصیص محل نگهداری | `PUT /api/orders/items/{orderItemId}/warehouse-allocations` |
-| کنترل کیفیت | `POST /api/orders/{orderId}/workflow/{categoryId}/quality-control` |
+| کنترل کیفیت | `POST /api/orders/workflow/{workflowInstanceId}/quality-control` |
+| حرکت بین مراحل تولید | `POST /api/orders/workflow/{workflowInstanceId}/transitions/{transitionId}` |
+| تکمیل فرآیند تولید | `POST /api/orders/workflow/{workflowInstanceId}/complete` |
+| انتقال بین سفارش‌ها | `POST /api/order-transfers`, `GET /api/order-transfers`, `POST /api/order-transfers/{id}/approve`, `POST /api/order-transfers/{id}/reject` |
 
 فهرست گردش‌کارها با صفحه‌بندی و جست‌وجوی نام/کد ارائه می‌شود؛ جزئیات هر گردش‌کار شامل نسخه‌ها، مراحل، مسیرها و شناسه دسته‌بندی‌های متصل است. همه endpointهای گردش‌کار تحت مجوز `workflow.manage` قرار دارند. مدیریت تعریف انبارها نیز با همین مجوز انجام می‌شود؛ تخصیص محصول به انبار به مجوز `workflow.move` نیاز دارد و فقط وقتی مجاز است که گردش‌کار دسته‌بندی در مرحله‌ای با کد `WAREHOUSE` باشد. هر قلم سفارش می‌تواند بین چند انبار تقسیم شود، به شرط آنکه مجموع تعداد تخصیص‌یافته از تعداد سفارش بیشتر نباشد. برای جزئیات دقیق قراردادهای درخواست و پاسخ، به Controllerها و DTOهای متناظر در بک‌اند مراجعه کنید.
 
@@ -90,13 +95,13 @@ npm start
 پیش از بهره‌برداری باید دست‌کم موارد زیر تکمیل و تأیید شوند:
 1. اجرای end-to-end ثبت سفارش از ابتدا تا انتهای تولید و تحویل با پایگاه داده واقعی.
 2. تست یکپارچهٔ سیاست احراز هویت پیش‌فرض، مجوز مدیریت گردش‌کار و مجوزهای QC/انتقال/تکمیل.
-3. ایجاد و بازبینی migration اولیه، سپس اجرای آن و آزمون روی SQL Server محیط مقصد.
+3. اجرای migrationهای موجود و بازبینی schema نهایی روی SQL Server محیط مقصد.
 4. بررسی رابط کاربری روی موبایل با نقش‌های واقعی کاربران کارگاه.
 5. افزودن تست‌های یکپارچه برای سفارش، انتقال مراحل، QC و تکمیل گردش‌کار.
 6. مشخص‌کردن فرآیند واقعی کارگاه؛ اجرای موازی هنوز پشتیبانی نمی‌شود و نباید پیش از مدل‌سازی دقیق وعده داده شود.
 7. پیکربندی CORS originهای محیط استقرار و اجرای آزمون نهایی روی دستگاه موبایل.
 8. افزودن تست‌های یکپارچه برای endpointهای فهرست و جزئیات گردش‌کار و سناریوهای نسخه‌بندی/اتصال دسته‌بندی.
-9. تولید و اجرای migration مربوط به جداول انبار و تخصیص انبار روی SQL Server؛ migration باید پیش از اجرای قابلیت انبار اعمال شود.
+9. آزمون migration انبار/انتقال/تولید و اطمینان از سازگاری آن با دیتابیس‌های موجود.
 
 ## CI
 
