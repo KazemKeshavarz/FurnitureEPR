@@ -139,12 +139,14 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         if (sourceItems.Count != sourceIds.Length || targetItems.Count != targetIds.Length)
             return BadRequest("یکی از اقلام انتخاب‌شده متعلق به سفارش مبدأ یا مقصد نیست.");
 
-        var completedCategoryIds = await db.OrderWorkflowInstances
-            .Where(x => x.OrderId == sourceOrder.Id && x.Status == FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Completed)
+        var warehouseCategoryIds = await db.OrderWorkflowInstances
+            .Where(x => x.OrderId == sourceOrder.Id
+                && x.CurrentStage.Code == "WAREHOUSE"
+                && x.Status != FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Cancelled)
             .Select(x => x.CategoryId)
             .ToListAsync(cancellationToken);
-        if (sourceItems.Values.Any(x => !completedCategoryIds.Contains(x.Product.CategoryId)))
-            return Conflict("گردش تولید محصول مبدأ هنوز کامل نشده است.");
+        if (sourceItems.Values.Any(x => !warehouseCategoryIds.Contains(x.Product.CategoryId)))
+            return Conflict("محصول مبدأ باید در مرحله انبار و آماده انتقال باشد.");
 
         foreach (var group in request.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
@@ -218,12 +220,14 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             .Include(x => x.WarehouseAllocations)
             .ToListAsync(cancellationToken);
         var itemMap = items.ToDictionary(x => x.Id);
-        var completedCategoryIds = await db.OrderWorkflowInstances
-            .Where(x => x.OrderId == sourceOrder.Id && x.Status == FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Completed)
+        var warehouseCategoryIds = await db.OrderWorkflowInstances
+            .Where(x => x.OrderId == sourceOrder.Id
+                && x.CurrentStage.Code == "WAREHOUSE"
+                && x.Status != FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Cancelled)
             .Select(x => x.CategoryId)
             .ToListAsync(cancellationToken);
-        if (sourceItemIds.Any(itemId => !itemMap.TryGetValue(itemId, out var item) || !completedCategoryIds.Contains(item.Product.CategoryId)))
-            return Conflict("گردش تولید یکی از محصولات مبدأ دیگر کامل نیست.");
+        if (sourceItemIds.Any(itemId => !itemMap.TryGetValue(itemId, out var item) || !warehouseCategoryIds.Contains(item.Product.CategoryId)))
+            return Conflict("یکی از محصولات مبدأ دیگر در مرحله انبار نیست.");
 
         foreach (var group in transfer.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
