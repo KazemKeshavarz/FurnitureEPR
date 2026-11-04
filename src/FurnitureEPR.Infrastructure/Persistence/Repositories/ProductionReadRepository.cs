@@ -24,7 +24,7 @@ public sealed class ProductionReadRepository : IProductionReadRepository
         var query = _db.OrderWorkflowInstances
             .AsNoTracking()
             .Where(x => x.Status == OrderWorkflowInstanceStatus.Active)
-            .Where(x => x.Order.Status == FurnitureEPR.Model.Orders.OrderStatus.Active);
+            .Where(x => x.Order.Status == FurnitureEPR.Model.Orders.OrderStatus.Active || x.Order.Status == FurnitureEPR.Model.Orders.OrderStatus.HasShortage);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -61,6 +61,12 @@ public sealed class ProductionReadRepository : IProductionReadRepository
                 CurrentStageCode = x.CurrentStage.Code,
                 x.CurrentStage.RequiresQualityControl,
                 x.StartedAtUtc,
+                ProductionQuantity = x.ProductionBatchId.HasValue
+                    ? _db.OrderItemProductionBatches.Where(b => b.Id == x.ProductionBatchId.Value).Select(b => (decimal?)b.Quantity).FirstOrDefault() ?? 0m
+                    : _db.OrderItems.Where(i => i.OrderId == x.OrderId && i.Product.CategoryId == x.CategoryId)
+                        .SelectMany(i => i.ProductionBatches)
+                        .Where(b => b.Status == FurnitureEPR.Model.Orders.ProductionBatchStatus.Planned || b.Status == FurnitureEPR.Model.Orders.ProductionBatchStatus.InProgress)
+                        .Sum(b => (decimal?)b.Quantity) ?? 0m,
                 ResponsibleRoleId = x.CurrentStage.ResponsibleRoleId,
                 QualityChecks = x.QualityChecks
                     .Where(q => q.StageId == x.CurrentStageId)
@@ -108,7 +114,8 @@ public sealed class ProductionReadRepository : IProductionReadRepository
                 canMove,
                 canComplete,
                 x.Transitions,
-                x.StartedAtUtc);
+                x.StartedAtUtc,
+                x.ProductionQuantity);
         }).ToList();
 
         return new PagedProductionTaskDto(items, page, pageSize, totalCount);
