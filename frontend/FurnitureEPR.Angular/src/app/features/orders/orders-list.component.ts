@@ -97,11 +97,11 @@ export class OrdersListComponent {
   open(id: string): void { this.router.navigate(['/orders', id]); }
 
   statusText(status: string): string {
-    return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',Cancelled:'لغوشده'} as Record<string,string>)[status] ?? status;
+    return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',HasShortage:'دارای کسری',Cancelled:'لغوشده'} as Record<string,string>)[status] ?? status;
   }
 
   statusClass(status: string): string {
-    return ({Draft:'draft',Active:'active',Completed:'completed',Cancelled:'cancelled'} as Record<string,string>)[status] ?? 'draft';
+    return ({Draft:'draft',Active:'active',Completed:'completed',HasShortage:'shortage',Cancelled:'cancelled'} as Record<string,string>)[status] ?? 'draft';
   }
 
   format(value: number): string { return new Intl.NumberFormat('fa-IR').format(Math.round(value)); }
