@@ -190,6 +190,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         }
 
         transfer.Approve(reviewerId);
+        sourceOrder.MarkHasShortage();
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return NoContent();
