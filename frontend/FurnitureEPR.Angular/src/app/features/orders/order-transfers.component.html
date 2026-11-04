@@ -5,7 +5,7 @@
   @if(canRequest){
     <section class="panel">
       <h2>ثبت درخواست انتقال</h2>
-      <p class="hint">فقط سفارش تکمیل‌شده به‌عنوان مبدأ و سفارش در حال انجام به‌عنوان مقصد قابل انتخاب است.</p>
+      <p class="hint">فقط اقلامی از مبدأ قابل انتقال‌اند که گردش تولیدشان کامل شده و در انبار تخصیص داشته باشند؛ مقصد باید در حال انجام باشد.</p>
       <div class="form-grid">
         <label>سفارش مبدأ<select [(ngModel)]="sourceOrderId" (ngModelChange)="loadSource()"><option value="">انتخاب سفارش دارای کالای آماده</option>@for(o of sourceOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
         <label>سفارش مقصد<select [(ngModel)]="targetOrderId" (ngModelChange)="loadTarget()"><option value="">انتخاب سفارش در حال انجام</option>@for(o of targetOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
