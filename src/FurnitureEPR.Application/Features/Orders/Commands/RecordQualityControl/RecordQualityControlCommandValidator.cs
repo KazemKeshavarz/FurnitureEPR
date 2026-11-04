@@ -7,8 +7,7 @@ public sealed class RecordQualityControlCommandValidator
 {
     public RecordQualityControlCommandValidator()
     {
-        RuleFor(x => x.OrderId).NotEmpty();
-        RuleFor(x => x.CategoryId).NotEmpty();
+        RuleFor(x => x.WorkflowInstanceId).NotEmpty();
         RuleFor(x => x.Comment).MaximumLength(2000);
         RuleFor(x => x.Result).IsInEnum();
     }
