@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace FurnitureEPR.Infrastructure.Migrations;
 
-[DbContext(typeof(ApplicationDbContext))]
-[Migration("20261104193000_AddWarehouseTransferAndProductionBatches")]
 public partial class AddWarehouseTransferAndProductionBatches : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
