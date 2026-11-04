@@ -6,6 +6,7 @@ using FurnitureEPR.Model.Products;
 using FurnitureEPR.Model.Customers;
 using FurnitureEPR.Model.Orders;
 using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Model.Warehouses;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<OrderItemComponent> OrderItemComponents => Set<OrderItemComponent>();
+    public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<OrderItemWarehouseAllocation> OrderItemWarehouseAllocations => Set<OrderItemWarehouseAllocation>();
     public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
     public DbSet<WorkflowVersion> WorkflowVersions => Set<WorkflowVersion>();
     public DbSet<WorkflowStage> WorkflowStages => Set<WorkflowStage>();
