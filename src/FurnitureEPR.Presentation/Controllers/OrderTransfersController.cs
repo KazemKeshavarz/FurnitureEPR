@@ -168,7 +168,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
 
         var sourceOrder = await db.Orders.SingleAsync(x => x.Id == transfer.SourceOrderId, cancellationToken);
         var targetOrder = await db.Orders.SingleAsync(x => x.Id == transfer.TargetOrderId, cancellationToken);
-        if (sourceOrder.Status is OrderStatus.Draft or OrderStatus.Cancelled || targetOrder.Status != OrderStatus.Active)
+        if ((sourceOrder.Status is OrderStatus.Draft or OrderStatus.Cancelled) || targetOrder.Status != OrderStatus.Active)
             return Conflict("وضعیت سفارش مبدأ یا مقصد پس از ثبت درخواست تغییر کرده است.");
 
         var sourceItemIds = transfer.Lines.Select(x => x.SourceOrderItemId).Distinct().ToArray();
