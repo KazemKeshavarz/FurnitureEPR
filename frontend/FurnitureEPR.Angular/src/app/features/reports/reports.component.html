@@ -63,7 +63,7 @@
       <div class="columns">
         <section class="panel"><h2>وضعیت فعلی مراحل</h2>
           @for (item of data.current ?? []; track item.stageId) {
-            <div class="metric-row"><span>{{ item.stageName }} <small>{{ item.workflowStatus }}</small></span><b>{{ number(item.activeCount) }}</b></div>
+            <div class="metric-row"><span>{{ item.stageName }}</span><b>{{ number(item.activeCount) }}</b></div>
           }
         </section>
         <section class="panel"><h2>فعالیت مراحل در بازه انتخابی</h2>
