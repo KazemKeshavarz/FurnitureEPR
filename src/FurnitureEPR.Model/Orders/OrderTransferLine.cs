@@ -1,3 +1,5 @@
+using FurnitureEPR.Model.Warehouses;
+
 namespace FurnitureEPR.Model.Orders;
 
 public sealed class OrderTransferLine
@@ -14,7 +16,7 @@ public sealed class OrderTransferLine
     public OrderTransfer Transfer { get; private set; } = null!;
     public OrderItem SourceOrderItem { get; private set; } = null!;
     public OrderItem TargetOrderItem { get; private set; } = null!;
-    public Warehouses.Warehouse Warehouse { get; private set; } = null!;
+    public Warehouse Warehouse { get; private set; } = null!;
 
     internal OrderTransferLine(Guid transferId, Guid sourceItemId, Guid targetItemId, Guid warehouseId, decimal quantity)
     {
