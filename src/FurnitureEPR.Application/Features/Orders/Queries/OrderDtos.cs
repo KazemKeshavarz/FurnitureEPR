@@ -11,6 +11,7 @@ public sealed record OrderItemWarehouseAllocationDto(Guid Id, Guid WarehouseId, 
 public sealed record OrderItemDto(
     Guid Id,
     Guid ProductId,
+    Guid CategoryId,
     string ProductName,
     decimal Quantity,
     decimal UnitPrice,
