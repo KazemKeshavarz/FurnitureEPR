@@ -79,8 +79,8 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             return NotFound("سفارش مبدأ یا مقصد پیدا نشد.");
         if (sourceOrder.Id == targetOrder.Id)
             return BadRequest("سفارش مبدأ و مقصد نمی‌توانند یکسان باشند.");
-        if (sourceOrder.Status is not (OrderStatus.Completed or OrderStatus.HasShortage))
-            return Conflict("فقط از سفارش تکمیل‌شده می‌توان کالای آماده انتقال داد.");
+        if (sourceOrder.Status is OrderStatus.Draft or OrderStatus.Cancelled)
+            return Conflict("از سفارش پیش‌نویس یا لغوشده نمی‌توان کالا منتقل کرد.");
         if (targetOrder.Status != OrderStatus.Active)
             return Conflict("سفارش مقصد باید در وضعیت در حال انجام باشد.");
 
@@ -89,6 +89,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         var sourceItems = await db.OrderItems
             .Where(x => sourceIds.Contains(x.Id) && x.OrderId == sourceOrder.Id)
             .Include(x => x.Components)
+            .Include(x => x.Product)
             .Include(x => x.WarehouseAllocations)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var targetItems = await db.OrderItems
@@ -99,6 +100,13 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
 
         if (sourceItems.Count != sourceIds.Length || targetItems.Count != targetIds.Length)
             return BadRequest("یکی از اقلام انتخاب‌شده متعلق به سفارش مبدأ یا مقصد نیست.");
+
+        var completedCategoryIds = await db.OrderWorkflowInstances
+            .Where(x => x.OrderId == sourceOrder.Id && x.Status == FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Completed)
+            .Select(x => x.CategoryId)
+            .ToListAsync(cancellationToken);
+        if (sourceItems.Values.Any(x => !completedCategoryIds.Contains(x.Product.CategoryId)))
+            return Conflict("گردش تولید محصول مبدأ هنوز کامل نشده است.");
 
         foreach (var group in request.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
@@ -160,7 +168,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
 
         var sourceOrder = await db.Orders.SingleAsync(x => x.Id == transfer.SourceOrderId, cancellationToken);
         var targetOrder = await db.Orders.SingleAsync(x => x.Id == transfer.TargetOrderId, cancellationToken);
-        if (sourceOrder.Status is not (OrderStatus.Completed or OrderStatus.HasShortage) || targetOrder.Status != OrderStatus.Active)
+        if (sourceOrder.Status is OrderStatus.Draft or OrderStatus.Cancelled || targetOrder.Status != OrderStatus.Active)
             return Conflict("وضعیت سفارش مبدأ یا مقصد پس از ثبت درخواست تغییر کرده است.");
 
         var sourceItemIds = transfer.Lines.Select(x => x.SourceOrderItemId).Distinct().ToArray();
@@ -168,9 +176,16 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         var items = await db.OrderItems
             .Where(x => sourceItemIds.Contains(x.Id) || targetItemIds.Contains(x.Id))
             .Include(x => x.Components)
+            .Include(x => x.Product)
             .Include(x => x.WarehouseAllocations)
             .ToListAsync(cancellationToken);
         var itemMap = items.ToDictionary(x => x.Id);
+        var completedCategoryIds = await db.OrderWorkflowInstances
+            .Where(x => x.OrderId == sourceOrder.Id && x.Status == FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Completed)
+            .Select(x => x.CategoryId)
+            .ToListAsync(cancellationToken);
+        if (sourceItemIds.Any(itemId => !itemMap.TryGetValue(itemId, out var item) || !completedCategoryIds.Contains(item.Product.CategoryId)))
+            return Conflict("گردش تولید یکی از محصولات مبدأ دیگر کامل نیست.");
 
         foreach (var group in transfer.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
@@ -232,7 +247,8 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         }
 
         transfer.Approve(reviewerId);
-        sourceOrder.MarkHasShortage();
+        if (sourceOrder.Status == OrderStatus.Completed)
+            sourceOrder.MarkHasShortage();
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return NoContent();
