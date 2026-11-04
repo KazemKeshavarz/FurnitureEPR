@@ -50,6 +50,7 @@ public sealed class OrderReadRepository : IOrderReadRepository
                     w.WorkflowVersion.VersionNumber,
                     w.CurrentStageId,
                     w.CurrentStage.Name,
+                    w.CurrentStage.Code,
                     w.Status.ToString(),
                     w.StartedAtUtc,
                     w.CompletedAtUtc,
