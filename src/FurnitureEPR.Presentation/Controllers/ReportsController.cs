@@ -120,17 +120,53 @@ public sealed class ReportsController : ControllerBase
         var (start, end) = NormalizeRange(from, to);
         var current = await _db.OrderWorkflowInstances.AsNoTracking()
             .Where(x => x.Status == OrderWorkflowInstanceStatus.Active && x.StartedAtUtc < end)
-            .GroupBy(x => new { x.CurrentStageId, x.CurrentStage.Name, x.CurrentStage.Code, x.Status })
+            .GroupBy(x => new { x.CurrentStageId, x.CurrentStage.Name, x.CurrentStage.Code })
             .Select(g => new
             {
                 stageId = g.Key.CurrentStageId,
                 stageName = g.Key.Name,
                 stageCode = g.Key.Code,
-                workflowStatus = g.Key.Status.ToString(),
                 activeCount = g.Count()
             })
             .OrderByDescending(x => x.activeCount)
             .ToListAsync(cancellationToken);
+
+        var workflowInstances = await _db.OrderWorkflowInstances.AsNoTracking()
+            .Where(x => x.Status != OrderWorkflowInstanceStatus.Cancelled
+                && x.StartedAtUtc < end
+                && (x.CompletedAtUtc == null || x.CompletedAtUtc >= start))
+            .Include(x => x.CurrentStage)
+            .Include(x => x.History)
+                .ThenInclude(x => x.FromStage)
+            .ToListAsync(cancellationToken);
+
+        // مدت هر مرحله از زمان شروع گردش‌کار یا آخرین ورود به مرحله تا انتقال بعدی محاسبه می‌شود.
+        // بازه گزارش روی زمان هر فعالیت اعمال می‌شود تا میانگین فقط از داده‌های همان بازه به دست آید.
+        var stageDurations = new List<(string StageName, double Minutes)>();
+        foreach (var instance in workflowInstances)
+        {
+            var cursor = instance.StartedAtUtc;
+            foreach (var history in instance.History.OrderBy(x => x.OccurredAtUtc))
+            {
+                AddDuration(stageDurations, history.FromStage.Name, cursor, history.OccurredAtUtc, start, end);
+                cursor = history.OccurredAtUtc;
+            }
+
+            var stageEnd = instance.CompletedAtUtc ?? DateTime.UtcNow;
+            AddDuration(stageDurations, instance.CurrentStage.Name, cursor, stageEnd, start, end);
+        }
+
+        var durationByStage = stageDurations
+            .GroupBy(x => x.StageName)
+            .Select(g => new
+            {
+                stageName = g.Key,
+                sampleCount = g.Count(),
+                totalMinutes = Math.Round(g.Sum(x => x.Minutes), 1),
+                averageMinutes = Math.Round(g.Average(x => x.Minutes), 1)
+            })
+            .OrderByDescending(x => x.averageMinutes)
+            .ToList();
 
         var completedByStage = await _db.OrderWorkflowHistories.AsNoTracking()
             .Where(x => x.OccurredAtUtc >= start && x.OccurredAtUtc < end)
@@ -152,7 +188,29 @@ public sealed class ReportsController : ControllerBase
             .Select(g => new { result = g.Key.ToString(), count = g.Count() })
             .ToListAsync(cancellationToken);
 
-        return Ok(new { from = start, to = end, current, completedByStage, quality });
+        var qualityChecksByUser = await (
+            from check in _db.OrderWorkflowQualityChecks.AsNoTracking()
+            join user in _db.Users.AsNoTracking()
+                on check.CheckedByUserId equals (Guid?)user.Id into userGroup
+            from user in userGroup.DefaultIfEmpty()
+            where check.CheckedAtUtc >= start && check.CheckedAtUtc < end
+            group new { check, user } by new
+            {
+                check.CheckedByUserId,
+                userName = user == null ? "کاربر حذف‌شده/ناشناس" : user.UserName
+            } into g
+            select new
+            {
+                userId = g.Key.CheckedByUserId,
+                userName = g.Key.userName,
+                totalChecks = g.Count(),
+                approved = g.Count(x => x.check.Result == QualityControlResult.Approved),
+                rejected = g.Count(x => x.check.Result == QualityControlResult.Rejected)
+            })
+            .OrderByDescending(x => x.totalChecks)
+            .ToListAsync(cancellationToken);
+
+        return Ok(new { from = start, to = end, current, completedByStage, durationByStage, quality, qualityChecksByUser });
     }
 
     [HttpGet("products")]
@@ -189,7 +247,7 @@ public sealed class ReportsController : ControllerBase
         var (start, end) = NormalizeRange(from, to);
         var activity = await (
             from log in _db.AuditLogs.AsNoTracking()
-            join user in _db.Users.AsNoTracking() on log.UserId equals user.Id into userGroup
+            join user in _db.Users.AsNoTracking() on log.UserId equals (Guid?)user.Id into userGroup
             from user in userGroup.DefaultIfEmpty()
             where log.OccurredAtUtc >= start && log.OccurredAtUtc < end
             group new { log, user } by new
@@ -209,6 +267,23 @@ public sealed class ReportsController : ControllerBase
             .ToListAsync(cancellationToken);
 
         return Ok(new { from = start, to = end, activity });
+    }
+
+    // فقط هم‌پوشانی بازه فعالیت با بازه گزارش در محاسبه مدت لحاظ می‌شود.
+    private static void AddDuration(
+        ICollection<(string StageName, double Minutes)> result,
+        string stageName,
+        DateTime segmentStart,
+        DateTime segmentEnd,
+        DateTime reportStart,
+        DateTime reportEnd)
+    {
+        var clippedStart = segmentStart < reportStart ? reportStart : segmentStart;
+        var clippedEnd = segmentEnd > reportEnd ? reportEnd : segmentEnd;
+        if (clippedEnd <= clippedStart)
+            return;
+
+        result.Add((stageName, (clippedEnd - clippedStart).TotalMinutes));
     }
 
     private static (DateTime Start, DateTime End) NormalizeRange(DateTime? from, DateTime? to)
