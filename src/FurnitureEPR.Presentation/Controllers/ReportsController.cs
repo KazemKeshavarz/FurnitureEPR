@@ -119,7 +119,7 @@ public sealed class ReportsController : ControllerBase
     {
         var (start, end) = NormalizeRange(from, to);
         var current = await _db.OrderWorkflowInstances.AsNoTracking()
-            .Where(x => x.StartedAtUtc < end && (x.CompletedAtUtc == null || x.CompletedAtUtc >= start))
+            .Where(x => x.Status == OrderWorkflowInstanceStatus.Active && x.StartedAtUtc < end)
             .GroupBy(x => new { x.CurrentStageId, x.CurrentStage.Name, x.CurrentStage.Code, x.Status })
             .Select(g => new
             {
