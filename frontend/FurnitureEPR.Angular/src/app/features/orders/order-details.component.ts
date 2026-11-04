@@ -18,6 +18,11 @@ interface Order {
   createdAtUtc:string; finalizedAtUtc?:string|null; createdByUserId?:string|null;
   totalAmount:number; discountAmount:number; finalAmount:number; items:OrderItem[]; workflows:Workflow[];
 }
+interface OrderTransferHistory {
+  id:string; sourceOrderId:string; sourceOrderNumber:string; targetOrderId:string; targetOrderNumber:string;
+  reason:string; status:string; requestedAtUtc:string; reviewedAtUtc?:string|null; isOutgoing:boolean;
+  lines:{sourceOrderItemId:string;sourceProductName:string;targetOrderItemId:string;targetProductName:string;warehouseName:string;quantity:number}[];
+}
 
 @Component({
   selector:'app-order-details',
@@ -32,7 +37,7 @@ export class OrderDetailsComponent {
   private readonly router=inject(Router);
   private readonly auth=inject(AuthService);
   order:Order|null=null; loading=false; error='';
-  warehouses:Warehouse[]=[]; allocationBusy=new Set<string>(); allocationError='';
+  warehouses:Warehouse[]=[]; allocationBusy=new Set<string>(); allocationError=''; transfers:OrderTransferHistory[]=[];
 
   constructor(){this.load(); if(this.canManageWarehouses){this.loadWarehouses();}}
 
@@ -41,8 +46,15 @@ export class OrderDetailsComponent {
     if(!id){this.error='شناسه سفارش نامعتبر است.';return;}
     this.loading=true;this.error='';
     this.http.get<Order>(`${environment.apiUrl}/orders/${id}`).subscribe({
-      next:o=>{this.order=o;this.loading=false;},
+      next:o=>{this.order=o;this.loading=false;this.loadTransfers(o.id);},
       error:e=>{this.error=e.error?.detail||'دریافت سفارش انجام نشد.';this.loading=false;}
+    });
+  }
+
+  loadTransfers(orderId:string):void{
+    this.http.get<OrderTransferHistory[]>(`${environment.apiUrl}/order-transfers/orders/${orderId}`).subscribe({
+      next:items=>this.transfers=items??[],
+      error:()=>this.transfers=[]
     });
   }
 
@@ -72,6 +84,7 @@ export class OrderDetailsComponent {
   back():void{this.router.navigate(['/orders']);}
   statusText(s:string):string{return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',HasShortage:'دارای کسری',Cancelled:'لغوشده'} as Record<string,string>)[s]??s;}
   statusClass(s:string):string{return ({Draft:'draft',Active:'active',Completed:'completed',HasShortage:'shortage',Cancelled:'cancelled'} as Record<string,string>)[s]??'draft';}
+  transferStatus(s:string):string{return s==='PendingApproval'?'در انتظار تأیید':s==='Approved'?'تأییدشده':s==='Rejected'?'ردشده':s;}
   workflowStatus(s:string):string{return s==='Completed'?'تکمیل‌شده':s==='Active'?'در حال انجام':s==='Cancelled'?'لغوشده':s;}
   qualityResult(s:string):string{return s==='Approved'?'تأیید شد':s==='Rejected'?'نیازمند اصلاح':s;}
   format(v:number):string{return new Intl.NumberFormat('fa-IR').format(Math.round(v));}
