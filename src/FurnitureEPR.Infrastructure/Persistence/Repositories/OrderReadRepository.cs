@@ -29,6 +29,7 @@ public sealed class OrderReadRepository : IOrderReadRepository
                 x.Items.Select(i => new OrderItemDto(
                     i.Id,
                     i.ProductId,
+                    i.Product.CategoryId,
                     i.ProductName,
                     i.Quantity,
                     i.UnitPrice,
