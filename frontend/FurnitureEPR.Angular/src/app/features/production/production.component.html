@@ -31,7 +31,7 @@
 
            <div class="stage-box">
              <div class="stage-icon"><mat-icon>precision_manufacturing</mat-icon></div>
-             <div><small>مرحله فعلی</small><strong>{{task.currentStageName}}</strong></div>
+             <div><small>مرحله فعلی · تعداد قابل انجام</small><strong>{{task.currentStageName}} · {{task.quantity}} عدد</strong></div>
            </div>
 
            @if(task.requiresQualityControl){
