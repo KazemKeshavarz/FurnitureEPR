@@ -21,6 +21,15 @@
               <div class="item">
                 <div class="item-head"><strong>{{item.productName}}</strong><span>{{item.quantity}} عدد</span></div>
                 <div class="item-price">{{format(item.totalPrice)}} ریال</div>
+                @if(item.productionBatches?.length){
+                  <div class=\"batch-summary\">
+                    <strong>وضعیت تعداد</strong>
+                    <div><span>در انتظار تولید</span><b>{{format(batchTotal(item,'Planned'))}}</b></div>
+                    <div><span>در حال تولید</span><b>{{format(batchTotal(item,'InProgress'))}}</b></div>
+                    <div><span>آماده</span><b>{{format(batchTotal(item,'Ready'))}}</b></div>
+                    <small>این تفکیک به‌صورت خودکار توسط سامانه مدیریت می‌شود.</small>
+                  </div>
+                }
                 @if(item.components.length){
                   <div class="components">
                     @for(c of item.components; track c.id){<span>{{c.componentName}}: {{c.quantity}}</span>}
