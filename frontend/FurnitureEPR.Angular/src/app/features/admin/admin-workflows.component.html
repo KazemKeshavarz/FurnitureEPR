@@ -2,32 +2,57 @@
   <div class="heading">
     <span>مدیریت تولید</span>
     <h1>فرآیندهای تولید</h1>
-    <p>فرآیند را مرحله‌به‌مرحله بسازید؛ لازم نیست از ابتدا همه چیز را بدانید.</p>
+    <p>فرآیند جدید بسازید یا یکی از فرآیندهای قبلی را برای مشاهده و ادامه کار انتخاب کنید.</p>
   </div>
 
-  <mat-card class="step" [class.done]="workflowId">
-    <div class="step-title"><b>۱</b><div><strong>تعریف فرآیند</strong><small>نام و کد فرآیند</small></div></div>
-    <form [formGroup]="workflowForm" (ngSubmit)="createWorkflow()">
-      <mat-form-field appearance="outline"><mat-label>نام فرآیند</mat-label><input matInput formControlName="name" placeholder="مثلاً فرآیند تولید مبلمان"></mat-form-field>
-      <mat-form-field appearance="outline"><mat-label>کد</mat-label><input matInput formControlName="code" placeholder="FURNITURE"></mat-form-field>
-      <button mat-flat-button [disabled]="workflowForm.invalid || busy || !!workflowId" type="submit">{{workflowId ? 'فرآیند ایجاد شد' : 'ایجاد فرآیند'}}</button>
-    </form>
-    @if(workflowId){
-      <div class="success">فرآیند ایجاد شد.</div>
-      <div class="identifier"><strong>شناسه فرآیند:</strong><code>{{workflowId}}</code></div>
+  <mat-card class="step">
+    <div class="step-title"><b><mat-icon>folder_open</mat-icon></b><div><strong>فرآیندهای ثبت‌شده</strong><small>فهرست از سرور دریافت می‌شود و پس از بارگذاری مجدد باقی می‌ماند.</small></div></div>
+    <mat-form-field appearance="outline" class="full-field">
+      <mat-label>انتخاب فرآیند</mat-label>
+      <select matNativeControl [value]="workflowId" (change)="selectWorkflow($any($event.target).value)" [disabled]="loadingWorkflows || busy">
+        <option value="">ایجاد فرآیند جدید / انتخاب نشده</option>
+        @for(item of workflows; track item.id){
+          <option [value]="item.id">{{item.name}} ({{item.code}}) - {{item.versionCount}} نسخه</option>
+        }
+      </select>
+    </mat-form-field>
+    @if(loadingWorkflows){<div class="empty-inline">در حال دریافت فهرست فرآیندها...</div>}
+    @if(selectedWorkflow){
+      <div class="identifier"><strong>{{selectedWorkflow.name}}</strong><code>{{selectedWorkflow.id}}</code></div>
+      <div class="meta-line">کد: {{selectedWorkflow.code}} · نسخه‌ها: {{selectedWorkflow.versions.length}} · دسته‌بندی‌های متصل: {{selectedWorkflow.assignedCategoryIds.length}}</div>
     }
   </mat-card>
 
-  @if(workflowId){
-    <mat-card class="step" [class.done]="versionId">
-      <div class="step-title"><b>۲</b><div><strong>نسخه فرآیند</strong><small>هر تغییر اساسی می‌تواند نسخه‌ی جدید داشته باشد.</small></div></div>
-      <form [formGroup]="versionForm" (ngSubmit)="createVersion()">
-        <mat-form-field appearance="outline"><mat-label>شماره نسخه</mat-label><input matInput type="number" min="1" formControlName="versionNumber"></mat-form-field>
-        <button mat-flat-button [disabled]="versionForm.invalid || busy || !!versionId" type="submit">{{versionId ? 'نسخه ایجاد شد' : 'ساخت نسخه'}}</button>
+  @if(!workflowId){
+    <mat-card class="step">
+      <div class="step-title"><b>۱</b><div><strong>تعریف فرآیند جدید</strong><small>نام و کد فرآیند</small></div></div>
+      <form [formGroup]="workflowForm" (ngSubmit)="createWorkflow()">
+        <mat-form-field appearance="outline"><mat-label>نام فرآیند</mat-label><input matInput formControlName="name" placeholder="مثلاً فرآیند تولید مبلمان"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>کد</mat-label><input matInput formControlName="code" placeholder="FURNITURE"></mat-form-field>
+        <button mat-flat-button [disabled]="workflowForm.invalid || busy" type="submit">ایجاد فرآیند</button>
       </form>
-      @if(versionId){
-        <div class="success">نسخه فرآیند ایجاد شد.</div>
-        <div class="identifier"><strong>شناسه نسخه:</strong><code>{{versionId}}</code></div>
+    </mat-card>
+  }
+
+  @if(selectedWorkflow){
+    <mat-card class="step">
+      <div class="step-title"><b>۲</b><div><strong>نسخه‌های فرآیند</strong><small>نسخه منتشرشده قابل ویرایش نیست؛ برای تغییرات نسخه جدید بسازید.</small></div></div>
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>انتخاب نسخه</mat-label>
+        <select matNativeControl [value]="versionId" (change)="selectVersion($any($event.target).value)" [disabled]="busy">
+          <option value="">انتخاب نسخه برای مشاهده یا ویرایش</option>
+          @for(version of selectedWorkflow.versions; track version.id){
+            <option [value]="version.id">نسخه {{version.versionNumber}} · {{version.isPublished ? 'منتشرشده' : 'پیش‌نویس'}}</option>
+          }
+        </select>
+      </mat-form-field>
+      <form [formGroup]="versionForm" (ngSubmit)="createVersion()" class="new-version-form">
+        <mat-form-field appearance="outline"><mat-label>شماره نسخه جدید</mat-label><input matInput type="number" min="1" formControlName="versionNumber"></mat-form-field>
+        <button mat-flat-button [disabled]="versionForm.invalid || busy" type="submit">ساخت نسخه جدید</button>
+      </form>
+      @if(selectedVersion){
+        <div class="identifier"><strong>شناسه نسخه {{selectedVersion.versionNumber}}:</strong><code>{{versionId}}</code></div>
+        @if(published){<div class="read-only-note"><mat-icon>lock</mat-icon> این نسخه منتشر شده و فقط قابل مشاهده است.</div>}
       }
     </mat-card>
   }
@@ -35,19 +60,21 @@
   @if(versionId){
     <mat-card class="step">
       <div class="step-title"><b>۳</b><div><strong>مراحل فرآیند</strong><small>مراحلی مثل خیاطی، نجاری، رویه‌کوبی و کنترل کیفیت.</small></div></div>
-      <form [formGroup]="stageForm" (ngSubmit)="addStage()" class="stage-form">
-        <mat-form-field appearance="outline"><mat-label>نام مرحله</mat-label><input matInput formControlName="name" placeholder="مثلاً نجاری"></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>کد مرحله</mat-label><input matInput formControlName="code" placeholder="CARPENTRY"></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>ترتیب</mat-label><input matInput type="number" min="0" formControlName="sortOrder"></mat-form-field>
-        <mat-form-field appearance="outline" class="role-field"><mat-label>نقش مسئول مرحله</mat-label><select matNativeControl formControlName="responsibleRoleId"><option value="">بدون نقش مشخص</option>@for(role of roles; track role.id){<option [value]="role.id">{{role.name}}</option>}</select></mat-form-field>
-        <label class="check"><input type="checkbox" formControlName="requiresQualityControl"> نیازمند تأیید کنترل کیفیت</label>
-        <button mat-flat-button [disabled]="stageForm.invalid || busy || hasDuplicateStageCode || hasDuplicateSortOrder" type="submit">افزودن مرحله</button>
-      </form>
-      @if(hasDuplicateStageCode){<p class="field-error">این کد مرحله قبلاً استفاده شده است.</p>}
-      @if(hasDuplicateSortOrder){<p class="field-error">این ترتیب برای مرحله دیگری ثبت شده است.</p>}
+      @if(canEditVersion){
+        <form [formGroup]="stageForm" (ngSubmit)="addStage()" class="stage-form">
+          <mat-form-field appearance="outline"><mat-label>نام مرحله</mat-label><input matInput formControlName="name" placeholder="مثلاً نجاری"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>کد مرحله</mat-label><input matInput formControlName="code" placeholder="CARPENTRY"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>ترتیب</mat-label><input matInput type="number" min="0" formControlName="sortOrder"></mat-form-field>
+          <mat-form-field appearance="outline" class="role-field"><mat-label>نقش مسئول مرحله</mat-label><select matNativeControl formControlName="responsibleRoleId"><option value="">بدون نقش مشخص</option>@for(role of roles; track role.id){<option [value]="role.id">{{role.name}}</option>}</select></mat-form-field>
+          <label class="check"><input type="checkbox" formControlName="requiresQualityControl"> نیازمند تأیید کنترل کیفیت</label>
+          <button mat-flat-button [disabled]="stageForm.invalid || busy || hasDuplicateStageCode || hasDuplicateSortOrder" type="submit">افزودن مرحله</button>
+        </form>
+        @if(hasDuplicateStageCode){<p class="field-error">این کد مرحله قبلاً استفاده شده است.</p>}
+        @if(hasDuplicateSortOrder){<p class="field-error">این ترتیب برای مرحله دیگری ثبت شده است.</p>}
+      }
       <div class="stage-list">
         @for(stage of stages; track stage.id){
-          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}</div>
+          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}</div>
         }@empty{<div class="empty-inline">هنوز مرحله‌ای اضافه نشده است.</div>}
       </div>
     </mat-card>
@@ -55,13 +82,15 @@
     @if(stages.length >= 2){
       <mat-card class="step">
         <div class="step-title"><b>۴</b><div><strong>مسیر بین مراحل</strong><small>مشخص کنید کار از کدام مرحله به کدام مرحله برود.</small></div></div>
-        <form [formGroup]="transitionForm" (ngSubmit)="addTransition()">
-          <mat-form-field appearance="outline"><mat-label>از مرحله</mat-label><select matNativeControl formControlName="fromStageId"><option value="">انتخاب مرحله</option>@for(stage of stages; track stage.id){<option [value]="stage.id">{{stage.sortOrder}} - {{stage.name}}</option>}</select></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>به مرحله</mat-label><select matNativeControl formControlName="toStageId"><option value="">انتخاب مرحله</option>@for(stage of stages; track stage.id){<option [value]="stage.id" [disabled]="stage.id === transitionForm.controls.fromStageId.value">{{stage.sortOrder}} - {{stage.name}}</option>}</select></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>عنوان مسیر</mat-label><input matInput formControlName="name" placeholder="ادامه تولید"></mat-form-field>
-          <button mat-flat-button [disabled]="transitionForm.invalid || busy || invalidTransition" type="submit">افزودن مسیر</button>
-        </form>
-        @if(invalidTransition && transitionForm.controls.fromStageId.value && transitionForm.controls.toStageId.value){<p class="field-error">مبدأ و مقصد باید متفاوت باشند و مسیر تکراری نباشد.</p>}
+        @if(canEditVersion){
+          <form [formGroup]="transitionForm" (ngSubmit)="addTransition()">
+            <mat-form-field appearance="outline"><mat-label>از مرحله</mat-label><select matNativeControl formControlName="fromStageId"><option value="">انتخاب مرحله</option>@for(stage of stages; track stage.id){<option [value]="stage.id">{{stage.sortOrder}} - {{stage.name}}</option>}</select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>به مرحله</mat-label><select matNativeControl formControlName="toStageId"><option value="">انتخاب مرحله</option>@for(stage of stages; track stage.id){<option [value]="stage.id" [disabled]="stage.id === transitionForm.controls.fromStageId.value">{{stage.sortOrder}} - {{stage.name}}</option>}</select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>عنوان مسیر</mat-label><input matInput formControlName="name" placeholder="ادامه تولید"></mat-form-field>
+            <button mat-flat-button [disabled]="transitionForm.invalid || busy || invalidTransition" type="submit">افزودن مسیر</button>
+          </form>
+        }
+        @if(canEditVersion && invalidTransition && transitionForm.controls.fromStageId.value && transitionForm.controls.toStageId.value){<p class="field-error">مبدأ و مقصد باید متفاوت باشند و مسیر تکراری نباشد.</p>}
         <div class="transition-list">
           @for(item of transitions; track item.id){<div class="transition"><span>{{stageName(item.fromStageId)}}</span><mat-icon>arrow_back</mat-icon><span>{{stageName(item.toStageId)}}</span><small>{{item.name}}</small></div>}
           @empty{<div class="empty-inline">هنوز مسیری تعریف نشده است.</div>}
@@ -71,10 +100,14 @@
 
     @if(stages.length > 0){
       <mat-card class="step">
-        <div class="step-title"><b>۵</b><div><strong>انتشار و اتصال به دسته‌بندی</strong><small>بعد از انتشار، این نسخه قابل استفاده در سفارش‌ها می‌شود.</small></div></div>
+        <div class="step-title"><b>۵</b><div><strong>اتصال به دسته‌بندی محصول</strong><small>هر دسته‌بندی به نسخه منتشرشده فرآیند متصل می‌شود.</small></div></div>
         <div class="publish-grid">
-          <mat-form-field appearance="outline"><mat-label>دسته‌بندی محصول</mat-label><select matNativeControl [value]="selectedCategoryId" (change)="selectedCategoryId=$any($event.target).value"><option value="">بدون اتصال</option>@for(category of categories; track category.id){<option [value]="category.id">{{category.name}}</option>}</select></mat-form-field>
-          <button mat-flat-button type="button" [disabled]="busy || published || !selectedCategoryId" (click)="publishAndAssign()"><mat-icon>{{published?'check':'publish'}}</mat-icon>{{published?'منتشر شد':'انتشار و اتصال'}}</button>
+          <mat-form-field appearance="outline"><mat-label>دسته‌بندی محصول</mat-label><select matNativeControl [value]="selectedCategoryId" (change)="selectedCategoryId=$any($event.target).value"><option value="">انتخاب دسته‌بندی</option>@for(category of categories; track category.id){<option [value]="category.id">{{category.name}}</option>}</select></mat-form-field>
+          @if(!published){
+            <button mat-flat-button type="button" [disabled]="busy || !selectedCategoryId" (click)="publishAndAssign()"><mat-icon>publish</mat-icon>انتشار و اتصال</button>
+          }@else{
+            <button mat-flat-button type="button" [disabled]="busy || !selectedCategoryId" (click)="assignSelectedVersion()"><mat-icon>link</mat-icon>اتصال این نسخه</button>
+          }
         </div>
       </mat-card>
     }
@@ -82,7 +115,4 @@
 
   @if(notice){<div class="notice" role="status">{{notice}}</div>}
   @if(error){<div class="error" role="alert">{{error}}</div>}
-  @if(workflowId || versionId){
-    <p class="persistence-note">توجه: API فعلی امکان دریافت فهرست و جزئیات فرآیندهای قبلی را ندارد. شناسه‌ها در همین صفحه تا زمان خروج از آن نگه داشته می‌شوند؛ با بارگذاری مجدد صفحه، برای ادامه به این شناسه‌ها نیاز خواهید داشت.</p>
-  }
 </section>
