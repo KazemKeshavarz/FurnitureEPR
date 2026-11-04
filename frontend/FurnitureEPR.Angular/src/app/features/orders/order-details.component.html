@@ -49,6 +49,26 @@
           </div>
         </div>
 
+        @if(transfers.length){
+          <div class="card">
+            <div class="section-title"><mat-icon>swap_horiz</mat-icon><strong>تاریخچه انتقال بین سفارش‌ها</strong></div>
+            @for(t of transfers;track t.id){
+              <div class="transfer-history-row">
+                <div class="transfer-history-head">
+                  <strong>{{t.isOutgoing?'انتقال از این سفارش':'دریافت برای این سفارش'}}</strong>
+                  <span>{{transferStatus(t.status)}}</span>
+                </div>
+                <small>از سفارش {{t.sourceOrderNumber}} به سفارش {{t.targetOrderNumber}}</small>
+                <p>{{t.reason}}</p>
+                @for(line of t.lines;track line.sourceOrderItemId + line.targetOrderItemId){
+                  <div class="transfer-history-line">{{line.sourceProductName}} · {{line.warehouseName}} · {{format(line.quantity)}} عدد</div>
+                }
+                <small>{{formatDateTime(t.requestedAtUtc)}}</small>
+              </div>
+            }
+          </div>
+        }
+
         @if(allocationError){<div class="error">{{allocationError}}</div>}
 
         <div class="card summary">
