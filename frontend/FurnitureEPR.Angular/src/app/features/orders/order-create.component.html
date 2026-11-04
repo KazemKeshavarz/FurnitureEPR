@@ -113,6 +113,16 @@
       </mat-card>
     }
 
+    @if(createdOrderId && !success){
+      <mat-card class="success-card">
+        <mat-icon>info</mat-icon>
+        <strong>سفارش ثبت شده است.</strong>
+        <span>برای جلوگیری از ثبت سفارش تکراری، سفارش جدید ایجاد نکنید. می‌توانید نهایی‌سازی را دوباره انجام دهید یا جزئیات سفارش را ببینید.</span>
+        <button mat-flat-button type="button" [disabled]="busy" (click)="retryFinalize()">تلاش دوباره برای نهایی‌سازی</button>
+        <button mat-stroked-button type="button" (click)="openCreatedOrder()">مشاهده جزئیات سفارش</button>
+      </mat-card>
+    }
+
     @if(success){
       <mat-card class="success-card">
         <mat-icon>task_alt</mat-icon>
