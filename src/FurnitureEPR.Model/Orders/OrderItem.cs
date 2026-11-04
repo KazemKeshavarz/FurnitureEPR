@@ -7,6 +7,7 @@ public sealed class OrderItem
 {
     private readonly List<OrderItemComponent> _components = new();
     private readonly List<OrderItemWarehouseAllocation> _warehouseAllocations = new();
+    private readonly List<OrderItemProductionBatch> _productionBatches = new();
 
     private OrderItem() { }
 
@@ -22,6 +23,13 @@ public sealed class OrderItem
     public Product Product { get; private set; } = null!;
     public IReadOnlyCollection<OrderItemComponent> Components => _components.AsReadOnly();
     public IReadOnlyCollection<OrderItemWarehouseAllocation> WarehouseAllocations => _warehouseAllocations.AsReadOnly();
+    public IReadOnlyCollection<OrderItemProductionBatch> ProductionBatches => _productionBatches.AsReadOnly();
+
+    public void AddProductionBatch(OrderItemProductionBatch batch)
+    {
+        ArgumentNullException.ThrowIfNull(batch);
+        _productionBatches.Add(batch);
+    }
 
     // سازگاری با کدهای قبلی: اگر قیمت هنوز ثبت نشده باشد، قیمت واحد صفر در نظر گرفته می‌شود.
     public OrderItem(Guid productId, string productName, decimal quantity)
