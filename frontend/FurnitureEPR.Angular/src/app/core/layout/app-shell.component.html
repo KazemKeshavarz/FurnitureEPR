@@ -27,6 +27,12 @@
             <mat-icon matListItemIcon>receipt_long</mat-icon>
             <span matListItemTitle>سفارش‌ها</span>
           </a>
+          @if (canRequestTransfers) {
+            <a mat-list-item routerLink="/order-transfers" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>swap_horiz</mat-icon>
+              <span matListItemTitle>انتقال بین سفارش‌ها</span>
+            </a>
+          }
 
           <a mat-list-item routerLink="/production" routerLinkActive="active" (click)="closeOnMobile(drawer)">
             <mat-icon matListItemIcon>precision_manufacturing</mat-icon>
