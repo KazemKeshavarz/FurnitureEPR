@@ -65,6 +65,8 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             return Unauthorized();
         if (request.Lines is null || request.Lines.Count == 0)
             return BadRequest("حداقل یک قلم برای انتقال انتخاب کنید.");
+        if (string.IsNullOrWhiteSpace(request.Reason) || request.Lines.Any(x => x.Quantity <= 0 || x.WarehouseId == Guid.Empty))
+            return BadRequest("دلیل انتقال، انبار و تعداد مثبت برای همه اقلام الزامی است.");
 
         var sourceOrder = await db.Orders
             .SingleOrDefaultAsync(x => x.Id == request.SourceOrderId, cancellationToken);
@@ -205,22 +207,26 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
                 return Conflict("ظرفیت تعداد درخواستی سفارش مقصد برای این انتقال کافی نیست.");
         }
 
-        foreach (var line in transfer.Lines)
+        foreach (var group in transfer.Lines.GroupBy(x => new { x.SourceOrderItemId, x.WarehouseId }))
         {
-            var source = itemMap[line.SourceOrderItemId];
-            var target = itemMap[line.TargetOrderItemId];
-            var sourceAllocation = source.WarehouseAllocations.Single(x => x.WarehouseId == line.WarehouseId);
-            var targetAllocation = target.WarehouseAllocations.SingleOrDefault(x => x.WarehouseId == line.WarehouseId);
-
-            if (sourceAllocation.Quantity == line.Quantity)
-                db.OrderItemWarehouseAllocations.Remove(sourceAllocation);
+            var source = itemMap[group.Key.SourceOrderItemId];
+            var allocation = source.WarehouseAllocations.Single(x => x.WarehouseId == group.Key.WarehouseId);
+            var quantity = group.Sum(x => x.Quantity);
+            if (allocation.Quantity == quantity)
+                db.OrderItemWarehouseAllocations.Remove(allocation);
             else
-                sourceAllocation.DecreaseQuantity(line.Quantity);
+                allocation.DecreaseQuantity(quantity);
+        }
 
-            if (targetAllocation is null)
-                db.OrderItemWarehouseAllocations.Add(new OrderItemWarehouseAllocation(target.Id, line.WarehouseId, line.Quantity));
+        foreach (var group in transfer.Lines.GroupBy(x => new { x.TargetOrderItemId, x.WarehouseId }))
+        {
+            var target = itemMap[group.Key.TargetOrderItemId];
+            var quantity = group.Sum(x => x.Quantity);
+            var allocation = target.WarehouseAllocations.SingleOrDefault(x => x.WarehouseId == group.Key.WarehouseId);
+            if (allocation is null)
+                db.OrderItemWarehouseAllocations.Add(new OrderItemWarehouseAllocation(target.Id, group.Key.WarehouseId, quantity));
             else
-                targetAllocation.IncreaseQuantity(line.Quantity);
+                allocation.IncreaseQuantity(quantity);
         }
 
         transfer.Approve(reviewerId);
