@@ -33,4 +33,18 @@ public sealed class OrderShortageTests
 
         Assert.Equal(OrderStatus.HasShortage, order.Status);
     }
+    [Fact]
+    public void CompletingRemainingWorkflows_DoesNotCompleteOrderWhileShortageExists()
+    {
+        var order = new Order(Guid.NewGuid());
+        order.SetOrderNumber("T-102");
+        order.AddItem(new OrderItem(Guid.NewGuid(), "صندلی", 2));
+        order.FinalizeOrder();
+        order.MarkHasShortage();
+
+        order.MarkCompleted();
+
+        Assert.Equal(OrderStatus.HasShortage, order.Status);
+    }
+
 }
