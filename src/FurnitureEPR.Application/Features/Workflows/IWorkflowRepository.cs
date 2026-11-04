@@ -1,9 +1,12 @@
 using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Application.Features.Workflows.Queries;
 
 namespace FurnitureEPR.Application.Features.Workflows;
 
 public interface IWorkflowRepository
 {
+    Task<WorkflowPagedResult<WorkflowListItemDto>> GetPagedAsync(int page, int pageSize, string? search, CancellationToken cancellationToken);
+    Task<WorkflowDetailDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task AddAsync(WorkflowDefinition workflow, CancellationToken cancellationToken);
     Task AddVersionAsync(WorkflowVersion version, CancellationToken cancellationToken);
 
