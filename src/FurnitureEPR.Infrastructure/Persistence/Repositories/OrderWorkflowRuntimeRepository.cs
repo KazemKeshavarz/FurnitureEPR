@@ -244,6 +244,24 @@ public sealed class OrderWorkflowRuntimeRepository
             transition.ToStageId,
             transition.Id);
 
+        // با شروع حرکت در گردش‌کار، مقدار مربوط به این کار از «در انتظار» به «در حال تولید» تغییر می‌کند.
+        if (instance.ProductionBatchId is Guid batchId)
+        {
+            var batch = await _db.OrderItemProductionBatches.SingleAsync(x => x.Id == batchId, cancellationToken);
+            if (batch.Status == ProductionBatchStatus.Planned)
+                batch.MarkInProgress();
+        }
+        else
+        {
+            var orderItems = await _db.OrderItems
+                .Where(x => x.OrderId == instance.OrderId && x.Product.CategoryId == instance.CategoryId)
+                .Include(x => x.ProductionBatches)
+                .ToListAsync(cancellationToken);
+            foreach (var batch in orderItems.SelectMany(x => x.ProductionBatches)
+                         .Where(x => x.Status == ProductionBatchStatus.Planned))
+                batch.MarkInProgress();
+        }
+
         await _db.SaveChangesAsync(cancellationToken);
     }
 }
