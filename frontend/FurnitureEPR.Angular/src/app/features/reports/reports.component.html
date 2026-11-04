@@ -1,0 +1,100 @@
+<section class="reports-page" dir="rtl">
+  <header class="page-heading">
+    <div><span>مدیریت و تحلیل</span><h1>گزارش‌ها</h1><p>نمای کلی سفارش‌ها و روند انجام کارگاه</p></div>
+  </header>
+
+  <section class="filters">
+    <label>از تاریخ <input type="date" [(ngModel)]="from"></label>
+    <label>تا تاریخ <input type="date" [(ngModel)]="to"></label>
+    <button mat-flat-button color="primary" (click)="load()" [disabled]="loading">اعمال بازه</button>
+  </section>
+
+  <nav class="tabs" aria-label="بخش‌های گزارش">
+    <button [class.selected]="tab === 'overview'" (click)="setTab('overview')">خلاصه مدیریت</button>
+    <button [class.selected]="tab === 'orders'" (click)="setTab('orders')">سفارش‌ها</button>
+    <button [class.selected]="tab === 'production'" (click)="setTab('production')">عملکرد تولید</button>
+    <button [class.selected]="tab === 'products'" (click)="setTab('products')">محصولات</button>
+    <button [class.selected]="tab === 'users'" (click)="setTab('users')">فعالیت کاربران</button>
+  </nav>
+
+  @if (loading) { <div class="message">در حال دریافت گزارش…</div> }
+  @if (error) { <div class="error">{{ error }}</div> }
+
+  @if (!loading && !error && data) {
+    @if (tab === 'overview') {
+      <section class="stats">
+        <article><span>تعداد سفارش‌ها</span><strong>{{ number(data.totals?.count) }}</strong></article>
+        <article><span>مبلغ کل سفارش‌ها (ریال)</span><strong>{{ number(data.totals?.totalAmount) }}</strong></article>
+        <article><span>تخفیف‌ها (ریال)</span><strong>{{ number(data.totals?.discountAmount) }}</strong></article>
+        <article><span>مبلغ نهایی (ریال)</span><strong>{{ number(data.totals?.finalAmount) }}</strong></article>
+      </section>
+      <div class="columns">
+        <section class="panel"><h2>وضعیت سفارش‌ها</h2>
+          @for (item of data.statuses ?? []; track item.status) {
+            <div class="metric-row"><span>{{ statusText(item.status) }}</span><b>{{ number(item.count) }}</b></div>
+          }
+          @if (!(data.statuses?.length)) { <p class="muted">در این بازه سفارشی ثبت نشده است.</p> }
+        </section>
+        <section class="panel"><h2>سفارش‌های در هر مرحله فعال</h2>
+          @for (item of data.activeStages ?? []; track item.stageName) {
+            <div class="metric-row"><span>{{ item.stageName }}</span><b>{{ number(item.count) }}</b></div>
+          }
+          @if (!(data.activeStages?.length)) { <p class="muted">مرحله فعالی وجود ندارد.</p> }
+        </section>
+      </div>
+      <section class="panel"><h2>آخرین سفارش‌ها</h2>
+        <div class="table-wrap"><table><thead><tr><th>شماره</th><th>مشتری</th><th>وضعیت</th><th>تاریخ</th><th>مبلغ نهایی</th></tr></thead>
+          <tbody>@for (item of data.recentOrders ?? []; track item.id) {
+            <tr><td>{{ item.orderNumber }}</td><td>{{ item.customerName }}</td><td>{{ statusText(item.status) }}</td><td>{{ date(item.createdAtUtc) }}</td><td>{{ number(item.finalAmount) }}</td></tr>
+          }</tbody></table></div>
+      </section>
+    }
+
+    @if (tab === 'orders') {
+      <section class="panel"><h2>گزارش سفارش‌ها</h2><p class="muted">تعداد کل: {{ number(data.totalCount) }}</p>
+        <div class="table-wrap"><table><thead><tr><th>شماره سفارش</th><th>مشتری</th><th>وضعیت</th><th>تاریخ ثبت</th><th>تعداد اقلام</th><th>مبلغ کل</th><th>تخفیف</th><th>مبلغ نهایی</th></tr></thead>
+          <tbody>@for (item of data.items ?? []; track item.id) {
+            <tr><td>{{ item.orderNumber }}</td><td>{{ item.customerName }}</td><td>{{ statusText(item.status) }}</td><td>{{ date(item.createdAtUtc) }}</td><td>{{ number(item.itemsCount) }}</td><td>{{ number(item.totalAmount) }}</td><td>{{ number(item.discountAmount) }}</td><td>{{ number(item.finalAmount) }}</td></tr>
+          }</tbody></table></div>
+      </section>
+    }
+
+    @if (tab === 'production') {
+      <div class="columns">
+        <section class="panel"><h2>وضعیت فعلی مراحل</h2>
+          @for (item of data.current ?? []; track item.stageId) {
+            <div class="metric-row"><span>{{ item.stageName }} <small>{{ item.workflowStatus }}</small></span><b>{{ number(item.activeCount) }}</b></div>
+          }
+        </section>
+        <section class="panel"><h2>فعالیت مراحل در بازه انتخابی</h2>
+          @for (item of data.completedByStage ?? []; track item.stageId) {
+            <div class="metric-row"><span>{{ item.stageName }} <small>آخرین فعالیت: {{ date(item.lastActivityAtUtc) }}</small></span><b>{{ number(item.entries) }}</b></div>
+          }
+        </section>
+      </div>
+      <section class="panel"><h2>نتایج کنترل کیفیت</h2>
+        @for (item of data.quality ?? []; track item.result) {
+          <div class="metric-row"><span>{{ resultText(item.result) }}</span><b>{{ number(item.count) }}</b></div>
+        }
+      </section>
+    }
+
+    @if (tab === 'products') {
+      <section class="panel"><h2>گزارش محصولات</h2>
+        <div class="table-wrap"><table><thead><tr><th>محصول</th><th>تعداد سفارش</th><th>تعداد درخواستی</th><th>مبلغ (ریال)</th></tr></thead>
+          <tbody>@for (item of data.products ?? []; track item.productId) {
+            <tr><td>{{ item.productName }}</td><td>{{ number(item.orderCount) }}</td><td>{{ number(item.quantity) }}</td><td>{{ number(item.amount) }}</td></tr>
+          }</tbody></table></div>
+      </section>
+    }
+
+    @if (tab === 'users') {
+      <section class="panel"><h2>فعالیت ثبت‌شده کاربران</h2><p class="muted">این گزارش بر اساس درخواست‌های ثبت‌شده در گزارش امنیتی سامانه است؛ معیار سنجش مستقیم بهره‌وری تولید نیست.</p>
+        <div class="table-wrap"><table><thead><tr><th>کاربر</th><th>کل درخواست‌ها</th><th>موفق</th><th>ناموفق</th></tr></thead>
+          <tbody>@for (item of data.activity ?? []; track item.userId) {
+            <tr><td>{{ item.userName }}</td><td>{{ number(item.requestCount) }}</td><td>{{ number(item.successfulRequests) }}</td><td>{{ number(item.failedRequests) }}</td></tr>
+          }</tbody></table></div>
+      </section>
+    }
+  }
+</section>
