@@ -110,6 +110,15 @@ public sealed class Order
         Status = OrderStatus.Completed;
     }
 
+    // پس از انتقال کالای آماده به سفارش دیگر، سفارش مبدأ تا جبران کسری دوباره نیازمند تکمیل است.
+    public void MarkHasShortage()
+    {
+        if (Status != OrderStatus.Completed)
+            throw new InvalidOperationException("Only completed orders can be marked as having a shortage.");
+
+        Status = OrderStatus.HasShortage;
+    }
+
     public void Cancel()
     {
         if (Status == OrderStatus.Completed)
