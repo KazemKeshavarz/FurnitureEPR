@@ -226,6 +226,44 @@ public sealed class WorkflowRepository : IWorkflowRepository
         await _db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateStageAsync(Guid workflowVersionId, Guid stageId, string name, string code, int sortOrder, bool requiresQualityControl, Guid? responsibleRoleId, CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.Include(x => x.Stages).Include(x => x.Transitions)
+            .SingleOrDefaultAsync(x => x.Id == workflowVersionId, cancellationToken)
+            ?? throw new KeyNotFoundException("Workflow version was not found.");
+        if (responsibleRoleId.HasValue && !await _db.Roles.AnyAsync(x => x.Id == responsibleRoleId.Value, cancellationToken))
+            throw new KeyNotFoundException("Responsible role was not found.");
+        version.UpdateStage(stageId, name, code, sortOrder, requiresQualityControl, responsibleRoleId);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteStageAsync(Guid workflowVersionId, Guid stageId, CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.Include(x => x.Stages).Include(x => x.Transitions)
+            .SingleOrDefaultAsync(x => x.Id == workflowVersionId, cancellationToken)
+            ?? throw new KeyNotFoundException("Workflow version was not found.");
+        version.RemoveStage(stageId);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateTransitionAsync(Guid workflowVersionId, Guid transitionId, Guid fromStageId, Guid toStageId, string name, CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.Include(x => x.Stages).Include(x => x.Transitions)
+            .SingleOrDefaultAsync(x => x.Id == workflowVersionId, cancellationToken)
+            ?? throw new KeyNotFoundException("Workflow version was not found.");
+        version.UpdateTransition(transitionId, fromStageId, toStageId, name);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteTransitionAsync(Guid workflowVersionId, Guid transitionId, CancellationToken cancellationToken)
+    {
+        var version = await _db.WorkflowVersions.Include(x => x.Transitions)
+            .SingleOrDefaultAsync(x => x.Id == workflowVersionId, cancellationToken)
+            ?? throw new KeyNotFoundException("Workflow version was not found.");
+        version.RemoveTransition(transitionId);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task PublishVersionAsync(
         Guid workflowVersionId,
         CancellationToken cancellationToken)
