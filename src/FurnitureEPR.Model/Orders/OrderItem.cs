@@ -1,10 +1,12 @@
 using FurnitureEPR.Model.Products;
+using FurnitureEPR.Model.Warehouses;
 
 namespace FurnitureEPR.Model.Orders;
 
 public sealed class OrderItem
 {
     private readonly List<OrderItemComponent> _components = new();
+    private readonly List<OrderItemWarehouseAllocation> _warehouseAllocations = new();
 
     private OrderItem() { }
 
@@ -19,6 +21,7 @@ public sealed class OrderItem
     public Order Order { get; private set; } = null!;
     public Product Product { get; private set; } = null!;
     public IReadOnlyCollection<OrderItemComponent> Components => _components.AsReadOnly();
+    public IReadOnlyCollection<OrderItemWarehouseAllocation> WarehouseAllocations => _warehouseAllocations.AsReadOnly();
 
     // سازگاری با کدهای قبلی: اگر قیمت هنوز ثبت نشده باشد، قیمت واحد صفر در نظر گرفته می‌شود.
     public OrderItem(Guid productId, string productName, decimal quantity)
