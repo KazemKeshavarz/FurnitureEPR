@@ -9,7 +9,8 @@ import { AuthService } from '../../core/auth/auth.service';
 
 interface Warehouse { id:string; name:string; code:string; isActive:boolean; }
 interface WarehouseAllocation { id:string; warehouseId:string; warehouseName:string; warehouseCode:string; quantity:number; }
-interface OrderItem { id:string; productId:string; productName:string; quantity:number; unitPrice:number; totalPrice:number; components:{id:string;componentId:string;componentName:string;quantity:number}[]; warehouseAllocations:WarehouseAllocation[]; }
+interface ProductionBatch { id:string; quantity:number; origin:string; status:string; createdAtUtc:string; readyAtUtc?:string|null; }
+interface OrderItem { id:string; productId:string; productName:string; quantity:number; unitPrice:number; totalPrice:number; components:{id:string;componentId:string;componentName:string;quantity:number}[]; warehouseAllocations:WarehouseAllocation[]; productionBatches:ProductionBatch[]; }
 interface WorkflowHistory { id:string; fromStageId:string; fromStageName:string; toStageId:string; toStageName:string; transitionId:string; transitionName:string; occurredAtUtc:string; }
 interface WorkflowQualityCheck { id:string; stageId:string; stageName:string; result:string; comment?:string|null; checkedAtUtc:string; checkedByUserId?:string|null; }
 interface Workflow { id:string; categoryId:string; categoryName:string; workflowVersionId:string; workflowVersionNumber:number; currentStageId:string; currentStageName:string; currentStageCode:string; status:string; startedAtUtc:string; completedAtUtc?:string|null; history:WorkflowHistory[]; qualityChecks:WorkflowQualityCheck[]; }
@@ -84,6 +85,9 @@ export class OrderDetailsComponent {
   back():void{this.router.navigate(['/orders']);}
   statusText(s:string):string{return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',HasShortage:'دارای کسری',Cancelled:'لغوشده'} as Record<string,string>)[s]??s;}
   statusClass(s:string):string{return ({Draft:'draft',Active:'active',Completed:'completed',HasShortage:'shortage',Cancelled:'cancelled'} as Record<string,string>)[s]??'draft';}
+  batchStatus(s:string):string{return s==='Planned'?'در انتظار تولید':s==='InProgress'?'در حال تولید':s==='Ready'?'آماده':s==='Cancelled'?'لغوشده':s;}
+  batchOrigin(s:string):string{return s==='Transfer'?'دریافتی از سفارش دیگر':'تولید این سفارش';}
+  batchTotal(item:OrderItem,status:string):number{return (item.productionBatches??[]).filter(x=>x.status===status).reduce((sum,x)=>sum+x.quantity,0);}
   transferStatus(s:string):string{return s==='PendingApproval'?'در انتظار تأیید':s==='Approved'?'تأییدشده':s==='Rejected'?'ردشده':s;}
   workflowStatus(s:string):string{return s==='Completed'?'تکمیل‌شده':s==='Active'?'در حال انجام':s==='Cancelled'?'لغوشده':s;}
   qualityResult(s:string):string{return s==='Approved'?'تأیید شد':s==='Rejected'?'نیازمند اصلاح':s;}
