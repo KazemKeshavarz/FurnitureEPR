@@ -1,0 +1,40 @@
+<section class="page">
+  <header class="page-header"><span class="eyebrow">مدیریت سفارش‌ها</span><h1>انتقال بین سفارش‌ها</h1><p>کالای آماده را با حفظ سابقه از یک سفارش به سفارش دیگر اختصاص دهید.</p></header>
+  @if(message){<div class="notice success">{{message}}</div>}
+  @if(error){<div class="notice error">{{error}}</div>}
+  @if(canRequest){
+    <section class="panel">
+      <h2>ثبت درخواست انتقال</h2>
+      <p class="hint">فقط سفارش تکمیل‌شده به‌عنوان مبدأ و سفارش در حال انجام به‌عنوان مقصد قابل انتخاب است.</p>
+      <div class="form-grid">
+        <label>سفارش مبدأ<select [(ngModel)]="sourceOrderId" (ngModelChange)="loadSource()"><option value="">انتخاب سفارش تکمیل‌شده</option>@for(o of sourceOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
+        <label>سفارش مقصد<select [(ngModel)]="targetOrderId" (ngModelChange)="loadTarget()"><option value="">انتخاب سفارش در حال انجام</option>@for(o of targetOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
+      </div>
+      @if(source&&target){
+        <div class="transfer-helper"><strong>انتقال همه اقلام واجد شرایط</strong><span>اقلام هم‌مشخصات و موجود در انبار تا سقف نیاز باقی‌مانده مقصد انتخاب می‌شوند.</span><button type="button" class="secondary" (click)="addAllEligible()">افزودن همه اقلام آماده</button></div>
+        <div class="form-grid">
+          <label>قلم آماده مبدأ<select [(ngModel)]="selectedSourceItemId" (ngModelChange)="selectedTargetItemId='';selectedWarehouseId=''"><option value="">انتخاب محصول</option>@for(i of source.items;track i.id){<option [value]="i.id">{{i.productName}} ({{format(i.quantity)}})</option>}</select></label>
+          <label>قلم متناظر مقصد<select [(ngModel)]="selectedTargetItemId"><option value="">انتخاب قلم هم‌مشخصات</option>@for(i of targetCandidates;track i.id){<option [value]="i.id">{{i.productName}} - تعداد {{format(i.quantity)}}</option>}</select></label>
+          <label>انبار مبدأ<select [(ngModel)]="selectedWarehouseId"><option value="">انتخاب انبار</option>@for(a of sourceItem?.warehouseAllocations??[];track a.id){<option [value]="a.warehouseId">{{a.warehouseName}} ({{format(a.quantity)}})</option>}</select></label>
+          <label>تعداد انتقال<input type="number" min="0.001" step="0.001" [(ngModel)]="quantity"></label>
+        </div>
+        <button type="button" class="secondary" (click)="addSelectedLine()">افزودن قلم انتخاب‌شده</button>
+        @if(draftLines.length){<div class="draft-list"><h3>اقلام انتخاب‌شده</h3>@for(line of draftLines;track $index){<div class="draft-row"><span>{{line.productName}} · {{line.warehouseName}}</span><strong>{{format(line.quantity)}}</strong><button type="button" class="link-danger" (click)="removeLine($index)">حذف</button></div>}</div>}
+        <label class="reason">دلیل انتقال<textarea rows="2" [(ngModel)]="reason" placeholder="مثلاً اولویت تحویل سفارش مقصد"></textarea></label>
+        <button type="button" class="primary" [disabled]="saving||!draftLines.length" (click)="submit()">{{saving?'در حال ثبت...':'ثبت درخواست برای تأیید مدیر'}}</button>
+      }
+    </section>
+  }
+  @if(canApprove){
+    <section class="panel">
+      <div class="section-heading"><h2>درخواست‌های انتقال</h2><button type="button" class="secondary" (click)="loadRequests()">بروزرسانی</button></div>
+      @if(loading){<p class="hint">در حال دریافت درخواست‌ها...</p>}
+      @else if(!requests.length){<p class="hint">درخواستی ثبت نشده است.</p>}
+      @else{@for(r of requests;track r.id){<article class="request-card">
+        <div class="request-heading"><strong>{{r.sourceOrderNumber}} · {{r.sourceCustomerName}}</strong><span>به</span><strong>{{r.targetOrderNumber}} · {{r.targetCustomerName}}</strong><span class="status">{{statusText(r.status)}}</span></div>
+        <p>{{r.reason}}</p><ul>@for(line of r.lines;track line.id){<li>{{line.sourceProductName}} · {{line.warehouseName}} · {{format(line.quantity)}} عدد</li>}</ul>
+        @if(r.status==='PendingApproval'){<div class="actions"><button type="button" class="primary" (click)="review(r.id,'approve')">تأیید و انتقال</button><button type="button" class="secondary" (click)="review(r.id,'reject')">رد درخواست</button></div>}
+      </article>}}
+    </section>
+  }
+</section>
