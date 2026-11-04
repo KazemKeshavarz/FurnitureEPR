@@ -6,6 +6,8 @@ public sealed record OrderItemComponentDto(
     string ComponentName,
     decimal Quantity);
 
+public sealed record OrderItemWarehouseAllocationDto(Guid Id, Guid WarehouseId, string WarehouseName, string WarehouseCode, decimal Quantity);
+
 public sealed record OrderItemDto(
     Guid Id,
     Guid ProductId,
@@ -13,7 +15,8 @@ public sealed record OrderItemDto(
     decimal Quantity,
     decimal UnitPrice,
     decimal TotalPrice,
-    IReadOnlyCollection<OrderItemComponentDto> Components);
+    IReadOnlyCollection<OrderItemComponentDto> Components,
+    IReadOnlyCollection<OrderItemWarehouseAllocationDto> WarehouseAllocations);
 
 // نام مراحل و Transition را هم نگه می‌داریم تا تاریخچه برای کاربر نهایی قابل فهم باشد.
 public sealed record OrderWorkflowHistoryDto(
