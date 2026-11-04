@@ -32,6 +32,7 @@ export class OrderCreateComponent {
 
   customers:Customer[]=[]; categories:Category[]=[]; products:Product[]=[]; selectedComponents:(ProductComponent & {quantity:number})[]=[];
   items:CartItem[]=[]; customerId=''; categoryId=''; productId=''; selectedProduct:ProductDetails|null=null;
+  createdOrderId='';
   itemQuantity=1; itemUnitPrice=0; discountAmount=0; busy=false; error=''; success=false; successOrderNumber='';
   showNewCustomer=false;
   customerForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(200)]],phoneNumber:[''],address:['']});
@@ -48,9 +49,11 @@ export class OrderCreateComponent {
   removeItem(index:number):void{this.items=this.items.filter((_,i)=>i!==index);}
   get totalAmount():number{return this.items.reduce((sum,x)=>sum+(x.quantity*x.unitPrice),0);}
   get finalAmount():number{return Math.max(0,this.totalAmount-this.discountAmount);}
-  canSave():boolean{return !!this.customerId&&this.items.length>0&&this.discountAmount>=0&&this.discountAmount<=this.totalAmount;}
-  saveOrder():void{if(!this.canSave())return;this.busy=true;this.error='';const body={customerId:this.customerId,createdByUserId:null,discountAmount:this.discountAmount,items:this.items.map(x=>({productId:x.productId,quantity:x.quantity,unitPrice:x.unitPrice,components:x.components.map(c=>({componentId:c.componentId,quantity:c.quantity}))}))};this.http.post<string>(`${environment.apiUrl}/orders`,body).subscribe({next:id=>this.finalize(id),error:e=>{this.error=e.error?.detail||'ثبت سفارش انجام نشد.';this.busy=false;}});}
-  finalize(id:string):void{this.http.post(`${environment.apiUrl}/orders/${id}/finalize`,{}).subscribe({next:()=>this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({next:o=>{this.success=true;this.successOrderNumber=o.orderNumber;this.busy=false;},error:()=>{this.success=true;this.successOrderNumber='ثبت شد';this.busy=false;}}),error:e=>{this.error=e.error?.detail||'نهایی‌سازی سفارش انجام نشد.';this.busy=false;}});}
+  canSave():boolean{return !this.createdOrderId&&!!this.customerId&&this.items.length>0&&this.discountAmount>=0&&this.discountAmount<=this.totalAmount;}
+  saveOrder():void{if(!this.canSave()||this.busy)return;this.busy=true;this.error='';const body={customerId:this.customerId,createdByUserId:null,discountAmount:this.discountAmount,items:this.items.map(x=>({productId:x.productId,quantity:x.quantity,unitPrice:x.unitPrice,components:x.components.map(c=>({componentId:c.componentId,quantity:c.quantity}))}))};this.http.post<string>(`${environment.apiUrl}/orders`,body).subscribe({next:id=>{this.createdOrderId=id;this.finalize(id);},error:e=>{this.error=e.error?.detail||'ثبت سفارش انجام نشد.';this.busy=false;}});}
+  retryFinalize():void{if(!this.createdOrderId||this.busy)return;this.error='';this.busy=true;this.finalize(this.createdOrderId);}
+  finalize(id:string):void{this.http.post(`${environment.apiUrl}/orders/${id}/finalize`,{}).subscribe({next:()=>this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({next:o=>{this.success=true;this.successOrderNumber=o.orderNumber;this.busy=false;},error:()=>{this.success=true;this.successOrderNumber='ثبت شد';this.busy=false;}}),error:e=>{this.error=e.error?.detail||'سفارش ثبت شده، اما نهایی‌سازی آن انجام نشد. می‌توانید دوباره تلاش کنید یا جزئیات سفارش را ببینید.';this.busy=false;}});}
   format(value:number):string{return new Intl.NumberFormat('fa-IR').format(Math.round(value));}
-  newOrder():void{this.items=[];this.customerId='';this.categoryId='';this.productId='';this.selectedProduct=null;this.selectedComponents=[];this.discountAmount=0;this.success=false;this.successOrderNumber='';}
+  openCreatedOrder():void{if(this.createdOrderId)this.router.navigate(['/orders',this.createdOrderId]);}
+  newOrder():void{this.createdOrderId='';this.items=[];this.customerId='';this.categoryId='';this.productId='';this.selectedProduct=null;this.selectedComponents=[];this.discountAmount=0;this.success=false;this.successOrderNumber='';}
 }
