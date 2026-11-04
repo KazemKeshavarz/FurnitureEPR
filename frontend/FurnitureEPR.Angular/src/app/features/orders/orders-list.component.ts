@@ -59,6 +59,11 @@ export class OrdersListComponent {
 
   get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
 
+  applyFilters(): void {
+    this.page = 1;
+    this.load();
+  }
+
   load(): void {
     this.loading = true;
     this.error = '';
