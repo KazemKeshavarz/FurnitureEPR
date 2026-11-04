@@ -21,6 +21,7 @@ public sealed class WarehouseAllocationsController(ApplicationDbContext db) : Co
     {
         var item = await db.OrderItems
             .Include(x => x.Order)
+            .Include(x => x.Product)
             .Include(x => x.WarehouseAllocations)
             .SingleOrDefaultAsync(x => x.Id == orderItemId, cancellationToken);
 
@@ -28,16 +29,26 @@ public sealed class WarehouseAllocationsController(ApplicationDbContext db) : Co
         if (item.Order.Status is OrderStatus.Draft or OrderStatus.Cancelled)
             return Conflict("انبار محصول فقط پس از نهایی‌شدن سفارش قابل ثبت است.");
 
-        if (request.Allocations.Any(x => x.Quantity <= 0))
+        // تخصیص فقط وقتی مجاز است که گردش‌کار دسته‌بندی به مرحله انبار رسیده باشد.
+        var isAtWarehouseStage = await db.OrderWorkflowInstances
+            .AnyAsync(x => x.OrderId == item.OrderId
+                && x.CategoryId == item.Product.CategoryId
+                && x.Status == FurnitureEPR.Model.Workflow.OrderWorkflowInstanceStatus.Active
+                && x.CurrentStage.Code == "WAREHOUSE", cancellationToken);
+        if (!isAtWarehouseStage)
+            return Conflict("ابتدا محصول را در گردش‌کار به مرحله انبار با کد WAREHOUSE برسانید.");
+
+        var allocationsToSave = request.Allocations ?? Array.Empty<WarehouseAllocationInput>();
+        if (allocationsToSave.Any(x => x.Quantity <= 0))
             return BadRequest("تعداد هر تخصیص باید بیشتر از صفر باشد.");
-        if (request.Allocations.GroupBy(x => x.WarehouseId).Any(x => x.Count() > 1))
+        if (allocationsToSave.GroupBy(x => x.WarehouseId).Any(x => x.Count() > 1))
             return BadRequest("هر انبار را فقط یک بار انتخاب کنید.");
 
-        var total = request.Allocations.Sum(x => x.Quantity);
+        var total = allocationsToSave.Sum(x => x.Quantity);
         if (total > item.Quantity)
             return BadRequest($"مجموع تعداد تخصیص‌یافته ({total}) نمی‌تواند از تعداد سفارش ({item.Quantity}) بیشتر باشد.");
 
-        var warehouseIds = request.Allocations.Select(x => x.WarehouseId).ToArray();
+        var warehouseIds = allocationsToSave.Select(x => x.WarehouseId).ToArray();
         var activeWarehouseIds = await db.Warehouses
             .Where(x => warehouseIds.Contains(x.Id) && x.IsActive)
             .Select(x => x.Id)
@@ -46,7 +57,7 @@ public sealed class WarehouseAllocationsController(ApplicationDbContext db) : Co
             return BadRequest("یکی از انبارهای انتخاب‌شده وجود ندارد یا غیرفعال است.");
 
         db.OrderItemWarehouseAllocations.RemoveRange(item.WarehouseAllocations);
-        foreach (var allocation in request.Allocations)
+        foreach (var allocation in allocationsToSave)
             db.OrderItemWarehouseAllocations.Add(new OrderItemWarehouseAllocation(orderItemId, allocation.WarehouseId, allocation.Quantity));
 
         await db.SaveChangesAsync(cancellationToken);
