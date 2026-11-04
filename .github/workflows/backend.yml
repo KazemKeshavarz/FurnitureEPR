@@ -30,5 +30,13 @@ jobs:
       - name: Build backend
         run: dotnet build src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj --configuration Release --no-restore
 
+      - name: نصب ابزار EF
+        run: dotnet tool install --global dotnet-ef --version 10.0.13
+
+      - name: بررسی Migrationها و Snapshot
+        run: |
+          dotnet ef migrations list --project src/FurnitureEPR.Infrastructure/FurnitureEPR.Infrastructure.csproj --startup-project src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj
+          dotnet ef migrations has-pending-model-changes --project src/FurnitureEPR.Infrastructure/FurnitureEPR.Infrastructure.csproj --startup-project src/FurnitureEPR.Presentation/FurnitureEPR.Presentation.csproj
+
       - name: Test
         run: dotnet test tests/FurnitureEPR.Model.Tests/FurnitureEPR.Model.Tests.csproj --configuration Release --no-restore --verbosity normal
