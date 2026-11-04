@@ -42,7 +42,15 @@ export class AppShellComponent {
   }
 
   get canManageUsers(): boolean {
-    return this.auth.hasPermission('identity.manage_users') || this.auth.hasPermission('identity.manage_roles');
+    return this.auth.hasPermission('identity.manage_users');
+  }
+
+  get canManageRoles(): boolean {
+    return this.auth.hasPermission('identity.manage_roles');
+  }
+
+  get canManageIdentity(): boolean {
+    return this.canManageUsers || this.canManageRoles;
   }
 
   get canManageWorkflows(): boolean {
