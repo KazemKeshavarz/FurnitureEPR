@@ -82,16 +82,27 @@ public sealed class WorkflowRepository : IWorkflowRepository
         if (definition is null)
             return null;
 
-        var assignedCategories = await _db.Categories
+        var assignedCategoryRows = await _db.Categories
             .AsNoTracking()
             .Where(x => x.WorkflowVersion != null && x.WorkflowVersion.WorkflowDefinitionId == id)
-            .Select(x => new WorkflowCategoryAssignmentDto(
-                x.Id,
-                x.Name,
-                x.WorkflowVersion!.Id,
-                x.WorkflowVersion.VersionNumber))
-            .OrderBy(x => x.CategoryName)
+            .Select(x => new
+            {
+                CategoryId = x.Id,
+                CategoryName = x.Name,
+                WorkflowVersionId = x.WorkflowVersion!.Id,
+                x.WorkflowVersion.VersionNumber
+            })
             .ToArrayAsync(cancellationToken);
+
+        // مرتب‌سازی DTO پس از materialize انجام می‌شود تا Providerهای SQLite و SQL Server رفتار یکسان داشته باشند.
+        var assignedCategories = assignedCategoryRows
+            .OrderBy(x => x.CategoryName)
+            .Select(x => new WorkflowCategoryAssignmentDto(
+                x.CategoryId,
+                x.CategoryName,
+                x.WorkflowVersionId,
+                x.VersionNumber))
+            .ToArray();
 
         var versions = definition.Versions
             .OrderByDescending(x => x.VersionNumber)
