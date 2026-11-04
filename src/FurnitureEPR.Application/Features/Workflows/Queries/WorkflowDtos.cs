@@ -30,9 +30,15 @@ public sealed record WorkflowVersionDto(
     IReadOnlyCollection<WorkflowStageDto> Stages,
     IReadOnlyCollection<WorkflowTransitionDto> Transitions);
 
+public sealed record WorkflowCategoryAssignmentDto(
+    Guid CategoryId,
+    string CategoryName,
+    Guid WorkflowVersionId,
+    int WorkflowVersionNumber);
+
 public sealed record WorkflowDetailDto(
     Guid Id,
     string Name,
     string Code,
-    IReadOnlyCollection<Guid> AssignedCategoryIds,
+    IReadOnlyCollection<WorkflowCategoryAssignmentDto> AssignedCategories,
     IReadOnlyCollection<WorkflowVersionDto> Versions);
