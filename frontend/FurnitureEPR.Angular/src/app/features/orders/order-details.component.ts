@@ -5,8 +5,11 @@ import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/auth/auth.service';
 
-interface OrderItem { id:string; productId:string; productName:string; quantity:number; unitPrice:number; totalPrice:number; components:{id:string;componentId:string;componentName:string;quantity:number}[]; }
+interface Warehouse { id:string; name:string; code:string; isActive:boolean; }
+interface WarehouseAllocation { id:string; warehouseId:string; warehouseName:string; warehouseCode:string; quantity:number; }
+interface OrderItem { id:string; productId:string; productName:string; quantity:number; unitPrice:number; totalPrice:number; components:{id:string;componentId:string;componentName:string;quantity:number}[]; warehouseAllocations:WarehouseAllocation[]; }
 interface WorkflowHistory { id:string; fromStageId:string; fromStageName:string; toStageId:string; toStageName:string; transitionId:string; transitionName:string; occurredAtUtc:string; }
 interface WorkflowQualityCheck { id:string; stageId:string; stageName:string; result:string; comment?:string|null; checkedAtUtc:string; checkedByUserId?:string|null; }
 interface Workflow { id:string; categoryId:string; categoryName:string; workflowVersionId:string; workflowVersionNumber:number; currentStageId:string; currentStageName:string; status:string; startedAtUtc:string; completedAtUtc?:string|null; history:WorkflowHistory[]; qualityChecks:WorkflowQualityCheck[]; }
@@ -27,9 +30,11 @@ export class OrderDetailsComponent {
   private readonly http=inject(HttpClient);
   private readonly route=inject(ActivatedRoute);
   private readonly router=inject(Router);
+  private readonly auth=inject(AuthService);
   order:Order|null=null; loading=false; error='';
+  warehouses:Warehouse[]=[]; allocationBusy=new Set<string>(); allocationError='';
 
-  constructor(){this.load();}
+  constructor(){this.load(); if(this.canManageWarehouses){this.loadWarehouses();}}
 
   load():void{
     const id=this.route.snapshot.paramMap.get('id');
@@ -38,6 +43,29 @@ export class OrderDetailsComponent {
     this.http.get<Order>(`${environment.apiUrl}/orders/${id}`).subscribe({
       next:o=>{this.order=o;this.loading=false;},
       error:e=>{this.error=e.error?.detail||'دریافت سفارش انجام نشد.';this.loading=false;}
+    });
+  }
+
+  get canManageWarehouses():boolean{return this.auth.hasPermission('workflow.manage');}
+
+  loadWarehouses():void{
+    this.http.get<Warehouse[]>(`${environment.apiUrl}/warehouses`).subscribe({
+      next:items=>this.warehouses=items.filter(x=>x.isActive),
+      error:()=>this.allocationError='دریافت فهرست انبارها انجام نشد.'
+    });
+  }
+
+  saveAllocation(item:OrderItem, warehouseId:string, quantityValue:string):void{
+    const quantity=Number(quantityValue);
+    if(!warehouseId||!Number.isFinite(quantity)||quantity<=0){this.allocationError='انبار و تعداد معتبر را انتخاب کنید.';return;}
+    const current=item.warehouseAllocations||[];
+    const allocations=current.filter(x=>x.warehouseId!==warehouseId).map(x=>({warehouseId:x.warehouseId,quantity:x.quantity}));
+    allocations.push({warehouseId,quantity});
+    if(allocations.reduce((sum,x)=>sum+x.quantity,0)>item.quantity){this.allocationError='مجموع تعدادهای تخصیص‌یافته نمی‌تواند از تعداد سفارش بیشتر باشد.';return;}
+    this.allocationError='';this.allocationBusy.add(item.id);
+    this.http.put(`${environment.apiUrl}/orders/items/${item.id}/warehouse-allocations`,{allocations}).subscribe({
+      next:()=>{const warehouse=this.warehouses.find(x=>x.id===warehouseId)!;item.warehouseAllocations=[...current.filter(x=>x.warehouseId!==warehouseId),{id:'',warehouseId,warehouseName:warehouse.name,warehouseCode:warehouse.code,quantity}];this.allocationBusy.delete(item.id);},
+      error:e=>{this.allocationError=e.error?.detail||e.error||'ثبت محل نگهداری انجام نشد.';this.allocationBusy.delete(item.id);}
     });
   }
 
