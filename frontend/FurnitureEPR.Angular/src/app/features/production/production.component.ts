@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Transition { id:string; name:string; toStageId:string; toStageName:string; }
 interface Task {
@@ -26,7 +27,10 @@ interface Page {items:Task[];page:number;pageSize:number;totalCount:number;}
   styleUrl: './production.component.scss'
 })
 export class ProductionComponent {
- private readonly http=inject(HttpClient); private readonly router=inject(Router);
+ private readonly http=inject(HttpClient); private readonly router=inject(Router); private readonly auth=inject(AuthService);
+ readonly canMoveWorkflow=this.auth.hasPermission('workflow.move');
+ readonly canQualityControl=this.auth.hasPermission('workflow.quality_control');
+ readonly canCompleteWorkflow=this.auth.hasPermission('workflow.complete');
  tasks:Task[]=[];search='';loading=false;error='';busy=false;qcTaskId='';qcComment='';totalCount=0;
 
  constructor(){this.load();}
@@ -41,20 +45,23 @@ export class ProductionComponent {
    });
  }
 
- startQc(t:Task):void{this.qcTaskId=t.workflowInstanceId;this.qcComment='';}
+ startQc(t:Task):void{if(!this.canQualityControl)return;this.qcTaskId=t.workflowInstanceId;this.qcComment='';}
  quality(t:Task,approved:boolean):void{
+   if(!this.canQualityControl||this.busy)return;
    this.busy=true;
    this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/quality-control`,{
      orderId:t.orderId,categoryId:t.categoryId,result:approved?0:1,comment:this.qcComment.trim()||null
    }).subscribe({next:()=>{this.qcTaskId='';this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'ثبت کنترل کیفیت انجام نشد.';this.busy=false;}});
  }
  move(t:Task,tr:Transition):void{
+   if(!this.canMoveWorkflow||this.busy)return;
    this.busy=true;
    this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/transitions/${tr.id}`,{}).subscribe({
      next:()=>{this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'انتقال مرحله انجام نشد.';this.busy=false;}
    });
  }
  complete(t:Task):void{
+   if(!this.canCompleteWorkflow||this.busy)return;
    this.busy=true;
    this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/complete`,{}).subscribe({
      next:()=>{this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'پایان فرآیند انجام نشد.';this.busy=false;}
