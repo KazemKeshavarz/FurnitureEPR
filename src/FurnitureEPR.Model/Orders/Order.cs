@@ -113,6 +113,8 @@ public sealed class Order
     // پس از انتقال کالای آماده به سفارش دیگر، سفارش مبدأ تا جبران کسری دوباره نیازمند تکمیل است.
     public void MarkHasShortage()
     {
+        if (Status == OrderStatus.HasShortage)
+            return;
         if (Status != OrderStatus.Completed)
             throw new InvalidOperationException("Only completed orders can be marked as having a shortage.");
 
