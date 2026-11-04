@@ -5,5 +5,6 @@ public enum OrderStatus
     Draft = 0,
     Active = 1,
     Cancelled = 2,
-    Completed = 3
+    Completed = 3,
+    HasShortage = 4
 }
