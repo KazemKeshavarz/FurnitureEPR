@@ -7,13 +7,13 @@
       <h2>ثبت درخواست انتقال</h2>
       <p class="hint">فقط سفارش تکمیل‌شده به‌عنوان مبدأ و سفارش در حال انجام به‌عنوان مقصد قابل انتخاب است.</p>
       <div class="form-grid">
-        <label>سفارش مبدأ<select [(ngModel)]="sourceOrderId" (ngModelChange)="loadSource()"><option value="">انتخاب سفارش تکمیل‌شده</option>@for(o of sourceOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
+        <label>سفارش مبدأ<select [(ngModel)]="sourceOrderId" (ngModelChange)="loadSource()"><option value="">انتخاب سفارش دارای کالای آماده</option>@for(o of sourceOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
         <label>سفارش مقصد<select [(ngModel)]="targetOrderId" (ngModelChange)="loadTarget()"><option value="">انتخاب سفارش در حال انجام</option>@for(o of targetOrders;track o.id){<option [value]="o.id">{{o.orderNumber}} - {{o.customerName}}</option>}</select></label>
       </div>
       @if(source&&target){
         <div class="transfer-helper"><strong>انتقال همه اقلام واجد شرایط</strong><span>اقلام هم‌مشخصات و موجود در انبار تا سقف نیاز باقی‌مانده مقصد انتخاب می‌شوند.</span><button type="button" class="secondary" (click)="addAllEligible()">افزودن همه اقلام آماده</button></div>
         <div class="form-grid">
-          <label>قلم آماده مبدأ<select [(ngModel)]="selectedSourceItemId" (ngModelChange)="selectedTargetItemId='';selectedWarehouseId=''"><option value="">انتخاب محصول</option>@for(i of source.items;track i.id){<option [value]="i.id">{{i.productName}} ({{format(i.quantity)}})</option>}</select></label>
+          <label>قلم آماده مبدأ<select [(ngModel)]="selectedSourceItemId" (ngModelChange)="selectedTargetItemId='';selectedWarehouseId=''"><option value="">انتخاب محصول</option>@for(i of eligibleSourceItems;track i.id){<option [value]="i.id">{{i.productName}} ({{format(i.quantity)}})</option>}</select></label>
           <label>قلم متناظر مقصد<select [(ngModel)]="selectedTargetItemId"><option value="">انتخاب قلم هم‌مشخصات</option>@for(i of targetCandidates;track i.id){<option [value]="i.id">{{i.productName}} - تعداد {{format(i.quantity)}}</option>}</select></label>
           <label>انبار مبدأ<select [(ngModel)]="selectedWarehouseId"><option value="">انتخاب انبار</option>@for(a of sourceItem?.warehouseAllocations??[];track a.id){<option [value]="a.warehouseId">{{a.warehouseName}} ({{format(a.quantity)}})</option>}</select></label>
           <label>تعداد انتقال<input type="number" min="0.001" step="0.001" [(ngModel)]="quantity"></label>
