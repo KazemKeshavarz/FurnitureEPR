@@ -17,8 +17,7 @@ public interface IOrderWorkflowRuntimeRepository
 
     // نتیجه QC مرحله فعلی را ثبت می‌کند؛ Reject سفارش را در همان Stage نگه می‌دارد.
     Task RecordQualityControlAsync(
-        Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         QualityControlResult result,
         string? comment,
         Guid? checkedByUserId,
