@@ -3,6 +3,7 @@ using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowTransition
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
 using FurnitureEPR.Application.Features.Workflows.Commands.PublishWorkflowVersion;
+using FurnitureEPR.Application.Features.Workflows.Commands;
 using FurnitureEPR.Application.Features.Workflows.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -81,6 +82,35 @@ public sealed class WorkflowsController : ControllerBase
         return Ok(await _sender.Send(command, cancellationToken));
     }
 
+    [HttpPut("versions/{versionId:guid}/stages/{stageId:guid}")]
+    public async Task<IActionResult> UpdateStage(Guid versionId, Guid stageId, UpdateWorkflowStageCommand command, CancellationToken cancellationToken)
+    {
+        if (versionId != command.WorkflowVersionId || stageId != command.StageId) return BadRequest("Route ids and command ids must match.");
+        await _sender.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("versions/{versionId:guid}/stages/{stageId:guid}")]
+    public async Task<IActionResult> DeleteStage(Guid versionId, Guid stageId, CancellationToken cancellationToken)
+    {
+        await _sender.Send(new DeleteWorkflowStageCommand(versionId, stageId), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPut("versions/{versionId:guid}/transitions/{transitionId:guid}")]
+    public async Task<IActionResult> UpdateTransition(Guid versionId, Guid transitionId, UpdateWorkflowTransitionCommand command, CancellationToken cancellationToken)
+    {
+        if (versionId != command.WorkflowVersionId || transitionId != command.TransitionId) return BadRequest("Route ids and command ids must match.");
+        await _sender.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("versions/{versionId:guid}/transitions/{transitionId:guid}")]
+    public async Task<IActionResult> DeleteTransition(Guid versionId, Guid transitionId, CancellationToken cancellationToken)
+    {
+        await _sender.Send(new DeleteWorkflowTransitionCommand(versionId, transitionId), cancellationToken);
+        return NoContent();
+    }
     [HttpPost("versions/{versionId:guid}/publish")]
     public async Task<IActionResult> Publish(
         Guid versionId,
