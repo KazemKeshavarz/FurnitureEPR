@@ -19,7 +19,7 @@
     @if(loadingWorkflows){<div class="empty-inline">در حال دریافت فهرست فرآیندها...</div>}
     @if(selectedWorkflow){
       <div class="identifier"><strong>{{selectedWorkflow.name}}</strong><code>{{selectedWorkflow.id}}</code></div>
-      <div class="meta-line">کد: {{selectedWorkflow.code}} · نسخه‌ها: {{selectedWorkflow.versions.length}} · دسته‌بندی‌های متصل: {{selectedWorkflow.assignedCategoryIds.length}}</div>
+      <div class="meta-line">کد: {{selectedWorkflow.code}} · نسخه‌ها: {{selectedWorkflow.versions.length}} · دسته‌بندی‌های متصل: {{selectedWorkflow.assignedCategories.length}}</div>
     }
   </mat-card>
 
