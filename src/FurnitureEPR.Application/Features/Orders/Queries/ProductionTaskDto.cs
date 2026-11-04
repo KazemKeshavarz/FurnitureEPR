@@ -21,7 +21,8 @@ public sealed record ProductionTaskDto(
     bool CanMove,
     bool CanComplete,
     IReadOnlyCollection<ProductionTaskTransitionDto> Transitions,
-    DateTime StartedAtUtc);
+    DateTime StartedAtUtc,
+    decimal Quantity);
 
 public sealed record PagedProductionTaskDto(
     IReadOnlyCollection<ProductionTaskDto> Items,
