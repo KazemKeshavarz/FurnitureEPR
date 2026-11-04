@@ -22,6 +22,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/orders/orders-list.component').then(m => m.OrdersListComponent)
       },
       {
+        path: 'order-transfers',
+        canActivate: [anyPermissionGuard(['workflow.move', 'workflow.manage'])],
+        loadComponent: () => import('./features/orders/order-transfers.component').then(m => m.OrderTransfersComponent)
+      },
+      {
         path: 'orders/new',
         loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
       },
