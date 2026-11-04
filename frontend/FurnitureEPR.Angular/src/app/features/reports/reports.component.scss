@@ -1,0 +1,35 @@
+.reports-page { max-width: 1200px; margin: 0 auto; color: #102a35; }
+.page-heading span { color: #286f93; font-size: 12px; font-weight: 700; }
+.page-heading h1 { margin: 5px 0; font-size: 25px; }
+.page-heading p, .muted { color: #68777d; font-size: 13px; }
+.filters { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; padding: 16px; margin: 18px 0; background: #fff; border-radius: 14px; }
+.filters label { display: grid; gap: 6px; font-size: 12px; color: #52656d; }
+.filters input { min-height: 40px; border: 1px solid #dce4e8; border-radius: 8px; padding: 0 10px; color: #102a35; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; }
+.tabs button { flex: 0 0 auto; border: 1px solid #dce4e8; background: #fff; color: #40545d; padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+.tabs button.selected { background: #286f93; border-color: #286f93; color: white; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+.stats article, .panel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 3px 14px rgba(16,42,53,.04); }
+.stats span { display: block; color: #68777d; font-size: 12px; margin-bottom: 10px; }
+.stats strong { font-size: 21px; overflow-wrap: anywhere; }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.panel { margin-bottom: 14px; min-width: 0; }
+.panel h2 { font-size: 16px; margin: 0 0 14px; }
+.metric-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf1f3; font-size: 13px; }
+.metric-row:last-child { border-bottom: 0; }
+.metric-row small { display: block; color: #7a898f; margin-top: 4px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 12px; }
+th, td { text-align: right; padding: 12px 10px; border-bottom: 1px solid #edf1f3; }
+th { color: #68777d; font-weight: 600; background: #f8fafb; }
+.message, .error { padding: 18px; background: #fff; border-radius: 12px; margin: 12px 0; }
+.error { color: #a32929; background: #fff4f3; }
+@media (max-width: 800px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .stats article { padding: 14px; }
+  .stats strong { font-size: 17px; }
+  .columns { grid-template-columns: 1fr; gap: 0; }
+  .filters { align-items: stretch; }
+  .filters label { flex: 1 1 130px; }
+  .filters button { width: 100%; }
+}
