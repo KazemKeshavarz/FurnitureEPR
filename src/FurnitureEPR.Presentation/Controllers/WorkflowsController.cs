@@ -3,6 +3,7 @@ using FurnitureEPR.Application.Features.Workflows.Commands.AddWorkflowTransition
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflow;
 using FurnitureEPR.Application.Features.Workflows.Commands.CreateWorkflowVersion;
 using FurnitureEPR.Application.Features.Workflows.Commands.PublishWorkflowVersion;
+using FurnitureEPR.Application.Features.Workflows.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,25 @@ public sealed class WorkflowsController : ControllerBase
     private readonly ISender _sender;
 
     public WorkflowsController(ISender sender) => _sender = sender;
+
+    [HttpGet]
+    public async Task<ActionResult<WorkflowPagedResult<WorkflowListItemDto>>> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        CancellationToken cancellationToken = default)
+        => Ok(await _sender.Send(
+            new GetWorkflowsQuery(page, pageSize, search),
+            cancellationToken));
+
+    [HttpGet("{workflowId:guid}")]
+    public async Task<ActionResult<WorkflowDetailDto>> GetById(
+        Guid workflowId,
+        CancellationToken cancellationToken)
+    {
+        var workflow = await _sender.Send(new GetWorkflowQuery(workflowId), cancellationToken);
+        return workflow is null ? NotFound() : Ok(workflow);
+    }
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(
