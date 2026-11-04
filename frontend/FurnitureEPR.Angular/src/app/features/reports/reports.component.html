@@ -72,11 +72,32 @@
           }
         </section>
       </div>
-      <section class="panel"><h2>نتایج کنترل کیفیت</h2>
-        @for (item of data.quality ?? []; track item.result) {
-          <div class="metric-row"><span>{{ resultText(item.result) }}</span><b>{{ number(item.count) }}</b></div>
+      <section class="panel"><h2>میانگین زمان حضور در هر مرحله</h2>
+        <p class="muted">مدت از شروع مرحله تا انتقال به مرحله بعد یا پایان گردش‌کار محاسبه شده است.</p>
+        @for (item of data.durationByStage ?? []; track item.stageName) {
+          <div class="metric-row">
+            <span>{{ item.stageName }} <small>{{ number(item.sampleCount) }} نوبت ثبت‌شده</small></span>
+            <b>{{ duration(item.averageMinutes) }}</b>
+          </div>
         }
+        @if (!(data.durationByStage?.length)) { <p class="muted">برای این بازه هنوز تاریخچه کافی ثبت نشده است.</p> }
       </section>
+      <div class="columns">
+        <section class="panel"><h2>نتایج کنترل کیفیت</h2>
+          @for (item of data.quality ?? []; track item.result) {
+            <div class="metric-row"><span>{{ resultText(item.result) }}</span><b>{{ number(item.count) }}</b></div>
+          }
+        </section>
+        <section class="panel"><h2>کنترل کیفیت به تفکیک کاربر</h2>
+          @for (item of data.qualityChecksByUser ?? []; track item.userId) {
+            <div class="metric-row">
+              <span>{{ item.userName }} <small>مجموع بررسی‌ها: {{ number(item.totalChecks) }}</small></span>
+              <b>تأیید {{ number(item.approved) }} / رد {{ number(item.rejected) }}</b>
+            </div>
+          }
+          @if (!(data.qualityChecksByUser?.length)) { <p class="muted">در این بازه بررسی کیفیتی ثبت نشده است.</p> }
+        </section>
+      </div>
     }
 
     @if (tab === 'products') {
