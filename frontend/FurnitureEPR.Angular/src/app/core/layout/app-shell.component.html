@@ -38,17 +38,19 @@
             <span matListItemTitle>مشتریان</span>
           </a>
 
-          <div class="section-title">تعریف اطلاعات</div>
+          @if (canManageIdentity) {
+            <div class="section-title">تعریف اطلاعات</div>
 
-          <a mat-list-item routerLink="/products" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-            <mat-icon matListItemIcon>chair</mat-icon>
-            <span matListItemTitle>محصولات</span>
-          </a>
+            <a mat-list-item routerLink="/products" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>chair</mat-icon>
+              <span matListItemTitle>محصولات</span>
+            </a>
 
-          <a mat-list-item routerLink="/categories" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-            <mat-icon matListItemIcon>category</mat-icon>
-            <span matListItemTitle>دسته‌بندی‌ها</span>
-          </a>
+            <a mat-list-item routerLink="/categories" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+              <mat-icon matListItemIcon>category</mat-icon>
+              <span matListItemTitle>دسته‌بندی‌ها</span>
+            </a>
+          }
 
           @if (canManageIdentity) {
             <div class="section-title">مدیریت سامانه</div>
