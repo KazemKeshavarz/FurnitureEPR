@@ -118,7 +118,18 @@ public sealed class OrderWorkflowRuntimeRepository
             var batch = await _db.OrderItemProductionBatches
                 .SingleAsync(x => x.Id == batchId, cancellationToken);
             if (batch.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress)
+            {
                 batch.MarkReady();
+                if (batch.ReplenishmentWarehouseId is Guid warehouseId)
+                {
+                    var allocation = await _db.OrderItemWarehouseAllocations
+                        .SingleOrDefaultAsync(x => x.OrderItemId == batch.OrderItemId && x.WarehouseId == warehouseId, cancellationToken);
+                    if (allocation is null)
+                        _db.OrderItemWarehouseAllocations.Add(new OrderItemWarehouseAllocation(batch.OrderItemId, warehouseId, batch.Quantity));
+                    else
+                        allocation.IncreaseQuantity(batch.Quantity);
+                }
+            }
         }
         else
         {
@@ -141,11 +152,23 @@ public sealed class OrderWorkflowRuntimeRepository
         if (!hasIncompleteWorkflow)
         {
             var order = await _db.Orders
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.WarehouseAllocations)
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.ProductionBatches)
                 .SingleOrDefaultAsync(x => x.Id == instance.OrderId, cancellationToken);
 
             if (order is null)
                 throw new KeyNotFoundException("Order was not found.");
 
+            if (order.Status == OrderStatus.HasShortage)
+            {
+                var shortagesResolved = order.Items.All(item =>
+                    item.ProductionBatches.Where(b => b.Status == ProductionBatchStatus.Ready).Sum(b => b.Quantity) >= item.Quantity
+                    && item.WarehouseAllocations.Sum(a => a.Quantity) >= item.Quantity);
+                if (shortagesResolved)
+                    order.ResolveShortage();
+            }
             order.MarkCompleted();
         }
 
