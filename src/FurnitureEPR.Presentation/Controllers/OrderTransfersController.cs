@@ -247,8 +247,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         }
 
         transfer.Approve(reviewerId);
-        if (sourceOrder.Status == OrderStatus.Completed)
-            sourceOrder.MarkHasShortage();
+        sourceOrder.MarkHasShortage();
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return NoContent();
