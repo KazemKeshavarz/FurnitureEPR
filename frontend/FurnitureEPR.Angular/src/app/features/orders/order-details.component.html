@@ -26,10 +26,31 @@
                     @for(c of item.components; track c.id){<span>{{c.componentName}}: {{c.quantity}}</span>}
                   </div>
                 }
+                @if(item.warehouseAllocations?.length){
+                  <div class="warehouse-allocations">
+                    <strong>محل نگهداری</strong>
+                    @for(a of item.warehouseAllocations; track a.warehouseId){
+                      <span>{{a.warehouseName}}: {{a.quantity}} عدد</span>
+                    }
+                    <small>مجموع تخصیص‌یافته: {{item.warehouseAllocations.reduce ? '' : ''}}</small>
+                  </div>
+                }
+                @if(canManageWarehouses && warehouses.length){
+                  <div class="warehouse-entry">
+                    <select #warehouseSelect aria-label="انتخاب انبار">
+                      <option value="">انتخاب انبار</option>
+                      @for(w of warehouses; track w.id){<option [value]="w.id">{{w.name}}</option>}
+                    </select>
+                    <input #quantityInput type="number" min="0.001" step="0.001" placeholder="تعداد" aria-label="تعداد در انبار">
+                    <button mat-button type="button" [disabled]="allocationBusy.has(item.id)" (click)="saveAllocation(item,warehouseSelect.value,quantityInput.value)">ثبت انبار</button>
+                  </div>
+                }
               </div>
             }
           </div>
         </div>
+
+        @if(allocationError){<div class="error">{{allocationError}}</div>}
 
         <div class="card summary">
           <div><span>مبلغ کل</span><strong>{{format(order.totalAmount)}} ریال</strong></div>
