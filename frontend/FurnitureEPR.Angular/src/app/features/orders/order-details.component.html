@@ -32,7 +32,6 @@
                     @for(a of item.warehouseAllocations; track a.warehouseId){
                       <span>{{a.warehouseName}}: {{a.quantity}} عدد</span>
                     }
-                    <small>مجموع تخصیص‌یافته: {{item.warehouseAllocations.reduce ? '' : ''}}</small>
                   </div>
                 }
                 @if(canManageWarehouses && warehouses.length){
