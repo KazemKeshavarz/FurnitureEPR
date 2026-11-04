@@ -67,6 +67,8 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             return BadRequest("حداقل یک قلم برای انتقال انتخاب کنید.");
         if (string.IsNullOrWhiteSpace(request.Reason) || request.Lines.Any(x => x.Quantity <= 0 || x.WarehouseId == Guid.Empty))
             return BadRequest("دلیل انتقال، انبار و تعداد مثبت برای همه اقلام الزامی است.");
+        if (request.Lines.GroupBy(x => new { x.SourceOrderItemId, x.TargetOrderItemId, x.WarehouseId }).Any(x => x.Count() > 1))
+            return BadRequest("قلم یکسان را در یک درخواست فقط یک بار اضافه کنید.");
 
         var sourceOrder = await db.Orders
             .SingleOrDefaultAsync(x => x.Id == request.SourceOrderId, cancellationToken);
