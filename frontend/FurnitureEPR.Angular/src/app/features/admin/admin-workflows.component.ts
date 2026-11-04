@@ -194,35 +194,57 @@ export class AdminWorkflowsComponent {
   createWorkflow(): void {
     if (this.workflowForm.invalid || this.busy) return;
     this.clearMessages();
-    this.run(this.http.post<string>(`${environment.apiUrl}/workflows`, this.workflowForm.getRawValue()), id => {
-      this.workflowId = id;
-      this.notice = 'فرآیند ایجاد شد؛ در حال دریافت اطلاعات آن...';
-      this.loadWorkflows();
-      this.selectWorkflow(id);
+    this.busy = true;
+    this.http.post<string>(`${environment.apiUrl}/workflows`, this.workflowForm.getRawValue()).subscribe({
+      next: id => {
+        this.workflowId = id;
+        this.loadWorkflows();
+        this.http.get<WorkflowDetail>(`${environment.apiUrl}/workflows/${id}`).subscribe({
+          next: detail => {
+            this.selectedWorkflow = detail;
+            this.busy = false;
+            this.notice = 'فرآیند ایجاد شد و اکنون در فهرست فرآیندها قابل مشاهده است.';
+          },
+          error: error => {
+            this.busy = false;
+            this.error = error.error?.detail || 'فرآیند ساخته شد، اما دریافت جزئیات آن انجام نشد.';
+          }
+        });
+      },
+      error: error => {
+        this.busy = false;
+        this.error = error.error?.detail || 'ایجاد فرآیند انجام نشد.';
+      }
     });
   }
 
   createVersion(): void {
     if (this.versionForm.invalid || this.busy || !this.workflowId) return;
     this.clearMessages();
-    this.run(
-      this.http.post<string>(`${environment.apiUrl}/workflows/${this.workflowId}/versions`, {
-        workflowId: this.workflowId,
-        ...this.versionForm.getRawValue()
-      }),
-      id => {
-        this.versionId = id;
-        this.notice = 'نسخه ساخته شد؛ در حال دریافت اطلاعات نسخه...';
+    this.busy = true;
+    this.http.post<string>(`${environment.apiUrl}/workflows/${this.workflowId}/versions`, {
+      workflowId: this.workflowId,
+      ...this.versionForm.getRawValue()
+    }).subscribe({
+      next: id => {
         this.http.get<WorkflowDetail>(`${environment.apiUrl}/workflows/${this.workflowId}`).subscribe({
           next: detail => {
             this.selectedWorkflow = detail;
-            const version = detail.versions.find(item => item.id === id);
-            if (version) this.selectVersion(version.id);
+            this.selectVersion(id);
+            this.busy = false;
+            this.notice = 'نسخه جدید ساخته شد و آماده تعریف مراحل است.';
           },
-          error: error => this.error = error.error?.detail || 'نسخه ساخته شد، اما دریافت جزئیات آن انجام نشد.'
+          error: error => {
+            this.busy = false;
+            this.error = error.error?.detail || 'نسخه ساخته شد، اما دریافت جزئیات آن انجام نشد.';
+          }
         });
+      },
+      error: error => {
+        this.busy = false;
+        this.error = error.error?.detail || 'ساخت نسخه جدید انجام نشد.';
       }
-    );
+    });
   }
 
   addStage(): void {
@@ -308,6 +330,32 @@ export class AdminWorkflowsComponent {
       error: error => {
         this.error = error.error?.detail || 'انتشار فرآیند انجام نشد.';
         this.busy = false;
+      }
+    });
+  }
+
+  assignSelectedVersion(): void {
+    if (this.busy || !this.published || !this.versionId || !this.selectedCategoryId) return;
+    this.clearMessages();
+    this.busy = true;
+    this.http.post(
+      `${environment.apiUrl}/categories/${this.selectedCategoryId}/workflow`,
+      { categoryId: this.selectedCategoryId, workflowVersionId: this.versionId }
+    ).subscribe({
+      next: () => {
+        if (this.selectedWorkflow && !this.selectedWorkflow.assignedCategoryIds.includes(this.selectedCategoryId)) {
+          this.selectedWorkflow = {
+            ...this.selectedWorkflow,
+            assignedCategoryIds: [...this.selectedWorkflow.assignedCategoryIds, this.selectedCategoryId]
+          };
+        }
+        this.busy = false;
+        this.notice = 'نسخه منتشرشده به دسته‌بندی متصل شد.';
+        this.loadWorkflows();
+      },
+      error: error => {
+        this.busy = false;
+        this.error = error.error?.detail || 'اتصال نسخه به دسته‌بندی انجام نشد.';
       }
     });
   }
