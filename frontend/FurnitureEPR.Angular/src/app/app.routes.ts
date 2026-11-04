@@ -39,11 +39,13 @@ export const routes: Routes = [
       },
       {
         path: 'products',
+        canActivate: [anyPermissionGuard(['identity.manage_users', 'identity.manage_roles'])],
         loadComponent: () => import('./features/master-data/master-data.component').then(m => m.MasterDataComponent),
         data: { initialTabIndex: 1 }
       },
       {
         path: 'categories',
+        canActivate: [anyPermissionGuard(['identity.manage_users', 'identity.manage_roles'])],
         loadComponent: () => import('./features/master-data/master-data.component').then(m => m.MasterDataComponent),
         data: { initialTabIndex: 0 }
       },
