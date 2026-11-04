@@ -186,7 +186,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         // درخواست هنوز موجودی را جابه‌جا نمی‌کند؛ جابه‌جایی فقط پس از تأیید مدیر انجام می‌شود.
         db.OrderTransfers.Add(transfer);
         await db.SaveChangesAsync(cancellationToken);
-        return CreatedAtAction(nameof(GetAll), new { id = transfer.Id }, new { transfer.Id, Status = transfer.Status.ToString() });
+        return Accepted(new { transfer.Id, Status = transfer.Status.ToString() });
     }
 
     [HttpPost("{id:guid}/approve")]
@@ -298,6 +298,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
         if (currentUser.UserId is not Guid reviewerId)
             return Unauthorized();
 
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var transfer = await db.OrderTransfers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (transfer is null) return NotFound();
         if (transfer.Status != OrderTransferStatus.PendingApproval)
@@ -305,6 +306,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
 
         transfer.Reject(reviewerId);
         await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
         return NoContent();
     }
 
