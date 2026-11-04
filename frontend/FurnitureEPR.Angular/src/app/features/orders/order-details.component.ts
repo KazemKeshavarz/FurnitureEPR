@@ -70,8 +70,8 @@ export class OrderDetailsComponent {
   }
 
   back():void{this.router.navigate(['/orders']);}
-  statusText(s:string):string{return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',Cancelled:'لغوشده'} as Record<string,string>)[s]??s;}
-  statusClass(s:string):string{return ({Draft:'draft',Active:'active',Completed:'completed',Cancelled:'cancelled'} as Record<string,string>)[s]??'draft';}
+  statusText(s:string):string{return ({Draft:'پیش‌نویس',Active:'در حال انجام',Completed:'تکمیل‌شده',HasShortage:'دارای کسری',Cancelled:'لغوشده'} as Record<string,string>)[s]??s;}
+  statusClass(s:string):string{return ({Draft:'draft',Active:'active',Completed:'completed',HasShortage:'shortage',Cancelled:'cancelled'} as Record<string,string>)[s]??'draft';}
   workflowStatus(s:string):string{return s==='Completed'?'تکمیل‌شده':s==='Active'?'در حال انجام':s==='Cancelled'?'لغوشده':s;}
   qualityResult(s:string):string{return s==='Approved'?'تأیید شد':s==='Rejected'?'نیازمند اصلاح':s;}
   format(v:number):string{return new Intl.NumberFormat('fa-IR').format(Math.round(v));}
