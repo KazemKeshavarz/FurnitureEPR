@@ -47,6 +47,7 @@ public sealed record OrderWorkflowInstanceDto(
     int WorkflowVersionNumber,
     Guid CurrentStageId,
     string CurrentStageName,
+    string CurrentStageCode,
     string Status,
     DateTime StartedAtUtc,
     DateTime? CompletedAtUtc,
