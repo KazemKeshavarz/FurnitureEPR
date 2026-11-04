@@ -141,7 +141,7 @@ public sealed class OrderWorkflowRuntimeRepository
         if (!hasIncompleteWorkflow)
         {
             var order = await _db.Orders
-                .SingleOrDefaultAsync(x => x.Id == orderId, cancellationToken);
+                .SingleOrDefaultAsync(x => x.Id == instance.OrderId, cancellationToken);
 
             if (order is null)
                 throw new KeyNotFoundException("Order was not found.");
