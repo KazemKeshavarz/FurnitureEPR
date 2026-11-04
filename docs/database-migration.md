@@ -25,13 +25,13 @@ dotnet ef database update --project src/FurnitureEPR.Infrastructure --startup-pr
 اگر ابزار EF Core روی سیستم نصب نیست:
 
 ```powershell
-dotnet tool install --global dotnet-ef --version 10.0.0
+dotnet tool install --global dotnet-ef --version 10.0.13
 ```
 
 یا در صورت نصب قبلی:
 
 ```powershell
-dotnet tool update --global dotnet-ef --version 10.0.0
+dotnet tool update --global dotnet-ef --version 10.0.13
 ```
 
 ## نکات امنیتی
