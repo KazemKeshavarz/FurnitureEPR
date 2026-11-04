@@ -129,6 +129,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             .Include(x => x.Components)
             .Include(x => x.Product)
             .Include(x => x.WarehouseAllocations)
+            .Include(x => x.ProductionBatches)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var targetItems = await db.OrderItems
             .Where(x => targetIds.Contains(x.Id) && x.OrderId == targetOrder.Id)
@@ -154,12 +155,21 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
                 .SingleOrDefault(x => x.WarehouseId == group.Key.WarehouseId);
             if (allocation is null || allocation.Quantity < group.Sum(x => x.Quantity))
                 return Conflict("مجموع تعداد درخواستی از موجودی انبار مبدأ بیشتر است.");
+            var readyQuantity = sourceItems[group.Key.SourceOrderItemId].ProductionBatches
+                .Where(x => x.Status == ProductionBatchStatus.Ready).Sum(x => x.Quantity);
+            if (readyQuantity < group.Sum(x => x.Quantity))
+                return Conflict("تعداد آماده این محصول برای انتقال کافی نیست.");
         }
 
         foreach (var group in request.Lines.GroupBy(x => x.TargetOrderItemId))
         {
             var target = targetItems[group.Key];
             var alreadyAllocated = target.WarehouseAllocations.Sum(x => x.Quantity);
+            var remainingProduction = target.ProductionBatches
+                .Where(x => x.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress)
+                .Sum(x => x.Quantity);
+            if (group.Sum(x => x.Quantity) > remainingProduction)
+                return Conflict("مقدار باقی‌مانده برای تولید سفارش مقصد کافی نیست.");
             if (alreadyAllocated + group.Sum(x => x.Quantity) > target.Quantity)
                 return Conflict("مجموع انتقال از نیاز باقی‌مانده قلم مقصد بیشتر است.");
         }
@@ -218,6 +228,7 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             .Include(x => x.Components)
             .Include(x => x.Product)
             .Include(x => x.WarehouseAllocations)
+            .Include(x => x.ProductionBatches)
             .ToListAsync(cancellationToken);
         var itemMap = items.ToDictionary(x => x.Id);
         var warehouseCategoryIds = await db.OrderWorkflowInstances
@@ -236,6 +247,10 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             var allocation = source.WarehouseAllocations.SingleOrDefault(x => x.WarehouseId == group.Key.WarehouseId);
             if (allocation is null || allocation.Quantity < group.Sum(x => x.Quantity))
                 return Conflict("موجودی انبار مبدأ برای مجموع این انتقال کافی نیست.");
+            var readyQuantity = source.ProductionBatches
+                .Where(x => x.Status == ProductionBatchStatus.Ready).Sum(x => x.Quantity);
+            if (readyQuantity < group.Sum(x => x.Quantity))
+                return Conflict("مقدار آماده برای انتقال از سفارش مبدأ کافی نیست.");
         }
 
         foreach (var group in transfer.Lines.GroupBy(x => x.TargetOrderItemId))
@@ -243,6 +258,11 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
             if (!itemMap.TryGetValue(group.Key, out var target))
                 return Conflict("قلم مقصد دیگر در دسترس نیست.");
             var allocated = target.WarehouseAllocations.Sum(x => x.Quantity);
+            var remainingProduction = target.ProductionBatches
+                .Where(x => x.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress)
+                .Sum(x => x.Quantity);
+            if (group.Sum(x => x.Quantity) > remainingProduction)
+                return Conflict("مقدار باقی‌مانده برای تولید سفارش مقصد کافی نیست.");
             if (allocated + group.Sum(x => x.Quantity) > target.Quantity)
                 return Conflict("ظرفیت باقی‌مانده قلم مقصد برای مجموع این انتقال کافی نیست.");
         }
@@ -286,6 +306,41 @@ public sealed class OrderTransfersController(ApplicationDbContext db, ICurrentUs
                 db.OrderItemWarehouseAllocations.Add(new OrderItemWarehouseAllocation(target.Id, group.Key.WarehouseId, quantity));
             else
                 allocation.IncreaseQuantity(quantity);
+        }
+
+        // مقدار آماده از سفارش مبدأ کم و همان مقدار به‌صورت کار تولید مجدد ثبت می‌شود.
+        foreach (var group in transfer.Lines.GroupBy(x => x.SourceOrderItemId))
+        {
+            var source = itemMap[group.Key];
+            var remaining = group.Sum(x => x.Quantity);
+            foreach (var batch in source.ProductionBatches.Where(x => x.Status == ProductionBatchStatus.Ready).ToList())
+            {
+                var take = Math.Min(batch.Quantity, remaining);
+                if (take <= 0) continue;
+                batch.ReduceQuantity(take);
+                remaining -= take;
+                if (remaining == 0) break;
+            }
+            source.AddProductionBatch(new OrderItemProductionBatch(source.Id, group.Sum(x => x.Quantity), ProductionBatchOrigin.Production));
+        }
+
+        // در مقصد، مقدار برنامه‌ریزی‌شده کاهش می‌یابد و مقدار دریافتی آماده محسوب می‌شود.
+        foreach (var line in transfer.Lines)
+        {
+            var target = itemMap[line.TargetOrderItemId];
+            var remaining = line.Quantity;
+            foreach (var batch in target.ProductionBatches
+                         .Where(x => x.Status is ProductionBatchStatus.Planned or ProductionBatchStatus.InProgress).ToList())
+            {
+                var take = Math.Min(batch.Quantity, remaining);
+                if (take <= 0) continue;
+                batch.ReduceQuantity(take);
+                remaining -= take;
+                if (remaining == 0) break;
+            }
+            target.AddProductionBatch(new OrderItemProductionBatch(
+                target.Id, line.Quantity, ProductionBatchOrigin.Transfer,
+                ProductionBatchStatus.Ready, line.Id));
         }
 
         transfer.Approve(reviewerId);
