@@ -39,6 +39,16 @@ public sealed class OrderItemProductionBatchTests
     }
 
     [Fact]
+    public void MarkInProgress_ChangesPlannedBatchToInProgress()
+    {
+        var batch = new OrderItemProductionBatch(Guid.NewGuid(), 3, ProductionBatchOrigin.Production);
+
+        batch.MarkInProgress();
+
+        Assert.Equal(ProductionBatchStatus.InProgress, batch.Status);
+    }
+
+    [Fact]
     public void TransferBatch_RequiresSourceTransferLine()
     {
         Assert.Throws<ArgumentException>(() =>
