@@ -56,17 +56,15 @@ public sealed class OrdersController : ControllerBase
 
     // اجرای یک Transition مشخص روی گردشکار Runtime سفارش.
     [Authorize(Policy = PermissionNames.WorkflowMove)]
-    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/transitions/{transitionId:guid}")]
+    [HttpPost("workflow/{workflowInstanceId:guid}/transitions/{transitionId:guid}")]
     public async Task<IActionResult> MoveWorkflow(
-        Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         Guid transitionId,
         CancellationToken cancellationToken)
     {
         await _sender.Send(
             new MoveOrderWorkflowCommand(
-                orderId,
-                categoryId,
+                workflowInstanceId,
                 transitionId),
             cancellationToken);
 
@@ -75,14 +73,13 @@ public sealed class OrdersController : ControllerBase
 
     // پایان دادن به Workflow یک Category مشخص؛ خود Order فقط پس از پایان همه Workflowها Completed می‌شود.
     [Authorize(Policy = PermissionNames.WorkflowComplete)]
-    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/complete")]
+    [HttpPost("workflow/{workflowInstanceId:guid}/complete")]
     public async Task<IActionResult> CompleteWorkflow(
-        Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         CancellationToken cancellationToken)
     {
         await _sender.Send(
-            new CompleteOrderWorkflowCommand(orderId, categoryId),
+            new CompleteOrderWorkflowCommand(workflowInstanceId),
             cancellationToken);
 
         return NoContent();
@@ -90,15 +87,14 @@ public sealed class OrdersController : ControllerBase
 
     // ثبت نتیجه QC برای Stage فعلی؛ Reject باعث خروج از Stage نمی‌شود و امکان QC مجدد وجود دارد.
     [Authorize(Policy = PermissionNames.WorkflowQualityControl)]
-    [HttpPost("{orderId:guid}/workflow/{categoryId:guid}/quality-control")]
+    [HttpPost("workflow/{workflowInstanceId:guid}/quality-control")]
     public async Task<IActionResult> RecordQualityControl(
-        Guid orderId,
-        Guid categoryId,
+        Guid workflowInstanceId,
         RecordQualityControlCommand command,
         CancellationToken cancellationToken)
     {
-        if (orderId != command.OrderId || categoryId != command.CategoryId)
-            return BadRequest("Route ids and command ids must match.");
+        if (workflowInstanceId != command.WorkflowInstanceId)
+            return BadRequest("Route id and command id must match.");
 
         await _sender.Send(command, cancellationToken);
         return NoContent();
