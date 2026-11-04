@@ -28,6 +28,10 @@ public interface IWorkflowRepository
         string name,
         CancellationToken cancellationToken);
 
+    Task UpdateStageAsync(Guid workflowVersionId, Guid stageId, string name, string code, int sortOrder, bool requiresQualityControl, Guid? responsibleRoleId, CancellationToken cancellationToken);
+    Task DeleteStageAsync(Guid workflowVersionId, Guid stageId, CancellationToken cancellationToken);
+    Task UpdateTransitionAsync(Guid workflowVersionId, Guid transitionId, Guid fromStageId, Guid toStageId, string name, CancellationToken cancellationToken);
+    Task DeleteTransitionAsync(Guid workflowVersionId, Guid transitionId, CancellationToken cancellationToken);
     // بعد از انتشار، ساختار نسخه دیگر قابل تغییر نیست.
     Task PublishVersionAsync(
         Guid workflowVersionId,
