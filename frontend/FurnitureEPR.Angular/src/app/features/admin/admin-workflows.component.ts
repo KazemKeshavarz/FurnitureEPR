@@ -300,6 +300,47 @@ export class AdminWorkflowsComponent {
     });
   }
 
+  editStage(stage: Stage): void {
+    if (!this.canEditVersion || this.busy) return;
+    const name = window.prompt('نام مرحله', stage.name);
+    if (name === null) return;
+    const code = window.prompt('کد مرحله', stage.code);
+    if (code === null) return;
+    const sortOrderText = window.prompt('ترتیب مرحله', String(stage.sortOrder));
+    if (sortOrderText === null) return;
+    const sortOrder = Number(sortOrderText);
+    if (!name.trim() || !code.trim() || !Number.isInteger(sortOrder) || sortOrder < 0) { this.error = 'نام، کد و ترتیب مرحله معتبر نیست.'; return; }
+    if (this.stages.some(x => x.id !== stage.id && (x.code.toLowerCase() === code.trim().toLowerCase() || x.sortOrder === sortOrder))) { this.error = 'کد و ترتیب باید در همین نسخه یکتا باشند.'; return; }
+    const body = { workflowVersionId: this.versionId, stageId: stage.id, name: name.trim(), code: code.trim(), sortOrder, requiresQualityControl: stage.requiresQualityControl, responsibleRoleId: stage.responsibleRoleId || null };
+    this.run(this.http.put(`${environment.apiUrl}/workflows/versions/${this.versionId}/stages/${stage.id}`, body), () => {
+      this.stages = this.stages.map(x => x.id === stage.id ? { ...x, ...body } : x); this.syncSelectedVersion(); this.notice = 'مرحله ویرایش شد.';
+    });
+  }
+
+  deleteStage(stage: Stage): void {
+    if (!this.canEditVersion || this.busy || !window.confirm(`مرحله «${stage.name}» حذف شود؟ ابتدا مسیرهای متصل به آن را حذف کنید.`)) return;
+    this.run(this.http.delete(`${environment.apiUrl}/workflows/versions/${this.versionId}/stages/${stage.id}`), () => {
+      this.stages = this.stages.filter(x => x.id !== stage.id); this.syncSelectedVersion(); this.notice = 'مرحله حذف شد.';
+    });
+  }
+
+  editTransition(item: Transition): void {
+    if (!this.canEditVersion || this.busy) return;
+    const name = window.prompt('عنوان مسیر', item.name);
+    if (name === null || !name.trim()) return;
+    const body = { workflowVersionId: this.versionId, transitionId: item.id, fromStageId: item.fromStageId, toStageId: item.toStageId, name: name.trim() };
+    this.run(this.http.put(`${environment.apiUrl}/workflows/versions/${this.versionId}/transitions/${item.id}`, body), () => {
+      this.transitions = this.transitions.map(x => x.id === item.id ? { ...x, name: name.trim() } : x); this.syncSelectedVersion(); this.notice = 'عنوان مسیر ویرایش شد.';
+    });
+  }
+
+  deleteTransition(item: Transition): void {
+    if (!this.canEditVersion || this.busy || !window.confirm(`مسیر «${item.name}» حذف شود؟`)) return;
+    this.run(this.http.delete(`${environment.apiUrl}/workflows/versions/${this.versionId}/transitions/${item.id}`), () => {
+      this.transitions = this.transitions.filter(x => x.id !== item.id); this.syncSelectedVersion(); this.notice = 'مسیر حذف شد.';
+    });
+  }
+
   publishAndAssign(): void {
     if (this.busy || this.published || !this.versionId || !this.stages.length || !this.selectedCategoryId) return;
 
