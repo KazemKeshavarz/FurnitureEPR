@@ -40,7 +40,7 @@ export class OrderTransfersComponent {
 
   loadOrderChoices():void{
     this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=Completed`).subscribe({
-      next:r=>this.sourceOrders=r.items??[],error:()=>this.error='دریافت سفارش‌های آماده انتقال انجام نشد.'
+      next:r=>{this.sourceOrders=r.items??[];this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=HasShortage`).subscribe({next:s=>this.sourceOrders=[...this.sourceOrders,...(s.items??[])],error:()=>{}});},error:()=>this.error='دریافت سفارش‌های آماده انتقال انجام نشد.'
     });
     this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=Active`).subscribe({
       next:r=>this.targetOrders=r.items??[],error:()=>this.error='دریافت سفارش‌های مقصد انجام نشد.'
