@@ -54,6 +54,26 @@
 
 همه endpointهای گزارش در حال حاضر نیازمند مجوز `workflow.manage` هستند. پارامترهای `from` و `to` بازه تاریخ را تعیین می‌کنند؛ پیش‌فرض بازه ۳۰ روز اخیر است.
 
+## مسیرهای اصلی API
+
+پیشوند endpointها `/api` است.
+
+| قابلیت | مسیرهای نمونه |
+|---|---|
+| مشتریان | `GET/POST /api/customers` |
+| دسته‌بندی‌ها | `GET/POST /api/categories` |
+| محصولات | `GET/POST /api/products` |
+| سفارش‌ها | `GET/POST /api/orders` |
+| کارهای تولید | `GET /api/orders/production/tasks` |
+| مدیریت گردش‌کار | `/api/workflows` و زیرمسیرهای نسخه، مرحله و انتقال |
+| انبارها و تخصیص محل نگهداری | `/api/warehouses` و `/api/orders/items/{orderItemId}/warehouse-allocations` |
+| انتقال بین سفارش‌ها | `/api/order-transfers` |
+| گزارش‌ها | `/api/reports/{summary,orders,production,products,users}` |
+
+## تنظیمات امن بک‌اند
+
+کلید JWT واقعی و تصادفی با حداقل ۳۲ کاراکتر را از User Secrets یا متغیر محیطی `Jwt__Key` تنظیم کنید. مقدار placeholder موجود در `appsettings.json` توسط برنامه رد می‌شود. برای ساخت اولین مدیر، تنظیمات `IdentitySeed__Enabled` و مقادیر امن `IdentitySeed__AdminUserName`، `IdentitySeed__AdminEmail` و `IdentitySeed__AdminPassword` را فقط از متغیرهای محیطی یا Secret Store فراهم کنید؛ رمز مدیر را در مخزن ثبت نکنید. در محیط غیرتوسعه، مبدأهای مجاز فرانت‌اند را با `Cors__AllowedOrigins__0` تنظیم کنید. همه endpointها به‌صورت پیش‌فرض نیازمند احراز هویت هستند؛ گزارش‌ها نیز علاوه بر ورود، مجوز `workflow.manage` می‌خواهند.
+
 ## اجرای بک‌اند
 
 پیش‌نیاز: .NET SDK 10، SQL Server و پیکربندی امن محیط اجرا. Migrationها را با فرمان‌های مستندشده در `docs/database-migration.md` روی SQL Server اعمال کنید.
