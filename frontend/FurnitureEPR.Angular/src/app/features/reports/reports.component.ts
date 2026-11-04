@@ -79,6 +79,10 @@ export class ReportsComponent {
   private dateOffset(days: number): string {
     const value = new Date();
     value.setDate(value.getDate() - days);
-    return value.toISOString().slice(0, 10);
+    // مقدار input[type=date] باید تاریخ محلی باشد؛ toISOString ممکن است در نیمه‌شب یک روز اختلاف ایجاد کند.
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }
