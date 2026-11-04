@@ -17,5 +17,7 @@ public sealed class OrderItemProductionBatchConfiguration : IEntityTypeConfigura
             .HasForeignKey(x => x.OrderItemId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(x => new { x.OrderItemId, x.Status });
         builder.HasIndex(x => x.SourceTransferLineId).IsUnique().HasFilter("[SourceTransferLineId] IS NOT NULL");
+        builder.HasIndex(x => x.ReplenishmentWarehouseId);
+        builder.HasOne<FurnitureEPR.Model.Warehouses.Warehouse>().WithMany().HasForeignKey(x => x.ReplenishmentWarehouseId).OnDelete(DeleteBehavior.Restrict);
     }
 }
