@@ -7,8 +7,7 @@ public sealed class MoveOrderWorkflowCommandValidator
 {
     public MoveOrderWorkflowCommandValidator()
     {
-        RuleFor(x => x.OrderId).NotEmpty();
-        RuleFor(x => x.CategoryId).NotEmpty();
+        RuleFor(x => x.WorkflowInstanceId).NotEmpty();
         RuleFor(x => x.TransitionId).NotEmpty();
     }
 }
