@@ -22,7 +22,7 @@
                 <div class="item-head"><strong>{{item.productName}}</strong><span>{{item.quantity}} عدد</span></div>
                 <div class="item-price">{{format(item.totalPrice)}} ریال</div>
                 @if(item.productionBatches?.length){
-                  <div class=\"batch-summary\">
+                  <div class="batch-summary">
                     <strong>وضعیت تعداد</strong>
                     <div><span>در انتظار تولید</span><b>{{format(batchTotal(item,'Planned'))}}</b></div>
                     <div><span>در حال تولید</span><b>{{format(batchTotal(item,'InProgress'))}}</b></div>
