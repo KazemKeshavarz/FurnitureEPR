@@ -1,6 +1,7 @@
 using FurnitureEPR.Application.Features.Orders;
 using FurnitureEPR.Application.Security;
 using FurnitureEPR.Model.Workflow;
+using FurnitureEPR.Model.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureEPR.Infrastructure.Persistence.Repositories;
@@ -114,6 +115,15 @@ public sealed class OrderWorkflowRuntimeRepository
         }
 
         instance.Complete();
+
+        // پس از پایان گردش تولید، مقدارهای برنامه‌ریزی‌شده این دسته آماده انبار می‌شوند.
+        var orderItems = await _db.OrderItems
+            .Where(x => x.OrderId == orderId && x.Product.CategoryId == categoryId)
+            .Include(x => x.ProductionBatches)
+            .ToListAsync(cancellationToken);
+        foreach (var batch in orderItems.SelectMany(x => x.ProductionBatches)
+                     .Where(x => x.Status == ProductionBatchStatus.Planned || x.Status == ProductionBatchStatus.InProgress))
+            batch.MarkReady();
 
         // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
         var hasIncompleteWorkflow = await _db.OrderWorkflowInstances
