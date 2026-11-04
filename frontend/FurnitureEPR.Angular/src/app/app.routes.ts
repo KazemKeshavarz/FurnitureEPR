@@ -18,6 +18,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'reports',
+        canActivate: [permissionGuard('workflow.manage')],
+        loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent)
+      },
+      {
         path: 'orders',
         loadComponent: () => import('./features/orders/orders-list.component').then(m => m.OrdersListComponent)
       },
