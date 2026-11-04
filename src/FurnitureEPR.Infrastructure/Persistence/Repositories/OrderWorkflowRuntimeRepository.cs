@@ -21,7 +21,6 @@ public sealed class OrderWorkflowRuntimeRepository
     }
 
     public async Task RecordQualityControlAsync(
-        Guid orderId,
         Guid workflowInstanceId,
         QualityControlResult result,
         string? comment,
@@ -67,15 +66,13 @@ public sealed class OrderWorkflowRuntimeRepository
     }
 
     public async Task CompleteAsync(
-        Guid orderId,
         Guid workflowInstanceId,
         CancellationToken cancellationToken)
     {
         // اجرای هر بخش تولید با شناسه مستقل گردش‌کار انجام می‌شود.
         var instance = await _db.OrderWorkflowInstances
             .SingleOrDefaultAsync(
-                x => x.OrderId == orderId
-                    && x.CategoryId == categoryId,
+                x => x.Id == workflowInstanceId,
                 cancellationToken);
 
         if (instance is null)
@@ -137,7 +134,7 @@ public sealed class OrderWorkflowRuntimeRepository
         // فقط زمانی Order را Completed می‌کنیم که همه Workflowهای آن به پایان رسیده باشند.
         var hasIncompleteWorkflow = await _db.OrderWorkflowInstances
             .AnyAsync(
-                x => x.OrderId == orderId
+                x => x.OrderId == instance.OrderId
                     && x.Status == OrderWorkflowInstanceStatus.Active,
                 cancellationToken);
 
@@ -156,7 +153,6 @@ public sealed class OrderWorkflowRuntimeRepository
     }
 
     public async Task MoveAsync(
-        Guid orderId,
         Guid workflowInstanceId,
         Guid transitionId,
         CancellationToken cancellationToken)
@@ -164,8 +160,7 @@ public sealed class OrderWorkflowRuntimeRepository
         // ابتدا Runtime Instance مشخص سفارش و Category را پیدا می‌کنیم.
         var instance = await _db.OrderWorkflowInstances
             .SingleOrDefaultAsync(
-                x => x.OrderId == orderId
-                    && x.CategoryId == categoryId,
+                x => x.Id == workflowInstanceId,
                 cancellationToken);
 
         if (instance is null)
