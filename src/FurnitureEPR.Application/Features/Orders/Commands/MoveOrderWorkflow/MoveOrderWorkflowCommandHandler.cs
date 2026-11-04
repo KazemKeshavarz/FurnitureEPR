@@ -18,8 +18,7 @@ public sealed class MoveOrderWorkflowCommandHandler
         MoveOrderWorkflowCommand request,
         CancellationToken cancellationToken)
         => _repository.MoveAsync(
-            request.OrderId,
-            request.CategoryId,
+            request.WorkflowInstanceId,
             request.TransitionId,
             cancellationToken);
 }
