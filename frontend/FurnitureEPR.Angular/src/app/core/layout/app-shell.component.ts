@@ -53,6 +53,10 @@ export class AppShellComponent {
     return this.canManageUsers || this.canManageRoles;
   }
 
+  get canRequestTransfers(): boolean {
+    return this.auth.hasPermission('workflow.move') || this.auth.hasPermission('workflow.manage');
+  }
+
   get canManageWorkflows(): boolean {
     return this.auth.hasPermission('workflow.manage');
   }
