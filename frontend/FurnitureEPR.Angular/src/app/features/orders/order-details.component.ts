@@ -12,7 +12,7 @@ interface WarehouseAllocation { id:string; warehouseId:string; warehouseName:str
 interface OrderItem { id:string; productId:string; productName:string; quantity:number; unitPrice:number; totalPrice:number; components:{id:string;componentId:string;componentName:string;quantity:number}[]; warehouseAllocations:WarehouseAllocation[]; }
 interface WorkflowHistory { id:string; fromStageId:string; fromStageName:string; toStageId:string; toStageName:string; transitionId:string; transitionName:string; occurredAtUtc:string; }
 interface WorkflowQualityCheck { id:string; stageId:string; stageName:string; result:string; comment?:string|null; checkedAtUtc:string; checkedByUserId?:string|null; }
-interface Workflow { id:string; categoryId:string; categoryName:string; workflowVersionId:string; workflowVersionNumber:number; currentStageId:string; currentStageName:string; status:string; startedAtUtc:string; completedAtUtc?:string|null; history:WorkflowHistory[]; qualityChecks:WorkflowQualityCheck[]; }
+interface Workflow { id:string; categoryId:string; categoryName:string; workflowVersionId:string; workflowVersionNumber:number; currentStageId:string; currentStageName:string; currentStageCode:string; status:string; startedAtUtc:string; completedAtUtc?:string|null; history:WorkflowHistory[]; qualityChecks:WorkflowQualityCheck[]; }
 interface Order {
   id:string; orderNumber:string; customerId:string; customerName:string; status:string;
   createdAtUtc:string; finalizedAtUtc?:string|null; createdByUserId?:string|null;
