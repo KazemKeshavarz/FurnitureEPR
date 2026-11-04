@@ -7,7 +7,6 @@ public sealed class CompleteOrderWorkflowCommandValidator
 {
     public CompleteOrderWorkflowCommandValidator()
     {
-        RuleFor(x => x.OrderId).NotEmpty();
-        RuleFor(x => x.CategoryId).NotEmpty();
+        RuleFor(x => x.WorkflowInstanceId).NotEmpty();
     }
 }
