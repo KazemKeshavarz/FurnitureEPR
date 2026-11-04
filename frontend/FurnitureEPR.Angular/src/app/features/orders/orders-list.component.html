@@ -14,13 +14,13 @@
       <div class="filters">
         <mat-form-field appearance="outline" class="search">
           <mat-label>جستجوی سفارش یا مشتری</mat-label>
-          <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="مثلاً 10025 یا نام مشتری">
+          <input matInput [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="مثلاً 10025 یا نام مشتری">
           @if(search){<button mat-icon-button matSuffix type="button" aria-label="پاک کردن" (click)="search='';load()"><mat-icon>close</mat-icon></button>}
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="status">
           <mat-label>وضعیت</mat-label>
-          <mat-select [(ngModel)]="status" (selectionChange)="load()">
+          <mat-select [(ngModel)]="status" (selectionChange)="applyFilters()">
             <mat-option value="">همه سفارش‌ها</mat-option>
             <mat-option value="Draft">پیش‌نویس</mat-option>
             <mat-option value="Active">در حال انجام</mat-option>
