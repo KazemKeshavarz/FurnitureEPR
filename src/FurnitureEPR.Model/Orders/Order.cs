@@ -113,6 +113,14 @@ public sealed class Order
         Status = OrderStatus.Completed;
     }
 
+    // پس از تأمین کامل کسری، سفارش دوباره اجازه تکمیل دارد.
+    public void ResolveShortage()
+    {
+        if (Status != OrderStatus.HasShortage)
+            return;
+        Status = OrderStatus.Active;
+    }
+
     // پس از انتقال کالای آماده به سفارش دیگر، سفارش مبدأ تا جبران کسری دوباره نیازمند تکمیل است.
     public void MarkHasShortage()
     {
