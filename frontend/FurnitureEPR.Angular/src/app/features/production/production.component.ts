@@ -15,7 +15,7 @@ interface Task {
   workflowInstanceId:string; orderId:string; orderNumber:string; customerName:string;
   categoryId:string; categoryName:string; currentStageId:string; currentStageName:string;
   currentStageCode:string; requiresQualityControl:boolean; qualityControlApproved:boolean;
-  canMove:boolean; canComplete:boolean; transitions:Transition[]; startedAtUtc:string;
+  canMove:boolean; canComplete:boolean; transitions:Transition[]; startedAtUtc:string; quantity:number;
 }
 interface Page {items:Task[];page:number;pageSize:number;totalCount:number;}
 
@@ -49,21 +49,21 @@ export class ProductionComponent {
  quality(t:Task,approved:boolean):void{
    if(!this.canQualityControl||this.busy)return;
    this.busy=true;
-   this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/quality-control`,{
-     orderId:t.orderId,categoryId:t.categoryId,result:approved?0:1,comment:this.qcComment.trim()||null
+   this.http.post(`${environment.apiUrl}/orders/workflow/${t.workflowInstanceId}/quality-control`,{
+     workflowInstanceId:t.workflowInstanceId,result:approved?0:1,comment:this.qcComment.trim()||null
    }).subscribe({next:()=>{this.qcTaskId='';this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'ثبت کنترل کیفیت انجام نشد.';this.busy=false;}});
  }
  move(t:Task,tr:Transition):void{
    if(!this.canMoveWorkflow||this.busy)return;
    this.busy=true;
-   this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/transitions/${tr.id}`,{}).subscribe({
+   this.http.post(`${environment.apiUrl}/orders/workflow/${t.workflowInstanceId}/transitions/${tr.id}`,{}).subscribe({
      next:()=>{this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'انتقال مرحله انجام نشد.';this.busy=false;}
    });
  }
  complete(t:Task):void{
    if(!this.canCompleteWorkflow||this.busy)return;
    this.busy=true;
-   this.http.post(`${environment.apiUrl}/orders/${t.orderId}/workflow/${t.categoryId}/complete`,{}).subscribe({
+   this.http.post(`${environment.apiUrl}/orders/workflow/${t.workflowInstanceId}/complete`,{}).subscribe({
      next:()=>{this.busy=false;this.load();},error:e=>{this.error=e.error?.detail||'پایان فرآیند انجام نشد.';this.busy=false;}
    });
  }
