@@ -7,8 +7,8 @@ import { environment } from '../../../environments/environment';
 
 interface OrderSummary { id:string; orderNumber:string; customerName:string; status:string; }
 interface Allocation { id:string; warehouseId:string; warehouseName:string; warehouseCode:string; quantity:number; }
-interface OrderLine { id:string; productId:string; productName:string; quantity:number; components:{componentId:string;quantity:number}[]; warehouseAllocations:Allocation[]; }
-interface OrderDetail { id:string; orderNumber:string; customerName:string; status:string; items:OrderLine[]; }
+interface OrderLine { id:string; productId:string; categoryId:string; productName:string; quantity:number; components:{componentId:string;quantity:number}[]; warehouseAllocations:Allocation[]; }
+interface OrderDetail { id:string; orderNumber:string; customerName:string; status:string; items:OrderLine[]; workflows:{categoryId:string;status:string}[]; }
 interface DraftLine { sourceOrderItemId:string; targetOrderItemId:string; warehouseId:string; quantity:number; productName:string; warehouseName:string; }
 interface TransferRequest { id:string; sourceOrderNumber:string; sourceCustomerName:string; targetOrderNumber:string; targetCustomerName:string; reason:string; status:string; requestedAtUtc:string; lines:{id:string;sourceProductName:string;targetProductName:string;warehouseName:string;quantity:number}[]; }
 
@@ -39,9 +39,12 @@ export class OrderTransfersComponent {
   }
 
   loadOrderChoices():void{
-    this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=Completed`).subscribe({
-      next:r=>{this.sourceOrders=r.items??[];this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=HasShortage`).subscribe({next:s=>this.sourceOrders=[...this.sourceOrders,...(s.items??[])],error:()=>{}});},error:()=>this.error='دریافت سفارش‌های آماده انتقال انجام نشد.'
-    });
+    for (const status of ['Active','Completed','HasShortage']) {
+      this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=${status}`).subscribe({
+        next:r=>this.sourceOrders=[...this.sourceOrders,...(r.items??[])],
+        error:()=>this.error='دریافت سفارش‌های آماده انتقال انجام نشد.'
+      });
+    }
     this.http.get<any>(`${environment.apiUrl}/orders?page=1&pageSize=100&status=Active`).subscribe({
       next:r=>this.targetOrders=r.items??[],error:()=>this.error='دریافت سفارش‌های مقصد انجام نشد.'
     });
@@ -64,7 +67,7 @@ export class OrderTransfersComponent {
     });
   }
 
-  get sourceItem():OrderLine|undefined{return this.source?.items.find(x=>x.id===this.selectedSourceItemId);}
+  get eligibleSourceItems():OrderLine[]{return this.source?.items.filter(item=>item.warehouseAllocations.length>0&&this.source!.workflows.some(w=>w.categoryId===item.categoryId&&w.status==='Completed'))??[];}\n  get sourceItem():OrderLine|undefined{return this.eligibleSourceItems.find(x=>x.id===this.selectedSourceItemId);}
   get targetCandidates():OrderLine[]{
     if(!this.sourceItem||!this.target)return [];
     return this.target.items.filter(x=>this.sameSpecification(this.sourceItem!,x));
@@ -100,7 +103,7 @@ export class OrderTransfersComponent {
   addAllEligible():void{
     if(!this.source||!this.target)return;
     let added=0;
-    for(const source of this.source.items){
+    for(const source of this.eligibleSourceItems){
       const target=this.target.items.find(x=>this.sameSpecification(source,x));
       if(!target)continue;
       for(const allocation of source.warehouseAllocations){
