@@ -47,7 +47,7 @@
       @if(hasDuplicateSortOrder){<p class="field-error">این ترتیب برای مرحله دیگری ثبت شده است.</p>}
       <div class="stage-list">
         @for(stage of stages; track stage.id){
-          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}</div>
+          <div class="stage-row"><span>{{stage.sortOrder}}</span><div><strong>{{stage.name}}</strong><small>{{stage.code}}@if(stage.responsibleRoleId){ · مسئول: {{roleName(stage.responsibleRoleId)}}}</small></div>@if(stage.requiresQualityControl){<em>کنترل کیفیت</em>}</div>
         }@empty{<div class="empty-inline">هنوز مرحله‌ای اضافه نشده است.</div>}
       </div>
     </mat-card>
