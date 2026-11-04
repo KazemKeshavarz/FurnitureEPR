@@ -104,6 +104,9 @@ public sealed class Order
 
     public void MarkCompleted()
     {
+        // تا زمانی که کسری ناشی از انتقال جبران نشده، سفارش Completed محسوب نمی‌شود.
+        if (Status == OrderStatus.HasShortage)
+            return;
         if (Status != OrderStatus.Active)
             throw new InvalidOperationException("Only active orders can be completed.");
 
@@ -115,8 +118,8 @@ public sealed class Order
     {
         if (Status == OrderStatus.HasShortage)
             return;
-        if (Status != OrderStatus.Completed)
-            throw new InvalidOperationException("Only completed orders can be marked as having a shortage.");
+        if (Status is not (OrderStatus.Active or OrderStatus.Completed))
+            throw new InvalidOperationException("Only active or completed orders can be marked as having a shortage.");
 
         Status = OrderStatus.HasShortage;
     }
