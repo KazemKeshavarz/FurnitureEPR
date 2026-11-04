@@ -67,7 +67,8 @@ export class OrderTransfersComponent {
     });
   }
 
-  get eligibleSourceItems():OrderLine[]{return this.source?.items.filter(item=>item.warehouseAllocations.length>0&&this.source!.workflows.some(w=>w.categoryId===item.categoryId&&w.status==='Completed'))??[];}\n  get sourceItem():OrderLine|undefined{return this.eligibleSourceItems.find(x=>x.id===this.selectedSourceItemId);}
+  get eligibleSourceItems():OrderLine[]{return this.source?.items.filter(item=>item.warehouseAllocations.length>0&&this.source!.workflows.some(w=>w.categoryId===item.categoryId&&w.status==='Completed'))??[];}
+  get sourceItem():OrderLine|undefined{return this.eligibleSourceItems.find(x=>x.id===this.selectedSourceItemId);}
   get targetCandidates():OrderLine[]{
     if(!this.sourceItem||!this.target)return [];
     return this.target.items.filter(x=>this.sameSpecification(this.sourceItem!,x));
