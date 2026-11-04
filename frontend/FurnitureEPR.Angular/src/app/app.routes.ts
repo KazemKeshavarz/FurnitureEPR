@@ -65,6 +65,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/admin-workflows.component').then(m => m.AdminWorkflowsComponent)
       },
       {
+        path: 'admin/warehouses',
+        canActivate: [permissionGuard('workflow.manage')],
+        loadComponent: () => import('./features/admin/admin-warehouses.component').then(m => m.AdminWarehousesComponent)
+      },
+      {
         path: 'admin/users',
         canActivate: [permissionGuard('identity.manage_users')],
         loadComponent: () => import('./features/admin/admin-users.component').then(m => m.AdminUsersComponent)
