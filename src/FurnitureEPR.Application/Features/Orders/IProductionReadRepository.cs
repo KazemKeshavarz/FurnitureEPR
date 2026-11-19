@@ -9,5 +9,6 @@ public interface IProductionReadRepository
         int pageSize,
         string? search,
         IReadOnlyCollection<Guid> roleIds,
+        bool canViewAllTasks,
         CancellationToken cancellationToken);
 }
