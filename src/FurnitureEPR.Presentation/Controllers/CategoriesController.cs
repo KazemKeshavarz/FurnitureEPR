@@ -17,6 +17,7 @@ public sealed class CategoriesController : ControllerBase
 
     public CategoriesController(ISender sender) => _sender = sender;
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateCategoryCommand command, CancellationToken ct)
     {
@@ -24,6 +25,7 @@ public sealed class CategoriesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateCategoryCommand command, CancellationToken ct)
     {
