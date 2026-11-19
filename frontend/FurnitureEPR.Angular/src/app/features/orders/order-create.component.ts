@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,16 +29,33 @@ export class OrderCreateComponent {
   private readonly http=inject(HttpClient);
   private readonly fb=inject(FormBuilder);
   private readonly router=inject(Router);
+  private readonly route=inject(ActivatedRoute);
 
   customers:Customer[]=[]; categories:Category[]=[]; products:Product[]=[]; selectedComponents:(ProductComponent & {quantity:number})[]=[];
   items:CartItem[]=[]; customerId=''; categoryId=''; productId=''; selectedProduct:ProductDetails|null=null;
   createdOrderId='';
+  editingOrderId: string | null = null;
   itemQuantity=1; itemUnitPrice=0; discountAmount=0; busy=false; error=''; success=false; successOrderNumber='';
   showNewCustomer=false;
   customerForm=this.fb.nonNullable.group({name:['',[Validators.required,Validators.maxLength(200)]],phoneNumber:[''],address:['']});
 
-  constructor(){this.loadCustomers();this.loadCategories();}
+  constructor(){this.loadCustomers();this.loadCategories();const id=this.route.snapshot.paramMap.get('id');if(id)this.loadDraft(id);}
 
+  loadDraft(id: string): void {
+    this.editingOrderId = id;
+    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+      next: order => {
+        if (order.status !== 'Draft') { this.error = 'فقط سفارش‌های پیش‌نویس قابل ویرایش هستند.'; this.editingOrderId = null; return; }
+        this.customerId = order.customerId;
+        this.discountAmount = order.discountAmount ?? 0;
+        this.items = (order.items ?? []).map((item: any) => ({
+          productId: item.productId, productName: item.productName, quantity: item.quantity, unitPrice: item.unitPrice,
+          components: (item.components ?? []).map((component: any) => ({ componentId: component.componentId, componentName: component.componentName, quantity: component.quantity }))
+        }));
+      },
+      error: e => this.error = e.error?.detail || 'دریافت پیش‌نویس سفارش انجام نشد.'
+    });
+  }
   loadCustomers():void{this.http.get<any>(`${environment.apiUrl}/customers?page=1&pageSize=100`).subscribe({next:r=>this.customers=r.items??r.data??r,error:()=>this.error='دریافت مشتریان انجام نشد.'});}
   loadCategories():void{this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({next:r=>this.categories=r.items??r.data??r,error:()=>this.error='دریافت دسته‌بندی‌ها انجام نشد.'});}
   selectCategory(id:string):void{this.categoryId=id;this.productId='';this.selectedProduct=null;this.selectedComponents=[];if(!id)return;this.http.get<any>(`${environment.apiUrl}/products?page=1&pageSize=100&categoryId=${id}`).subscribe({next:r=>this.products=r.items??r.data??r,error:()=>this.error='دریافت محصولات انجام نشد.'});}
@@ -50,7 +67,20 @@ export class OrderCreateComponent {
   get totalAmount():number{return this.items.reduce((sum,x)=>sum+(x.quantity*x.unitPrice),0);}
   get finalAmount():number{return Math.max(0,this.totalAmount-this.discountAmount);}
   canSave():boolean{return !this.createdOrderId&&!!this.customerId&&this.items.length>0&&this.discountAmount>=0&&this.discountAmount<=this.totalAmount;}
-  saveOrder():void{if(!this.canSave()||this.busy)return;this.busy=true;this.error='';const body={customerId:this.customerId,createdByUserId:null,discountAmount:this.discountAmount,items:this.items.map(x=>({productId:x.productId,quantity:x.quantity,unitPrice:x.unitPrice,components:x.components.map(c=>({componentId:c.componentId,quantity:c.quantity}))}))};this.http.post<string>(`${environment.apiUrl}/orders`,body).subscribe({next:id=>{this.createdOrderId=id;this.finalize(id);},error:e=>{this.error=e.error?.detail||'ثبت سفارش انجام نشد.';this.busy=false;}});}
+  saveOrder():void{
+    if(!this.canSave()||this.busy)return;
+    this.busy=true;this.error='';
+    const items=this.items.map(x=>({productId:x.productId,quantity:x.quantity,unitPrice:x.unitPrice,components:x.components.map(c=>({componentId:c.componentId,quantity:c.quantity}))}));
+    if(this.editingOrderId){
+      this.http.put(`${environment.apiUrl}/orders/${this.editingOrderId}/draft`,{orderId:this.editingOrderId,customerId:this.customerId,discountAmount:this.discountAmount,items}).subscribe({
+        next:()=>{this.busy=false;this.router.navigate(['/orders',this.editingOrderId]);},
+        error:e=>{this.error=e.error?.detail||'ذخیره تغییرات سفارش انجام نشد.';this.busy=false;}
+      });
+      return;
+    }
+    const body={customerId:this.customerId,createdByUserId:null,discountAmount:this.discountAmount,items};
+    this.http.post<string>(`${environment.apiUrl}/orders`,body).subscribe({next:id=>{this.createdOrderId=id;this.finalize(id);},error:e=>{this.error=e.error?.detail||'ثبت سفارش انجام نشد.';this.busy=false;}});
+  }
   retryFinalize():void{if(!this.createdOrderId||this.busy)return;this.error='';this.busy=true;this.finalize(this.createdOrderId);}
   finalize(id:string):void{this.http.post(`${environment.apiUrl}/orders/${id}/finalize`,{}).subscribe({next:()=>this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({next:o=>{this.success=true;this.successOrderNumber=o.orderNumber;this.busy=false;},error:()=>{this.success=true;this.successOrderNumber='ثبت شد';this.busy=false;}}),error:e=>{this.error=e.error?.detail||'سفارش ثبت شده، اما نهایی‌سازی آن انجام نشد. می‌توانید دوباره تلاش کنید یا جزئیات سفارش را ببینید.';this.busy=false;}});}
   format(value:number):string{return new Intl.NumberFormat('fa-IR').format(Math.round(value));}
