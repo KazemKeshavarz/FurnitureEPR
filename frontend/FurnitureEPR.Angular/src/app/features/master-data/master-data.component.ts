@@ -38,6 +38,7 @@ export class MasterDataComponent {
   saving = false;
   editingCategoryId: string | null = null;
   editingProductId: string | null = null;
+  editingComponentId: string | null = null;
   editingProductComponentId: string | null = null;
   error = '';
 
@@ -131,13 +132,22 @@ export class MasterDataComponent {
     });
   }
 
+  editComponent(item: ComponentItem): void {
+    this.editingComponentId = item.id;
+    this.componentForm.setValue({ name: item.name });
+  }
+
   addComponent(): void {
     if (this.componentForm.invalid || this.saving) return;
     this.saving = true;
     this.error = '';
-    this.http.post(`${environment.apiUrl}/components`, this.componentForm.getRawValue()).subscribe({
+    const request = this.editingComponentId
+      ? this.http.put(`${environment.apiUrl}/components/${this.editingComponentId}`, this.componentForm.getRawValue())
+      : this.http.post(`${environment.apiUrl}/components`, this.componentForm.getRawValue());
+    request.subscribe({
       next: () => {
         this.componentForm.reset({ name: '' });
+        this.editingComponentId = null;
         this.loadAll();
         this.saving = false;
       },
