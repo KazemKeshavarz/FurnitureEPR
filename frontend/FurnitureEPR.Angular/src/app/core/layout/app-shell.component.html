@@ -30,10 +30,12 @@
 
       <div class="section-title">عملیات</div>
 
-      <a mat-list-item routerLink="/orders" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-        <mat-icon matListItemIcon>receipt_long</mat-icon>
-        <span matListItemTitle>سفارش‌ها</span>
-      </a>
+      @if (canViewOrders) {
+        <a mat-list-item routerLink="/orders" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+          <mat-icon matListItemIcon>receipt_long</mat-icon>
+          <span matListItemTitle>سفارش‌ها</span>
+        </a>
+      }
       @if (canRequestTransfers) {
         <a mat-list-item routerLink="/order-transfers" routerLinkActive="active" (click)="closeOnMobile(drawer)">
           <mat-icon matListItemIcon>swap_horiz</mat-icon>
@@ -41,15 +43,19 @@
         </a>
       }
 
-      <a mat-list-item routerLink="/production" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-        <mat-icon matListItemIcon>precision_manufacturing</mat-icon>
-        <span matListItemTitle>تولید و مراحل کار</span>
-      </a>
+      @if (canViewProduction) {
+        <a mat-list-item routerLink="/production" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+          <mat-icon matListItemIcon>precision_manufacturing</mat-icon>
+          <span matListItemTitle>کارتابل من</span>
+        </a>
+      }
 
-      <a mat-list-item routerLink="/customers" routerLinkActive="active" (click)="closeOnMobile(drawer)">
-        <mat-icon matListItemIcon>people</mat-icon>
-        <span matListItemTitle>مشتریان</span>
-      </a>
+      @if (canViewCustomers) {
+        <a mat-list-item routerLink="/customers" routerLinkActive="active" (click)="closeOnMobile(drawer)">
+          <mat-icon matListItemIcon>people</mat-icon>
+          <span matListItemTitle>مشتریان</span>
+        </a>
+      }
 
       @if (canManageIdentity) {
         <div class="section-title">تعریف اطلاعات</div>
