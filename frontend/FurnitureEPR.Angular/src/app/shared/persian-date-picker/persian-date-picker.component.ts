@@ -59,6 +59,12 @@ export class PersianDatePickerComponent implements OnChanges {
     this.buildDays();
   }
 
+  isSelected(day: number): boolean {
+    if (!this.value) return false;
+    const selected = this.toJalali(this.parseIso(this.value));
+    return selected.year === this.viewYear && selected.month === this.viewMonth && selected.day === day;
+  }
+
   choose(day: number | null): void {
     if (!day) return;
     const date = this.fromJalali(this.viewYear, this.viewMonth, day);
