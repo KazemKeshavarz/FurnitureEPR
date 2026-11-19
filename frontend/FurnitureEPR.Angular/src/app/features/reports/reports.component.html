@@ -4,8 +4,8 @@
   </header>
 
   <section class="filters">
-    <label>از تاریخ <input type="date" [(ngModel)]="from"></label>
-    <label>تا تاریخ <input type="date" [(ngModel)]="to"></label>
+    <app-persian-date-picker label="از تاریخ" [(value)]="from"></app-persian-date-picker>
+    <app-persian-date-picker label="تا تاریخ" [(value)]="to"></app-persian-date-picker>
     <button mat-flat-button color="primary" (click)="load()" [disabled]="loading">اعمال بازه</button>
   </section>
 
