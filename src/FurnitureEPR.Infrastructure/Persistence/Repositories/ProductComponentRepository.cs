@@ -38,4 +38,12 @@ public sealed class ProductComponentRepository : IProductComponentRepository
         await _db.ProductComponents.AddAsync(productComponent, cancellationToken);
         await _db.SaveChangesAsync(cancellationToken);
     }
+    public async Task UpdateDefaultQuantityAsync(Guid productId, Guid productComponentId, decimal defaultQuantity, CancellationToken cancellationToken)
+    {
+        var item = await _db.ProductComponents.SingleOrDefaultAsync(
+            x => x.Id == productComponentId && x.ProductId == productId, cancellationToken)
+            ?? throw new KeyNotFoundException("Product component was not found.");
+        item.SetDefaultQuantity(defaultQuantity);
+        await _db.SaveChangesAsync(cancellationToken);
+    }
 }
