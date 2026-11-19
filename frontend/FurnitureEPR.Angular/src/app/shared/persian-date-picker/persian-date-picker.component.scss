@@ -1,0 +1,16 @@
+:host { display: block; min-width: 0; }
+.date-picker { position: relative; display: grid; gap: 6px; min-width: 0; }
+label { color: #526873; font-size: 12px; font-weight: 600; }
+.date-input { width: 100%; min-height: 44px; border: 1px solid #cbd5da; border-radius: 10px; background: #fff; color: #102a35; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; font: inherit; cursor: pointer; }
+.actions { display: flex; align-items: center; gap: 10px; color: #526873; }
+.clear { font-size: 20px; line-height: 1; cursor: pointer; }
+.calendar { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; width: min(300px, calc(100vw - 40px)); padding: 12px; border: 1px solid #dce4e8; border-radius: 14px; background: #fff; box-shadow: 0 12px 32px #102a3520; }
+.calendar header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.calendar header button, footer button { border: 0; border-radius: 8px; background: #edf4f6; color: #102a35; width: 34px; height: 34px; font-size: 22px; cursor: pointer; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.weekdays { margin-bottom: 6px; color: #71858e; font-size: 12px; }
+.day { height: 34px; border: 0; border-radius: 8px; background: transparent; color: #102a35; font: inherit; cursor: pointer; }
+.day:hover, .day.selected { background: #286f93; color: white; }
+.empty { height: 34px; }
+footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+footer button { width: auto; padding: 0 12px; font-size: 12px; }
