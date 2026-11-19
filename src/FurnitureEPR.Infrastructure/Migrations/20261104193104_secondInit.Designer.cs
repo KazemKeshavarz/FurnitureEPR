@@ -3,8 +3,8 @@ using System;
 using FurnitureEPR.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FurnitureEPR.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261104193000_AddWarehouseTransferAndProductionBatches")]
-    partial class AddWarehouseTransferAndProductionBatches : Migration
+    [Migration("20261104193104_secondInit")]
+    partial class secondInit
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -337,78 +338,129 @@ namespace FurnitureEPR.Infrastructure.Migrations
                     b.ToTable("OrderItemComponents");
                 });
 
-            modelBuilder.Entity("FurnitureEPR.Model.Warehouses.Warehouse", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-                    b.Property<string>("Name").IsRequired().HasMaxLength(150).HasColumnType("nvarchar(150)");
-                    b.Property<string>("Code").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
-                    b.Property<bool>("IsActive").HasColumnType("bit");
-                    b.HasKey("Id");
-                    b.HasIndex("Code").IsUnique();
-                    b.ToTable("Warehouses");
-                });
-
-            modelBuilder.Entity("FurnitureEPR.Model.Warehouses.OrderItemWarehouseAllocation", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("OrderItemId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("WarehouseId").HasColumnType("uniqueidentifier");
-                    b.Property<decimal>("Quantity").HasPrecision(18, 3).HasColumnType("decimal(18,3)");
-                    b.Property<DateTime>("AssignedAtUtc").HasColumnType("datetime2");
-                    b.HasKey("Id");
-                    b.HasIndex("WarehouseId");
-                    b.HasIndex("OrderItemId", "WarehouseId").IsUnique();
-                    b.ToTable("OrderItemWarehouseAllocations");
-                });
-
             modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderItemProductionBatch", b =>
                 {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("OrderItemId").HasColumnType("uniqueidentifier");
-                    b.Property<decimal>("Quantity").HasPrecision(18, 3).HasColumnType("decimal(18,3)");
-                    b.Property<string>("Origin").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
-                    b.Property<string>("Status").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
-                    b.Property<Guid?>("SourceTransferLineId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid?>("ReplenishmentWarehouseId").HasColumnType("uniqueidentifier");
-                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("datetime2");
-                    b.Property<DateTime?>("ReadyAtUtc").HasColumnType("datetime2");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<DateTime?>("ReadyAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReplenishmentWarehouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SourceTransferLineId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
+
                     b.HasIndex("ReplenishmentWarehouseId");
-                    b.HasIndex("SourceTransferLineId").IsUnique().HasFilter("[SourceTransferLineId] IS NOT NULL");
+
+                    b.HasIndex("SourceTransferLineId")
+                        .IsUnique()
+                        .HasFilter("[SourceTransferLineId] IS NOT NULL");
+
                     b.HasIndex("OrderItemId", "Status");
+
                     b.ToTable("OrderItemProductionBatches");
                 });
 
             modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransfer", b =>
                 {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("SourceOrderId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("TargetOrderId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("RequestedByUserId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid?>("ReviewedByUserId").HasColumnType("uniqueidentifier");
-                    b.Property<string>("Reason").IsRequired().HasMaxLength(1000).HasColumnType("nvarchar(1000)");
-                    b.Property<string>("Status").IsRequired().HasMaxLength(40).HasColumnType("nvarchar(40)");
-                    b.Property<DateTime>("RequestedAtUtc").HasColumnType("datetime2");
-                    b.Property<DateTime?>("ReviewedAtUtc").HasColumnType("datetime2");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("RequestedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReviewedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<Guid>("TargetOrderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
                     b.HasIndex("SourceOrderId", "RequestedAtUtc");
+
                     b.HasIndex("TargetOrderId", "RequestedAtUtc");
+
                     b.ToTable("OrderTransfers");
                 });
 
             modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransferLine", b =>
                 {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("OrderTransferId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("SourceOrderItemId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("TargetOrderItemId").HasColumnType("uniqueidentifier");
-                    b.Property<Guid>("WarehouseId").HasColumnType("uniqueidentifier");
-                    b.Property<decimal>("Quantity").HasPrecision(18, 3).HasColumnType("decimal(18,3)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderTransferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<Guid>("SourceOrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TargetOrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
                     b.HasIndex("OrderTransferId");
+
                     b.HasIndex("SourceOrderItemId");
+
                     b.HasIndex("TargetOrderItemId");
+
                     b.HasIndex("WarehouseId");
+
                     b.ToTable("OrderTransferLines");
                 });
 
@@ -462,37 +514,58 @@ namespace FurnitureEPR.Infrastructure.Migrations
 
             modelBuilder.Entity("FurnitureEPR.Model.Warehouses.OrderItemWarehouseAllocation", b =>
                 {
-                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "OrderItem").WithMany("WarehouseAllocations").HasForeignKey("OrderItemId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", "Warehouse").WithMany().HasForeignKey("WarehouseId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.Navigation("OrderItem");
-                    b.Navigation("Warehouse");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.HasIndex("OrderItemId", "WarehouseId")
+                        .IsUnique();
+
+                    b.ToTable("OrderItemWarehouseAllocations");
                 });
 
-            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderItemProductionBatch", b =>
+            modelBuilder.Entity("FurnitureEPR.Model.Warehouses.Warehouse", b =>
                 {
-                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "OrderItem").WithMany("ProductionBatches").HasForeignKey("OrderItemId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", null).WithMany().HasForeignKey("ReplenishmentWarehouseId").OnDelete(DeleteBehavior.Restrict);
-                    b.Navigation("OrderItem");
-                });
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransfer", b =>
-                {
-                    b.HasOne("FurnitureEPR.Model.Orders.Order", "SourceOrder").WithMany().HasForeignKey("SourceOrderId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Orders.Order", "TargetOrder").WithMany().HasForeignKey("TargetOrderId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.Navigation("SourceOrder");
-                    b.Navigation("TargetOrder");
-                });
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransferLine", b =>
-                {
-                    b.HasOne("FurnitureEPR.Model.Orders.OrderTransfer", "Transfer").WithMany("Lines").HasForeignKey("OrderTransferId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "SourceOrderItem").WithMany().HasForeignKey("SourceOrderItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "TargetOrderItem").WithMany().HasForeignKey("TargetOrderItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", "Warehouse").WithMany().HasForeignKey("WarehouseId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.Navigation("Transfer");
-                    b.Navigation("SourceOrderItem");
-                    b.Navigation("TargetOrderItem");
-                    b.Navigation("Warehouse");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Warehouses");
                 });
 
             modelBuilder.Entity("FurnitureEPR.Model.Workflow.OrderWorkflowHistory", b =>
@@ -567,13 +640,13 @@ namespace FurnitureEPR.Infrastructure.Migrations
 
                     b.HasIndex("CurrentStageId");
 
-                    b.HasIndex("WorkflowVersionId");
-
-                    b.HasIndex("OrderId", "CategoryId");
-
                     b.HasIndex("ProductionBatchId")
                         .IsUnique()
                         .HasFilter("[ProductionBatchId] IS NOT NULL");
+
+                    b.HasIndex("WorkflowVersionId");
+
+                    b.HasIndex("OrderId", "CategoryId");
 
                     b.HasIndex("Status", "CurrentStageId");
 
@@ -892,6 +965,76 @@ namespace FurnitureEPR.Infrastructure.Migrations
                     b.Navigation("OrderItem");
                 });
 
+            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderItemProductionBatch", b =>
+                {
+                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "OrderItem")
+                        .WithMany("ProductionBatches")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("ReplenishmentWarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("OrderItem");
+                });
+
+            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransfer", b =>
+                {
+                    b.HasOne("FurnitureEPR.Model.Orders.Order", "SourceOrder")
+                        .WithMany()
+                        .HasForeignKey("SourceOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Orders.Order", "TargetOrder")
+                        .WithMany()
+                        .HasForeignKey("TargetOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SourceOrder");
+
+                    b.Navigation("TargetOrder");
+                });
+
+            modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderTransferLine", b =>
+                {
+                    b.HasOne("FurnitureEPR.Model.Orders.OrderTransfer", "Transfer")
+                        .WithMany("Lines")
+                        .HasForeignKey("OrderTransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "SourceOrderItem")
+                        .WithMany()
+                        .HasForeignKey("SourceOrderItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "TargetOrderItem")
+                        .WithMany()
+                        .HasForeignKey("TargetOrderItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SourceOrderItem");
+
+                    b.Navigation("TargetOrderItem");
+
+                    b.Navigation("Transfer");
+
+                    b.Navigation("Warehouse");
+                });
+
             modelBuilder.Entity("FurnitureEPR.Model.Products.Product", b =>
                 {
                     b.HasOne("FurnitureEPR.Model.Categories.Category", "Category")
@@ -920,6 +1063,25 @@ namespace FurnitureEPR.Infrastructure.Migrations
                     b.Navigation("Component");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("FurnitureEPR.Model.Warehouses.OrderItemWarehouseAllocation", b =>
+                {
+                    b.HasOne("FurnitureEPR.Model.Orders.OrderItem", "OrderItem")
+                        .WithMany("WarehouseAllocations")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FurnitureEPR.Model.Warehouses.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("OrderItem");
+
+                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("FurnitureEPR.Model.Workflow.OrderWorkflowHistory", b =>
@@ -1136,7 +1298,9 @@ namespace FurnitureEPR.Infrastructure.Migrations
             modelBuilder.Entity("FurnitureEPR.Model.Orders.OrderItem", b =>
                 {
                     b.Navigation("Components");
+
                     b.Navigation("ProductionBatches");
+
                     b.Navigation("WarehouseAllocations");
                 });
 
