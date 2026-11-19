@@ -120,22 +120,27 @@ export class CustomersComponent {
       phoneNumber: value.phoneNumber.trim() || null,
       address: value.address.trim() || null
     };
-    const request = this.editingCustomerId
-      ? this.http.put<void>(`${environment.apiUrl}/customers/${this.editingCustomerId}`, { id: this.editingCustomerId, ...payload })
-      : this.http.post<string>(`${environment.apiUrl}/customers`, payload);
-    request.subscribe({
-      next: () => {
-        this.form.reset({ name: '', phoneNumber: '', address: '' });
-        this.showForm = false;
-        this.editingCustomerId = null;
-        this.saving = false;
-        this.loadCustomers();
-      },
-      error: (response: HttpErrorResponse) => {
-        this.error = response.error?.detail || 'ثبت مشتری انجام نشد.';
-        this.saving = false;
-      }
-    });
+    const onSuccess = (): void => {
+      this.form.reset({ name: '', phoneNumber: '', address: '' });
+      this.showForm = false;
+      this.editingCustomerId = null;
+      this.saving = false;
+      this.loadCustomers();
+    };
+    const onError = (response: HttpErrorResponse): void => {
+      this.error = response.error?.detail || (this.editingCustomerId ? 'ویرایش مشتری انجام نشد.' : 'ثبت مشتری انجام نشد.');
+      this.saving = false;
+    };
+
+    if (this.editingCustomerId) {
+      this.http.put<void>(`${environment.apiUrl}/customers/${this.editingCustomerId}`, {
+        id: this.editingCustomerId,
+        ...payload
+      }).subscribe({ next: onSuccess, error: onError });
+    } else {
+      this.http.post<string>(`${environment.apiUrl}/customers`, payload)
+        .subscribe({ next: onSuccess, error: onError });
+    }
   }
 
   showAddress(customer: Customer): void {
