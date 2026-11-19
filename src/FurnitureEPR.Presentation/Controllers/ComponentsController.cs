@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using FurnitureEPR.Application.Features.Components.Commands.CreateComponent;
 using FurnitureEPR.Application.Features.Components;
 using FurnitureEPR.Application.Features.Components.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using FurnitureEPR.Application.Security;
 
 namespace FurnitureEPR.Presentation.Controllers;
 
@@ -14,6 +16,7 @@ public sealed class ComponentsController : ControllerBase
     private readonly IComponentRepository _repository;
     public ComponentsController(ISender sender, IComponentRepository repository) { _sender = sender; _repository = repository; }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateComponentCommand command, CancellationToken ct)
     {
@@ -21,6 +24,7 @@ public sealed class ComponentsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateComponentBody body, CancellationToken ct)
     {
