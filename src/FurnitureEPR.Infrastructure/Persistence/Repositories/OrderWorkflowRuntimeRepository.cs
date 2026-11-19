@@ -21,6 +21,21 @@ public sealed class OrderWorkflowRuntimeRepository
         _currentUser = currentUser;
     }
 
+    // کاربر عادی فقط روی مرحله‌ای اقدام می‌کند که نقش مسئول آن را دارد.
+    // مرحله بدون مسئول مشخص فقط برای مدیر گردش کار قابل اقدام است.
+    private void EnsureCurrentUserCanActOnStage(WorkflowStage stage)
+    {
+        if (_currentUser.HasPermission(PermissionNames.WorkflowManage))
+            return;
+
+        if (stage.ResponsibleRoleId is not Guid roleId
+            || !_currentUser.RoleIds.Contains(roleId))
+        {
+            throw new UnauthorizedAccessException(
+                "The current user is not responsible for this workflow stage.");
+        }
+    }
+
     public async Task RecordQualityControlAsync(
         Guid workflowInstanceId,
         QualityControlResult result,
@@ -46,12 +61,7 @@ public sealed class OrderWorkflowRuntimeRepository
         if (currentStage is null)
             throw new InvalidOperationException("Current workflow stage was not found.");
 
-        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId
-            && !_currentUser.RoleIds.Contains(responsibleRoleId))
-        {
-            throw new UnauthorizedAccessException(
-                "The current user is not responsible for this workflow stage.");
-        }
+        EnsureCurrentUserCanActOnStage(currentStage);
 
         if (!currentStage.RequiresQualityControl)
             throw new InvalidOperationException(
@@ -83,12 +93,7 @@ public sealed class OrderWorkflowRuntimeRepository
             .SingleAsync(x => x.Id == instance.CurrentStageId, cancellationToken);
 
         // تکمیل Workflow نیز باید توسط Role مسئول Stage فعلی انجام شود.
-        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId
-            && !_currentUser.RoleIds.Contains(responsibleRoleId))
-        {
-            throw new UnauthorizedAccessException(
-                "The current user is not responsible for this workflow stage.");
-        }
+        EnsureCurrentUserCanActOnStage(currentStage);
 
         // Stage دارای QC فقط بعد از تأیید آخرین QC قابل تکمیل است.
         if (currentStage.RequiresQualityControl
