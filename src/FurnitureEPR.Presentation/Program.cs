@@ -62,6 +62,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(PermissionNames.IdentityManageUsers, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageUsers));
 
+    options.AddPolicy(PermissionNames.IdentityManageMasterData, policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageUsers)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageRoles)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageMasterData)));
+
     options.AddPolicy(PermissionNames.IdentityManageRoles, policy =>
         policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.IdentityManageRoles));
 
