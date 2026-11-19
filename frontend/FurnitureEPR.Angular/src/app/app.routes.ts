@@ -54,6 +54,7 @@ export const routes: Routes = [
       },
       {
         path: 'customers',
+        canActivate: [anyPermissionGuard(['orders.view_all', 'orders.create'])],
         loadComponent: () => import('./features/customers/customers.component').then(m => m.CustomersComponent)
       },
       {
