@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Components.Commands.CreateComponent;
+using FurnitureEPR.Application.Features.Components;
 using FurnitureEPR.Application.Features.Components.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,21 @@ namespace FurnitureEPR.Presentation.Controllers;
 public sealed class ComponentsController : ControllerBase
 {
     private readonly ISender _sender;
-    public ComponentsController(ISender sender) => _sender = sender;
+    private readonly IComponentRepository _repository;
+    public ComponentsController(ISender sender, IComponentRepository repository) { _sender = sender; _repository = repository; }
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateComponentCommand command, CancellationToken ct)
     {
         var id = await _sender.Send(command, ct);
         return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, UpdateComponentBody body, CancellationToken ct)
+    {
+        await _repository.UpdateAsync(id, body.Name, ct);
+        return NoContent();
     }
 
     [HttpGet]
@@ -31,3 +40,5 @@ public sealed class ComponentsController : ControllerBase
         return item is null ? NotFound() : Ok(item);
     }
 }
+
+public sealed record UpdateComponentBody(string Name);
