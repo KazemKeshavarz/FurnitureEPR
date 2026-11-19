@@ -4,13 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { environment } from '../../../environments/environment';
+import { PersianDatePickerComponent } from '../../shared/persian-date-picker/persian-date-picker.component';
 
 type ReportTab = 'overview' | 'orders' | 'production' | 'products' | 'users';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, PersianDatePickerComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss'
 })
@@ -73,7 +74,7 @@ export class ReportsComponent {
   }
 
   date(value: string): string {
-    return value ? new Intl.DateTimeFormat('fa-IR').format(new Date(value)) : '—';
+    return value ? new Intl.DateTimeFormat('fa-IR-u-ca-persian').format(new Date(value)) : '—';
   }
 
   private dateOffset(days: number): string {
