@@ -16,6 +16,7 @@ public sealed class ProductionReadRepository : IProductionReadRepository
         int pageSize,
         string? search,
         IReadOnlyCollection<Guid> roleIds,
+        bool canViewAllTasks,
         CancellationToken cancellationToken)
     {
         page = Math.Max(1, page);
@@ -36,10 +37,14 @@ public sealed class ProductionReadRepository : IProductionReadRepository
                 x.CurrentStage.Name.Contains(term));
         }
 
-        // فقط Stageهایی نمایش داده می‌شوند که مسئول مشخصی ندارند یا Role کاربر فعلی مسئول آن‌هاست.
-        query = query.Where(x =>
-            x.CurrentStage.ResponsibleRoleId == null ||
-            roleIds.Contains(x.CurrentStage.ResponsibleRoleId.Value));
+        // کاربر عادی فقط کارهای دارای نقش مسئولِ منطبق با نقش خودش را می‌بیند.
+        // مراحل بدون مسئول مشخص فقط برای مدیر گردش کار قابل مشاهده‌اند.
+        if (!canViewAllTasks)
+        {
+            query = query.Where(x =>
+                x.CurrentStage.ResponsibleRoleId != null &&
+                roleIds.Contains(x.CurrentStage.ResponsibleRoleId.Value));
+        }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -93,7 +98,7 @@ public sealed class ProductionReadRepository : IProductionReadRepository
 
             var canMove =
                 qualityApproved &&
-                (x.ResponsibleRoleId is null || roleIds.Contains(x.ResponsibleRoleId.Value));
+                (canViewAllTasks || (x.ResponsibleRoleId is Guid responsibleRoleId && roleIds.Contains(responsibleRoleId)));
 
             var canComplete =
                 canMove &&
