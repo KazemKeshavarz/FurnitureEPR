@@ -8,6 +8,10 @@
       @if(loading){<div class="state"><mat-icon>sync</mat-icon>در حال دریافت اطلاعات...</div>}
       @else if(error){<div class="error">{{error}}<button mat-button (click)="load()">تلاش مجدد</button></div>}
       @else if(order){
+        @if(order.status === 'Draft') {
+          <a mat-flat-button class="production" [routerLink]="['/orders', order.id, 'edit']"><mat-icon>edit</mat-icon> ویرایش پیش‌نویس</a>
+        }
+
         <div class="customer card">
           <div class="section-title"><mat-icon>person</mat-icon><strong>مشتری</strong></div>
           <strong class="customer-name">{{order.customerName}}</strong>
