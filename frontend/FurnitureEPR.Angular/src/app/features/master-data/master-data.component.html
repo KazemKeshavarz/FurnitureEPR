@@ -11,7 +11,7 @@
         </div></mat-tab>
         <mat-tab label="محصولات"><div class="tab-content">
           <mat-card class="form-card"><h2>{{editingProductId ? 'ویرایش محصول' : 'محصول جدید'}}</h2><form [formGroup]="productForm" (ngSubmit)="addProduct()">
-            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId" [disabled]="!!editingProductId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>نام محصول</mat-label><input matInput formControlName="name" placeholder="مثلاً مبل بوچلی"></mat-form-field>
             <button mat-flat-button type="submit" [disabled]="productForm.invalid || saving">{{editingProductId ? 'ذخیره تغییرات' : 'ثبت محصول'}}</button>
             @if(editingProductId){<button mat-button type="button" (click)="cancelProductEdit()">انصراف</button>}
