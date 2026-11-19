@@ -45,6 +45,7 @@ export class CustomersComponent {
   customers: Customer[] = [];
   search = '';
   showForm = false;
+  editingCustomerId: string | null = null;
   loading = false;
   saving = false;
   error = '';
@@ -60,6 +61,26 @@ export class CustomersComponent {
 
   toggleForm(): void {
     this.showForm = !this.showForm;
+    this.editingCustomerId = null;
+    this.form.reset({ name: '', phoneNumber: '', address: '' });
+    this.error = '';
+  }
+
+  editCustomer(customer: Customer): void {
+    this.editingCustomerId = customer.id;
+    this.form.reset({
+      name: customer.name,
+      phoneNumber: customer.phoneNumber ?? '',
+      address: customer.address ?? ''
+    });
+    this.showForm = true;
+    this.error = '';
+  }
+
+  cancelEdit(): void {
+    this.showForm = false;
+    this.editingCustomerId = null;
+    this.form.reset({ name: '', phoneNumber: '', address: '' });
     this.error = '';
   }
 
@@ -94,14 +115,19 @@ export class CustomersComponent {
     this.saving = true;
     this.error = '';
     const value = this.form.getRawValue();
-    this.http.post<string>(`${environment.apiUrl}/customers`, {
+    const payload = {
       name: value.name.trim(),
       phoneNumber: value.phoneNumber.trim() || null,
       address: value.address.trim() || null
-    }).subscribe({
+    };
+    const request = this.editingCustomerId
+      ? this.http.put<void>(`${environment.apiUrl}/customers/${this.editingCustomerId}`, { id: this.editingCustomerId, ...payload })
+      : this.http.post<string>(`${environment.apiUrl}/customers`, payload);
+    request.subscribe({
       next: () => {
         this.form.reset({ name: '', phoneNumber: '', address: '' });
         this.showForm = false;
+        this.editingCustomerId = null;
         this.saving = false;
         this.loadCustomers();
       },
