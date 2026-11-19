@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../auth/auth.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-shell',
@@ -26,8 +27,18 @@ export class AppShellComponent {
   private readonly breakpoint = inject(BreakpointObserver);
 
   isMobile = false;
+  private currentUrl = '';
+  private previousUrl = '';
 
   constructor() {
+    this.currentUrl = this.router.url;
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(event => {
+      const nextUrl = (event as NavigationEnd).urlAfterRedirects;
+      if (nextUrl !== this.currentUrl) {
+        this.previousUrl = this.currentUrl;
+        this.currentUrl = nextUrl;
+      }
+    });
     this.breakpoint.observe(['(max-width: 800px)']).subscribe(state => {
       this.isMobile = state.matches;
     });
@@ -72,6 +83,26 @@ export class AppShellComponent {
 
   get canManageWorkflows(): boolean {
     return this.auth.hasPermission('workflow.manage');
+  }
+
+  get showBackButton(): boolean {
+    return this.currentUrl !== '/dashboard' && this.currentUrl !== '/login' && this.currentUrl !== '/';
+  }
+
+  goBack(): void {
+    if (this.previousUrl && this.previousUrl !== '/login') {
+      this.router.navigateByUrl(this.previousUrl);
+      return;
+    }
+
+    const path = this.currentUrl.split('?')[0];
+    if (/^\/orders\/[^/]+\/(edit)?$/.test(path) || /^\/orders\/[^/]+$/.test(path)) {
+      this.router.navigate(['/orders']);
+    } else if (path.startsWith('/admin/')) {
+      this.router.navigate(['/admin']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   closeOnMobile(drawer: { close: () => void }): void {
