@@ -106,8 +106,28 @@ export class OrderCreateComponent {
       error: e => this.error = e.error?.detail || 'دریافت پیش‌نویس سفارش انجام نشد.'
     });
   }
-  loadCustomers():void{this.http.get<any>(`${environment.apiUrl}/customers?page=1&pageSize=100`).subscribe({next:r=>this.customers=r.items??r.data??r,error:()=>this.error='دریافت مشتریان انجام نشد.'});}
-  loadCategories():void{this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({next:r=>this.categories=r.items??r.data??r,error:()=>this.error='دریافت دسته‌بندی‌ها انجام نشد.'});}
+  loadCustomers():void{
+    this.http.get<any>(`${environment.apiUrl}/customers?page=1&pageSize=100`).subscribe({
+      next:r=>{
+        const list:Customer[]=r.items??r.data??r??[];
+        // اگر مشتری سفارش در صفحه اول نتایج نباشد، گزینه انتخاب‌شده را حذف نمی‌کنیم.
+        const selected=this.customers.find(x=>x.id===this.customerId);
+        this.customers=selected&&!list.some(x=>x.id===selected.id)?[...list,selected]:list;
+      },
+      error:()=>this.error='دریافت مشتریان انجام نشد.'
+    });
+  }
+  loadCategories():void{
+    this.http.get<any>(`${environment.apiUrl}/categories?page=1&pageSize=100`).subscribe({
+      next:r=>{
+        const list:Category[]=r.items??r.data??r??[];
+        // دسته‌بندی محصول سفارش حتی اگر در صفحه اول نتایج نباشد باید در دراپ‌داون باقی بماند.
+        const selected=this.categories.find(x=>x.id===this.categoryId);
+        this.categories=selected&&!list.some(x=>x.id===selected.id)?[...list,selected]:list;
+      },
+      error:()=>this.error='دریافت دسته‌بندی‌ها انجام نشد.'
+    });
+  }
   selectCategory(id:string):void{this.categoryId=id;this.productId='';this.selectedProduct=null;this.selectedComponents=[];if(!id)return;this.http.get<any>(`${environment.apiUrl}/products?page=1&pageSize=100&categoryId=${id}`).subscribe({next:r=>this.products=r.items??r.data??r,error:()=>this.error='دریافت محصولات انجام نشد.'});}
   selectProduct(id:string):void{this.productId=id;this.selectedProduct=null;this.selectedComponents=[];if(!id)return;this.http.get<ProductDetails>(`${environment.apiUrl}/products/${id}`).subscribe({next:p=>{this.selectedProduct=p;this.selectedComponents=(p.components??[]).map(c=>({...c,quantity:c.defaultQuantity}));},error:()=>this.error='دریافت اطلاعات محصول انجام نشد.'});}
   createCustomer():void{if(this.customerForm.invalid)return;this.busy=true;this.http.post<string>(`${environment.apiUrl}/customers`,this.customerForm.getRawValue()).subscribe({next:id=>{const value=this.customerForm.getRawValue();this.customers=[...this.customers,{id,name:value.name,phoneNumber:value.phoneNumber}];this.customerId=id;this.customerForm.reset();this.showNewCustomer=false;this.busy=false;},error:e=>{this.error=e.error?.detail||'ثبت مشتری انجام نشد.';this.busy=false;}});}
