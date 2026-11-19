@@ -1,0 +1,31 @@
+<div class="date-picker" dir="rtl">
+  <label>{{ label }}</label>
+  <button class="date-input" type="button" [attr.aria-expanded]="isOpen" (click)="toggle()">
+    <span>{{ displayValue || 'انتخاب تاریخ شمسی' }}</span>
+    <span class="actions">
+      @if (value) { <span class="clear" role="button" tabindex="0" aria-label="پاک کردن تاریخ" (click)="clear($event)">×</span> }
+      <span class="calendar-icon">▦</span>
+    </span>
+  </button>
+
+  @if (isOpen) {
+    <div class="calendar" role="dialog" aria-label="تقویم شمسی">
+      <header>
+        <button type="button" aria-label="ماه قبل" (click)="previousMonth()">‹</button>
+        <strong>{{ monthTitle }}</strong>
+        <button type="button" aria-label="ماه بعد" (click)="nextMonth()">›</button>
+      </header>
+      <div class="grid weekdays">
+        @for (day of weekdays; track day) { <span>{{ day }}</span> }
+      </div>
+      <div class="grid">
+        @for (day of days; track $index) {
+          @if (day) {
+            <button type="button" class="day" [class.selected]="displayValue.endsWith('/' + digits.format(day).padStart(2, '۰')) && displayValue.startsWith(digits.format(viewYear)) && displayValue.split('/')[1] === digits.format(viewMonth).padStart(2, '۰')" (click)="choose(day)">{{ digits.format(day) }}</button>
+          } @else { <span class="empty"></span> }
+        }
+      </div>
+      <footer><button type="button" (click)="isOpen = false">بستن</button></footer>
+    </div>
+  }
+</div>
