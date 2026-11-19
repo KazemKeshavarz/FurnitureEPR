@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using FurnitureEPR.Application.Features.Products.Commands.AddProductComponent;
 using FurnitureEPR.Application.Features.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using FurnitureEPR.Application.Security;
 
 namespace FurnitureEPR.Presentation.Controllers;
 
@@ -18,6 +20,7 @@ public sealed class ProductComponentsController : ControllerBase
         _repository = repository;
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPut("{productComponentId:guid}")]
     public async Task<IActionResult> UpdateDefaultQuantity(
         Guid productId,
@@ -29,6 +32,7 @@ public sealed class ProductComponentsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPost]
     public async Task<IActionResult> Add(
         Guid productId,
