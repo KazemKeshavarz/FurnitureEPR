@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -131,7 +131,7 @@ export class CustomersComponent {
         this.saving = false;
         this.loadCustomers();
       },
-      error: response => {
+      error: (response: HttpErrorResponse) => {
         this.error = response.error?.detail || 'ثبت مشتری انجام نشد.';
         this.saving = false;
       }
