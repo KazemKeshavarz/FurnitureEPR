@@ -36,6 +36,9 @@ export class MasterDataComponent {
   productComponents: ProductComponent[] = [];
   selectedProductName = '';
   saving = false;
+  editingCategoryId: string | null = null;
+  editingProductId: string | null = null;
+  editingProductComponentId: string | null = null;
   error = '';
 
   categoryForm = this.fb.nonNullable.group({
@@ -76,13 +79,22 @@ export class MasterDataComponent {
     return (response?.items ?? response?.data ?? []) as T[];
   }
 
+  editCategory(item: Category): void {
+    this.editingCategoryId = item.id;
+    this.categoryForm.setValue({ name: item.name });
+  }
+
   addCategory(): void {
     if (this.categoryForm.invalid || this.saving) return;
     this.saving = true;
     this.error = '';
-    this.http.post(`${environment.apiUrl}/categories`, this.categoryForm.getRawValue()).subscribe({
+    const request = this.editingCategoryId
+      ? this.http.put(`${environment.apiUrl}/categories/${this.editingCategoryId}`, { id: this.editingCategoryId, ...this.categoryForm.getRawValue() })
+      : this.http.post(`${environment.apiUrl}/categories`, this.categoryForm.getRawValue());
+    request.subscribe({
       next: () => {
         this.categoryForm.reset({ name: '' });
+        this.editingCategoryId = null;
         this.loadAll();
         this.saving = false;
       },
@@ -93,13 +105,22 @@ export class MasterDataComponent {
     });
   }
 
+  editProduct(item: Product): void {
+    this.editingProductId = item.id;
+    this.productForm.setValue({ categoryId: item.categoryId, name: item.name });
+  }
+
   addProduct(): void {
     if (this.productForm.invalid || this.saving) return;
     this.saving = true;
     this.error = '';
-    this.http.post(`${environment.apiUrl}/products`, this.productForm.getRawValue()).subscribe({
+    const request = this.editingProductId
+      ? this.http.put(`${environment.apiUrl}/products/${this.editingProductId}`, { id: this.editingProductId, ...this.productForm.getRawValue() })
+      : this.http.post(`${environment.apiUrl}/products`, this.productForm.getRawValue());
+    request.subscribe({
       next: () => {
         this.productForm.reset({ categoryId: '', name: '' });
+        this.editingProductId = null;
         this.loadAll();
         this.saving = false;
       },
@@ -142,18 +163,24 @@ export class MasterDataComponent {
     });
   }
 
+  editProductComponent(item: ProductComponent): void {
+    this.editingProductComponentId = item.id;
+    this.productComponentForm.patchValue({ productId: this.productComponentForm.controls.productId.value, componentId: item.componentId, defaultQuantity: item.defaultQuantity });
+  }
+
   addProductComponent(): void {
     if (this.productComponentForm.invalid || this.saving) return;
     this.saving = true;
     this.error = '';
     const value = this.productComponentForm.getRawValue();
-    this.http.post(
-      `${environment.apiUrl}/products/${value.productId}/components`,
-      { componentId: value.componentId, defaultQuantity: value.defaultQuantity }
-    ).subscribe({
+    const request = this.editingProductComponentId
+      ? this.http.put(`${environment.apiUrl}/products/${value.productId}/components/${this.editingProductComponentId}`, { defaultQuantity: value.defaultQuantity })
+      : this.http.post(`${environment.apiUrl}/products/${value.productId}/components`, { componentId: value.componentId, defaultQuantity: value.defaultQuantity });
+    request.subscribe({
       next: () => {
         this.loadProductComponents(value.productId);
         this.productComponentForm.patchValue({ componentId: '', defaultQuantity: 1 });
+        this.editingProductComponentId = null;
         this.saving = false;
       },
       error: response => {
