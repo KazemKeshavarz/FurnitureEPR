@@ -110,6 +110,7 @@ public sealed class IdentitySeeder
             PermissionNames.WorkflowQualityControl,
             PermissionNames.WorkflowComplete,
             PermissionNames.IdentityManageUsers,
+            PermissionNames.IdentityManageMasterData,
             PermissionNames.IdentityManageRoles,
             PermissionNames.IdentityManageClaims
         };
