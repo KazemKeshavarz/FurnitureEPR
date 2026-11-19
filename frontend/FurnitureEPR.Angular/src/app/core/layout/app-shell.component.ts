@@ -53,6 +53,19 @@ export class AppShellComponent {
     return this.canManageUsers || this.canManageRoles;
   }
 
+  get canViewOrders(): boolean {
+    return this.auth.hasPermission('orders.view_all');
+  }
+
+  get canViewProduction(): boolean {
+    return ['workflow.view_tasks', 'workflow.move', 'workflow.quality_control', 'workflow.complete', 'workflow.manage']
+      .some(permission => this.auth.hasPermission(permission));
+  }
+
+  get canViewCustomers(): boolean {
+    return this.auth.hasPermission('orders.view_all') || this.auth.hasPermission('orders.create');
+  }
+
   get canRequestTransfers(): boolean {
     return this.auth.hasPermission('workflow.move') || this.auth.hasPermission('workflow.manage');
   }
