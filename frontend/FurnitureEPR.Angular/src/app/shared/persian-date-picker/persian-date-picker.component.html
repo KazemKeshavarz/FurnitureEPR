@@ -21,7 +21,7 @@
       <div class="grid">
         @for (day of days; track $index) {
           @if (day) {
-            <button type="button" class="day" [class.selected]="displayValue.endsWith('/' + digits.format(day).padStart(2, '۰')) && displayValue.startsWith(digits.format(viewYear)) && displayValue.split('/')[1] === digits.format(viewMonth).padStart(2, '۰')" (click)="choose(day)">{{ digits.format(day) }}</button>
+            <button type="button" class="day" [class.selected]="isSelected(day)" (click)="choose(day)">{{ digits.format(day) }}</button>
           } @else { <span class="empty"></span> }
         }
       </div>
