@@ -1,4 +1,3 @@
-import '@fontsource/material-icons/400.css';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
