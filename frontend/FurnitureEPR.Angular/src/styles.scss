@@ -38,7 +38,10 @@ body {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga' 1 !important;
+  -webkit-font-feature-settings: 'liga' 1 !important;
+  font-variant-ligatures: contextual;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
