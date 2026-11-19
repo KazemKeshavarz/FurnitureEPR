@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -99,7 +99,7 @@ export class MasterDataComponent {
         this.loadAll();
         this.saving = false;
       },
-      error: response => {
+      error: (response: HttpErrorResponse) => {
         this.error = response.error?.detail || 'ثبت دسته‌بندی انجام نشد.';
         this.saving = false;
       }
@@ -125,7 +125,7 @@ export class MasterDataComponent {
         this.loadAll();
         this.saving = false;
       },
-      error: response => {
+      error: (response: HttpErrorResponse) => {
         this.error = response.error?.detail || 'ثبت محصول انجام نشد.';
         this.saving = false;
       }
@@ -151,7 +151,7 @@ export class MasterDataComponent {
         this.loadAll();
         this.saving = false;
       },
-      error: response => {
+      error: (response: HttpErrorResponse) => {
         this.error = response.error?.detail || 'ثبت جزء انجام نشد.';
         this.saving = false;
       }
@@ -193,7 +193,7 @@ export class MasterDataComponent {
         this.editingProductComponentId = null;
         this.saving = false;
       },
-      error: response => {
+      error: (response: HttpErrorResponse) => {
         this.error = response.error?.detail || 'افزودن جزء به محصول انجام نشد.';
         this.saving = false;
       }
