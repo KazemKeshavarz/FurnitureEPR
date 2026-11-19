@@ -1,5 +1,6 @@
 using FurnitureEPR.Application.Features.Categories.Commands.AssignWorkflow;
 using FurnitureEPR.Application.Features.Categories.Commands.CreateCategory;
+using FurnitureEPR.Application.Features.Categories.Commands.UpdateCategory;
 using FurnitureEPR.Application.Features.Categories.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,14 @@ public sealed class CategoriesController : ControllerBase
     {
         var id = await _sender.Send(command, ct);
         return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, UpdateCategoryCommand command, CancellationToken ct)
+    {
+        if (id != command.Id) return BadRequest("Route id and command id must match.");
+        await _sender.Send(command, ct);
+        return NoContent();
     }
 
     [HttpGet]
