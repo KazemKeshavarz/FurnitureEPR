@@ -12,7 +12,7 @@
 ## محدوده سامانه
 
 ### داخل محدوده
-- تعریف و ویرایش اطلاعات مشتری، دسته‌بندی محصول، محصول و تعداد پیش‌فرض اجزای تشکیل‌دهنده محصول.
+- تعریف و ویرایش اطلاعات مشتری، دسته‌بندی محصول، محصول، اجزای پایه و تعداد پیش‌فرض اجزای تشکیل‌دهنده محصول.
 - تعیین تعداد پیش‌فرض اجزای محصول و امکان تغییر تعداد در سفارش.
 - ثبت سفارش، مبلغ کل، تخفیف و مبلغ نهایی به ریال.
 - تعریف گردش‌کار و نسخه‌بندی مراحل و مسیرهای مجاز.
@@ -64,7 +64,8 @@
 |---|---|
 | مشتریان | `GET/POST /api/customers` و `PUT /api/customers/{id}` |
 | دسته‌بندی‌ها | `GET/POST /api/categories` و `PUT /api/categories/{id}` |
-| محصولات | `GET/POST /api/products` و `PUT /api/products/{id}` |
+| محصولات و اجزای آن‌ها | `GET/POST /api/products`، `PUT /api/products/{id}`، `POST /api/products/{id}/components` و `PUT /api/products/{id}/components/{productComponentId}` |
+| اجزای پایه | `GET/POST /api/components` و `PUT /api/components/{id}` |
 | سفارش‌ها | `GET/POST /api/orders` و `PUT /api/orders/{id}/draft` فقط برای پیش‌نویس |
 | کارهای تولید | `GET /api/orders/production/tasks` |
 | مدیریت گردش‌کار | `/api/workflows` و زیرمسیرهای نسخه، مرحله و انتقال |
