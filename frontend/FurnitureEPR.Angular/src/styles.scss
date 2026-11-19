@@ -1,6 +1,13 @@
 @use '@angular/material' as mat;
 
 // فونت‌ها از بسته‌های محلی npm بارگذاری می‌شوند؛ نیازی به Google Fonts نیست.
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/assets/fonts/material-icons-latin-400-normal.woff2') format('woff2');
+  font-display: block;
+}
 @import '@fontsource/vazirmatn/300.css';
 @import '@fontsource/vazirmatn/400.css';
 @import '@fontsource/vazirmatn/500.css';
