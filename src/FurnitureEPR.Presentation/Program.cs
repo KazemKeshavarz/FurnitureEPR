@@ -92,6 +92,21 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(
             IdentityClaimTypes.Permission,
             PermissionNames.WorkflowComplete));
+
+    options.AddPolicy(PermissionNames.WorkflowViewTasks, policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowViewTasks)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowMove)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowQualityControl)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowComplete)
+            || context.User.HasClaim(IdentityClaimTypes.Permission, PermissionNames.WorkflowManage)));
+
+    options.AddPolicy(PermissionNames.OrdersViewAll, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.OrdersViewAll));
+    options.AddPolicy(PermissionNames.OrdersCreate, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.OrdersCreate));
+    options.AddPolicy(PermissionNames.OrdersEditDraft, policy =>
+        policy.RequireClaim(IdentityClaimTypes.Permission, PermissionNames.OrdersEditDraft));
 });
 
 builder.Services
