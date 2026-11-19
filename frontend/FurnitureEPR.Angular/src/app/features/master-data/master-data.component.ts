@@ -80,6 +80,8 @@ export class MasterDataComponent {
     return (response?.items ?? response?.data ?? []) as T[];
   }
 
+  cancelCategoryEdit(): void { this.editingCategoryId = null; this.categoryForm.reset({ name: '' }); }
+
   editCategory(item: Category): void {
     this.editingCategoryId = item.id;
     this.categoryForm.setValue({ name: item.name });
@@ -106,6 +108,8 @@ export class MasterDataComponent {
     });
   }
 
+  cancelProductEdit(): void { this.editingProductId = null; this.productForm.reset({ categoryId: '', name: '' }); }
+
   editProduct(item: Product): void {
     this.editingProductId = item.id;
     this.productForm.setValue({ categoryId: item.categoryId, name: item.name });
@@ -131,6 +135,8 @@ export class MasterDataComponent {
       }
     });
   }
+
+  cancelComponentEdit(): void { this.editingComponentId = null; this.componentForm.reset({ name: '' }); }
 
   editComponent(item: ComponentItem): void {
     this.editingComponentId = item.id;
@@ -163,6 +169,7 @@ export class MasterDataComponent {
   }
 
   loadProductComponents(id: string): void {
+    this.editingProductComponentId = null;
     this.productComponents = [];
     const product = this.products.find(item => item.id === id);
     this.selectedProductName = product?.name || '';
@@ -172,6 +179,8 @@ export class MasterDataComponent {
       error: () => this.error = 'دریافت اجزای محصول انجام نشد.'
     });
   }
+
+  cancelProductComponentEdit(): void { this.editingProductComponentId = null; this.productComponentForm.patchValue({ componentId: '', defaultQuantity: 1 }); }
 
   editProductComponent(item: ProductComponent): void {
     this.editingProductComponentId = item.id;
