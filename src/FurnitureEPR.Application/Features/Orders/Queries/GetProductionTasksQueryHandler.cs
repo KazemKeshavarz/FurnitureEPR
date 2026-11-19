@@ -29,6 +29,7 @@ public sealed class GetProductionTasksQueryHandler
             request.PageSize,
             request.Search,
             _currentUser.RoleIds,
+            _currentUser.HasPermission(PermissionNames.WorkflowManage),
             cancellationToken);
     }
 }
