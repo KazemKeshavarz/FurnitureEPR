@@ -46,12 +46,50 @@ export class OrderCreateComponent {
     this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
       next: order => {
         if (order.status !== 'Draft') { this.error = 'فقط سفارش‌های پیش‌نویس قابل ویرایش هستند.'; this.editingOrderId = null; return; }
-        this.customerId = order.customerId;
+        // اطلاعات سفارش را مستقل از زمان بارگذاری فهرست‌های کشویی نگه می‌داریم.
+        this.customerId = String(order.customerId ?? '');
         this.discountAmount = order.discountAmount ?? 0;
         this.items = (order.items ?? []).map((item: any) => ({
-          productId: item.productId, productName: item.productName, quantity: item.quantity, unitPrice: item.unitPrice,
-          components: (item.components ?? []).map((component: any) => ({ componentId: component.componentId, componentName: component.componentName, quantity: component.quantity }))
+          productId: String(item.productId),
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          components: (item.components ?? []).map((component: any) => ({
+            componentId: component.componentId,
+            componentName: component.componentName,
+            quantity: component.quantity
+          }))
         }));
+
+        // دسته‌بندی و محصولات از اطلاعات واقعی محصول اول سفارش بازیابی می‌شوند.
+        // این کار باعث می‌شود دراپ‌داون‌ها بعد از بارگذاری سفارش مقدار انتخاب‌شده را بشناسند.
+        const firstItem = this.items[0];
+        if (firstItem) {
+          this.http.get<ProductDetails>(`${environment.apiUrl}/products/${firstItem.productId}`).subscribe({
+            next: product => {
+              this.categoryId = String(product.categoryId ?? '');
+              this.products = [product];
+              this.productId = String(product.id);
+              this.selectedProduct = product;
+              this.selectedComponents = (product.components ?? []).map(component => ({
+                ...component,
+                quantity: component.defaultQuantity
+              }));
+              if (this.categoryId) {
+                this.http.get<any>(`${environment.apiUrl}/products?page=1&pageSize=100&categoryId=${this.categoryId}`).subscribe({
+                  next: result => {
+                    const list: Product[] = result.items ?? result.data ?? result ?? [];
+                    this.products = list.some(x => x.id === product.id) ? list : [product, ...list];
+                  },
+                  error: () => this.products = [product]
+                });
+              }
+            },
+            error: () => {
+              this.error = 'اطلاعات محصول سفارش برای بارگذاری دسته‌بندی و محصول دریافت نشد.';
+            }
+          });
+        }
       },
       error: e => this.error = e.error?.detail || 'دریافت پیش‌نویس سفارش انجام نشد.'
     });
