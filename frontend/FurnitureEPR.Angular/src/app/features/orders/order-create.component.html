@@ -88,9 +88,20 @@
           @for(item of items; track $index){
             <div class="cart-item">
               <div class="cart-head">
-                <div><strong>{{item.productName}}</strong><small>{{item.quantity}} عدد × {{format(item.unitPrice)}} ریال</small></div>
+                <div><strong>{{item.productName}}</strong></div>
                 <button mat-icon-button type="button" aria-label="حذف" (click)="removeItem($index)"><mat-icon>delete_outline</mat-icon></button>
               </div>
+              <div class="cart-edit">
+                <label>تعداد <input type="number" min="0.001" step="1" [(ngModel)]="item.quantity"></label>
+                <label>قیمت واحد (ریال) <input type="number" min="0" step="1000" [(ngModel)]="item.unitPrice"></label>
+              </div>
+              @if(item.components.length){
+                <div class="cart-components">
+                  @for(component of item.components; track component.componentId){
+                    <label>{{component.componentName}} <input type="number" min="0" step="0.001" [(ngModel)]="component.quantity"></label>
+                  }
+                </div>
+              }
               <div class="cart-total">{{format(item.quantity * item.unitPrice)}} ریال</div>
             </div>
           }
@@ -108,7 +119,7 @@
         <div class="final-row"><span>مبلغ نهایی</span><strong>{{format(finalAmount)}} ریال</strong></div>
         @if(discountAmount > totalAmount){<div class="error-inline">مبلغ تخفیف نمی‌تواند بیشتر از مبلغ کل باشد.</div>}
         <button mat-flat-button class="save" type="button" [disabled]="busy || !canSave()" (click)="saveOrder()">
-          <mat-icon>check_circle</mat-icon> ثبت و نهایی‌سازی سفارش
+          <mat-icon>check_circle</mat-icon> {{editingOrderId ? 'ذخیره تغییرات پیش‌نویس' : 'ثبت و نهایی‌سازی سفارش'}}
         </button>
       </mat-card>
     }
