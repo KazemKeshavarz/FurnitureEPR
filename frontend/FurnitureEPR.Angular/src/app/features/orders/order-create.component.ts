@@ -48,6 +48,12 @@ export class OrderCreateComponent {
         if (order.status !== 'Draft') { this.error = 'فقط سفارش‌های پیش‌نویس قابل ویرایش هستند.'; this.editingOrderId = null; return; }
         // اطلاعات سفارش را مستقل از زمان بارگذاری فهرست‌های کشویی نگه می‌داریم.
         this.customerId = String(order.customerId ?? '');
+        if (this.customerId && !this.customers.some(customer => customer.id === this.customerId)) {
+          this.customers = [...this.customers, {
+            id: this.customerId,
+            name: order.customerName ?? 'مشتری سفارش'
+          }];
+        }
         this.discountAmount = order.discountAmount ?? 0;
         this.items = (order.items ?? []).map((item: any) => ({
           productId: String(item.productId),
@@ -68,6 +74,12 @@ export class OrderCreateComponent {
           this.http.get<ProductDetails>(`${environment.apiUrl}/products/${firstItem.productId}`).subscribe({
             next: product => {
               this.categoryId = String(product.categoryId ?? '');
+              if (this.categoryId && !this.categories.some(category => category.id === this.categoryId)) {
+                this.categories = [...this.categories, {
+                  id: this.categoryId,
+                  name: product.categoryName ?? 'دسته‌بندی محصول'
+                }];
+              }
               this.products = [product];
               this.productId = String(product.id);
               this.selectedProduct = product;
