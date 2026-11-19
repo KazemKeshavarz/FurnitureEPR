@@ -15,7 +15,12 @@ const PERMISSIONS=[
   {key:'workflow.move',label:'جابجایی در فرآیند تولید'},
   {key:'workflow.quality_control',label:'تأیید کنترل کیفیت'},
   {key:'workflow.complete',label:'تکمیل مرحله تولید'},
+  {key:'workflow.view_tasks',label:'مشاهده کارتابل تولید'},
+  {key:'orders.view_all',label:'مشاهده فهرست و جزئیات همه سفارش‌ها'},
+  {key:'orders.create',label:'ثبت و نهایی‌سازی سفارش'},
+  {key:'orders.edit_draft',label:'ویرایش سفارش‌های پیش‌نویس'},
   {key:'identity.manage_users',label:'مدیریت کاربران'},
+  {key:'identity.manage_master_data',label:'مدیریت اطلاعات پایه محصولات'},
   {key:'identity.manage_roles',label:'مدیریت نقش‌ها'},
   {key:'identity.manage_claims',label:'مدیریت دسترسی‌ها'}
 ];
