@@ -20,6 +20,7 @@ public sealed class OrdersController : ControllerBase
 
     public OrdersController(ISender sender) => _sender = sender;
 
+    [Authorize(Policy = PermissionNames.OrdersCreate)]
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(
         CreateOrderCommand command,
@@ -29,6 +30,7 @@ public sealed class OrdersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 
+    [Authorize(Policy = PermissionNames.OrdersEditDraft)]
     [HttpPut("{id:guid}/draft")]
     public async Task<IActionResult> UpdateDraft(
         Guid id,
@@ -42,6 +44,7 @@ public sealed class OrdersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = PermissionNames.OrdersCreate)]
     [HttpPost("{id:guid}/finalize")]
     public async Task<IActionResult> Finalize(
         Guid id,
@@ -100,7 +103,7 @@ public sealed class OrdersController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionNames.WorkflowViewTasks)]
     [HttpGet("production/tasks")]
     public async Task<ActionResult<PagedProductionTaskDto>> GetProductionTasks(
         [FromQuery] int page = 1,
@@ -115,6 +118,7 @@ public sealed class OrdersController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = PermissionNames.OrdersViewAll)]
     [HttpGet]
     public async Task<ActionResult<PagedOrderDto>> Get(
         [FromQuery] int page = 1,
@@ -130,6 +134,7 @@ public sealed class OrdersController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = PermissionNames.OrdersViewAll)]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<OrderDto>> GetById(
         Guid id,
