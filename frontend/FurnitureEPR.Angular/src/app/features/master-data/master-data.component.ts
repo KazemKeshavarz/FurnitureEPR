@@ -108,10 +108,11 @@ export class MasterDataComponent {
     });
   }
 
-  cancelProductEdit(): void { this.editingProductId = null; this.productForm.reset({ categoryId: '', name: '' }); }
+  cancelProductEdit(): void { this.editingProductId = null; this.productForm.controls.categoryId.enable(); this.productForm.reset({ categoryId: '', name: '' }); }
 
   editProduct(item: Product): void {
     this.editingProductId = item.id;
+    this.productForm.controls.categoryId.disable();
     this.productForm.setValue({ categoryId: item.categoryId, name: item.name });
   }
 
@@ -124,6 +125,7 @@ export class MasterDataComponent {
       : this.http.post(`${environment.apiUrl}/products`, this.productForm.getRawValue());
     request.subscribe({
       next: () => {
+        this.productForm.controls.categoryId.enable();
         this.productForm.reset({ categoryId: '', name: '' });
         this.editingProductId = null;
         this.loadAll();
