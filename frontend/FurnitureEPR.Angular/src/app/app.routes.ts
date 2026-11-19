@@ -24,6 +24,7 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
+        canActivate: [permissionGuard('orders.view_all')],
         loadComponent: () => import('./features/orders/orders-list.component').then(m => m.OrdersListComponent)
       },
       {
@@ -33,18 +34,22 @@ export const routes: Routes = [
       },
       {
         path: 'orders/new',
+        canActivate: [permissionGuard('orders.create')],
         loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
       },
       {
         path: 'orders/:id/edit',
+        canActivate: [permissionGuard('orders.edit_draft')],
         loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
       },
       {
         path: 'orders/:id',
+        canActivate: [permissionGuard('orders.view_all')],
         loadComponent: () => import('./features/orders/order-details.component').then(m => m.OrderDetailsComponent)
       },
       {
         path: 'production',
+        canActivate: [anyPermissionGuard(['workflow.view_tasks', 'workflow.move', 'workflow.quality_control', 'workflow.complete', 'workflow.manage'])],
         loadComponent: () => import('./features/production/production.component').then(m => m.ProductionComponent)
       },
       {
