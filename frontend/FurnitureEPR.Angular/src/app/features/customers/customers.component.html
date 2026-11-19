@@ -13,7 +13,7 @@
 
       @if (showForm) {
         <mat-card class="form-card">
-          <h2>ثبت مشتری جدید</h2>
+          <h2>{{ editingCustomerId ? 'ویرایش اطلاعات مشتری' : 'ثبت مشتری جدید' }}</h2>
           <form [formGroup]="form" (ngSubmit)="createCustomer()">
             <mat-form-field appearance="outline">
               <mat-label>نام و نام خانوادگی / نام شرکت</mat-label>
@@ -31,8 +31,9 @@
               <textarea matInput formControlName="address" rows="2" placeholder="آدرس مشتری (اختیاری)"></textarea>
             </mat-form-field>
             <button mat-flat-button class="save-button" type="submit" [disabled]="form.invalid || saving">
-              {{ saving ? 'در حال ثبت...' : 'ثبت مشتری' }}
+              {{ saving ? 'در حال ذخیره...' : (editingCustomerId ? 'ذخیره تغییرات' : 'ثبت مشتری') }}
             </button>
+            <button mat-button type="button" (click)="cancelEdit()">انصراف</button>
           </form>
         </mat-card>
       }
@@ -69,9 +70,10 @@
                 <span class="phone" dir="ltr">{{ customer.phoneNumber || 'شماره تماس ثبت نشده' }}</span>
                 @if (customer.address) { <span class="address">{{ customer.address }}</span> }
               </div>
-              <button mat-icon-button aria-label="نمایش اطلاعات مشتری" [disabled]="!customer.address" (click)="showAddress(customer)">
-                <mat-icon>location_on</mat-icon>
-              </button>
+              <div class="customer-actions">
+                <button mat-icon-button aria-label="ویرایش مشتری" (click)="editCustomer(customer)"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button aria-label="نمایش اطلاعات مشتری" [disabled]="!customer.address" (click)="showAddress(customer)"><mat-icon>location_on</mat-icon></button>
+              </div>
             </mat-card>
           }
         </div>
