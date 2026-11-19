@@ -5,14 +5,16 @@
           <mat-card class="form-card"><h2>{{editingCategoryId ? 'ویرایش دسته‌بندی' : 'دسته‌بندی جدید'}}</h2><form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
             <mat-form-field appearance="outline"><mat-label>نام دسته‌بندی</mat-label><input matInput formControlName="name" placeholder="مثلاً مبلمان"></mat-form-field>
             <button mat-flat-button type="submit" [disabled]="categoryForm.invalid || saving">{{editingCategoryId ? 'ذخیره تغییرات' : 'ثبت دسته‌بندی'}}</button>
+            @if(editingCategoryId){<button mat-button type="button" (click)="cancelCategoryEdit()">انصراف</button>}
           </form></mat-card>
           <div class="list">@for (item of categories; track item.id) {<mat-card class="row"><mat-icon>category</mat-icon><div><strong>{{item.name}}</strong><small>دسته‌بندی محصول</small></div><button mat-icon-button type="button" aria-label="ویرایش دسته‌بندی" (click)="editCategory(item)"><mat-icon>edit</mat-icon></button></mat-card>} @empty {<div class="empty">هنوز دسته‌بندی‌ای ثبت نشده است.</div>}</div>
         </div></mat-tab>
         <mat-tab label="محصولات"><div class="tab-content">
           <mat-card class="form-card"><h2>{{editingProductId ? 'ویرایش محصول' : 'محصول جدید'}}</h2><form [formGroup]="productForm" (ngSubmit)="addProduct()">
-            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>دسته‌بندی</mat-label><select matNativeControl formControlName="categoryId" [disabled]="!!editingProductId"><option value="">انتخاب کنید</option>@for (item of categories; track item.id) {<option [value]="item.id">{{item.name}}</option>}</select></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>نام محصول</mat-label><input matInput formControlName="name" placeholder="مثلاً مبل بوچلی"></mat-form-field>
             <button mat-flat-button type="submit" [disabled]="productForm.invalid || saving">{{editingProductId ? 'ذخیره تغییرات' : 'ثبت محصول'}}</button>
+            @if(editingProductId){<button mat-button type="button" (click)="cancelProductEdit()">انصراف</button>}
           </form></mat-card>
           <div class="list">@for (item of products; track item.id) {<mat-card class="row"><mat-icon>chair</mat-icon><div><strong>{{item.name}}</strong><small>{{categoryName(item.categoryId)}}</small></div><button mat-icon-button type="button" aria-label="ویرایش محصول" (click)="editProduct(item)"><mat-icon>edit</mat-icon></button></mat-card>} @empty {<div class="empty">هنوز محصولی ثبت نشده است.</div>}</div>
         </div></mat-tab>
@@ -20,6 +22,7 @@
           <mat-card class="form-card"><h2>{{editingComponentId ? 'ویرایش جزء' : 'جزء جدید'}}</h2><form [formGroup]="componentForm" (ngSubmit)="addComponent()">
             <mat-form-field appearance="outline"><mat-label>نام جزء</mat-label><input matInput formControlName="name" placeholder="مثلاً پایه مبل"></mat-form-field>
             <button mat-flat-button type="submit" [disabled]="componentForm.invalid || saving">{{editingComponentId ? 'ذخیره تغییرات' : 'ثبت جزء'}}</button>
+            @if(editingComponentId){<button mat-button type="button" (click)="cancelComponentEdit()">انصراف</button>}
           </form></mat-card>
           <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div><button mat-icon-button type="button" aria-label="ویرایش جزء" (click)="editComponent(item)"><mat-icon>edit</mat-icon></button></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
         </div></mat-tab>
@@ -41,6 +44,7 @@
               </mat-form-field>
               <mat-form-field appearance="outline"><mat-label>تعداد پیش‌فرض</mat-label><input matInput type="number" min="0.001" step="0.001" formControlName="defaultQuantity"></mat-form-field>
               <button mat-flat-button type="submit" [disabled]="productComponentForm.invalid || saving">{{editingProductComponentId ? 'ذخیره تعداد' : 'افزودن جزء به محصول'}}</button>
+              @if(editingProductComponentId){<button mat-button type="button" (click)="cancelProductComponentEdit()">انصراف</button>}
             </form>
           </mat-card>
           @if(selectedProductName){
