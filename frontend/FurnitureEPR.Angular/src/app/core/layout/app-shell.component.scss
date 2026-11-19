@@ -20,6 +20,8 @@
     .logout-button { width: 100%; justify-content: flex-start; color: #9b4c4c; margin-top: 4px; }
     .topbar { position: sticky; top: 0; z-index: 10; height: 64px; background: rgba(255,255,255,.96); border-bottom: 1px solid #e7ecee; box-shadow: none; }
     .menu-button { display: none; }
+    .back-button { margin-left: 6px; color: #286f93; }
+    .back-button[hidden] { display: none; }
     .page-title strong, .page-title span { display: block; }
     .page-title strong { color: #102a35; font-size: 14px; }
     .page-title span { color: #849197; font-size: 10px; margin-top: 2px; }
@@ -28,6 +30,7 @@
     @media (max-width: 800px) {
       .sidenav { width: min(86vw, 310px); }
       .menu-button { display: inline-flex; margin-left: 6px; }
+      .back-button { margin-left: 2px; }
       .desktop-logout { display: none; }
       .topbar { height: 58px; padding: 0 8px; }
       .content { padding: 12px; min-height: calc(100vh - 58px); }
