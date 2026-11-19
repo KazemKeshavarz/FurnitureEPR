@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using FurnitureEPR.Application.Features.Products.Commands.CreateProduct;
 using FurnitureEPR.Application.Features.Products.Commands.UpdateProduct;
 using FurnitureEPR.Application.Features.Products.Queries;
+using FurnitureEPR.Application.Security;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +15,7 @@ public sealed class ProductsController : ControllerBase
     private readonly ISender _sender;
     public ProductsController(ISender sender) => _sender = sender;
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateProductCommand command, CancellationToken ct)
     {
@@ -20,6 +23,7 @@ public sealed class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 
+    [Authorize(Policy = PermissionNames.IdentityManageMasterData)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateProductCommand command, CancellationToken ct)
     {
