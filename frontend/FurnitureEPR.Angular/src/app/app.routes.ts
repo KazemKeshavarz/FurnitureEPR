@@ -36,6 +36,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
       },
       {
+        path: 'orders/:id/edit',
+        loadComponent: () => import('./features/orders/order-create.component').then(m => m.OrderCreateComponent)
+      },
+      {
         path: 'orders/:id',
         loadComponent: () => import('./features/orders/order-details.component').then(m => m.OrderDetailsComponent)
       },
