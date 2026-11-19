@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Products.Commands.CreateProduct;
+using FurnitureEPR.Application.Features.Products.Commands.UpdateProduct;
 using FurnitureEPR.Application.Features.Products.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,14 @@ public sealed class ProductsController : ControllerBase
     {
         var id = await _sender.Send(command, ct);
         return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, UpdateProductCommand command, CancellationToken ct)
+    {
+        if (id != command.Id) return BadRequest("Route id and command id must match.");
+        await _sender.Send(command, ct);
+        return NoContent();
     }
 
     [HttpGet]
