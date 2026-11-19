@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Customers.Commands.CreateCustomer;
+using FurnitureEPR.Application.Features.Customers.Commands.UpdateCustomer;
 using FurnitureEPR.Application.Features.Customers.Queries.GetCustomer;
 using FurnitureEPR.Application.Features.Customers.Queries.GetCustomers;
 using MediatR;
@@ -28,6 +29,19 @@ public sealed class CustomersController : ControllerBase
             nameof(GetById),
             new { id = customerId },
             customerId);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id,
+        [FromBody] UpdateCustomerCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+            return BadRequest("Route id and command id must match.");
+
+        await _sender.Send(command, cancellationToken);
+        return NoContent();
     }
 
     [HttpGet]
