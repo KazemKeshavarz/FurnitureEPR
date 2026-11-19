@@ -219,12 +219,7 @@ public sealed class OrderWorkflowRuntimeRepository
                 cancellationToken);
 
         // اجرای Transition نیز فقط برای Role مسئول Stage فعلی مجاز است.
-        if (currentStage.ResponsibleRoleId is Guid responsibleRoleId
-            && !_currentUser.RoleIds.Contains(responsibleRoleId))
-        {
-            throw new UnauthorizedAccessException(
-                "The current user is not responsible for this workflow stage.");
-        }
+        EnsureCurrentUserCanActOnStage(currentStage);
 
         // اگر Stage فعلی نیاز به QC دارد، ابتدا باید آخرین QC آن Approved شده باشد.
         if (currentStage.RequiresQualityControl
