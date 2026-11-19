@@ -1,4 +1,5 @@
 using FurnitureEPR.Application.Features.Products.Commands.AddProductComponent;
+using FurnitureEPR.Application.Features.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +10,24 @@ namespace FurnitureEPR.Presentation.Controllers;
 public sealed class ProductComponentsController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly IProductComponentRepository _repository;
 
-    public ProductComponentsController(ISender sender) => _sender = sender;
+    public ProductComponentsController(ISender sender, IProductComponentRepository repository)
+    {
+        _sender = sender;
+        _repository = repository;
+    }
+
+    [HttpPut("{productComponentId:guid}")]
+    public async Task<IActionResult> UpdateDefaultQuantity(
+        Guid productId,
+        Guid productComponentId,
+        UpdateProductComponentBody body,
+        CancellationToken ct)
+    {
+        await _repository.UpdateDefaultQuantityAsync(productId, productComponentId, body.DefaultQuantity, ct);
+        return NoContent();
+    }
 
     [HttpPost]
     public async Task<IActionResult> Add(
@@ -29,3 +46,5 @@ public sealed class ProductComponentsController : ControllerBase
 public sealed record AddProductComponentBody(
     Guid ComponentId,
     decimal DefaultQuantity);
+
+public sealed record UpdateProductComponentBody(decimal DefaultQuantity);
