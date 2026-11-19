@@ -31,6 +31,7 @@ export class ProductionComponent {
  readonly canMoveWorkflow=this.auth.hasPermission('workflow.move');
  readonly canQualityControl=this.auth.hasPermission('workflow.quality_control');
  readonly canCompleteWorkflow=this.auth.hasPermission('workflow.complete');
+ readonly canViewOrderDetails=this.auth.hasPermission('orders.view_all');
  tasks:Task[]=[];search='';loading=false;error='';busy=false;qcTaskId='';qcComment='';totalCount=0;
 
  constructor(){this.load();}
