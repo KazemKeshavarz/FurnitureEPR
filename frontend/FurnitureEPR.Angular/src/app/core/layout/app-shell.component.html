@@ -124,6 +124,9 @@
       <button mat-icon-button class="menu-button" aria-label="باز کردن منو" (click)="drawer.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
+      <button mat-icon-button class="back-button" aria-label="بازگشت به صفحه قبل" [hidden]="!showBackButton" (click)="goBack()">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
       <div class="page-title">
         <strong>Furniture EPR</strong>
         <span>سامانه مدیریت سفارش و تولید</span>
