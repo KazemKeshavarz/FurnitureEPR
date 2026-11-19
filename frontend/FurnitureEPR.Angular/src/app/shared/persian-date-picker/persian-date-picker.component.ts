@@ -17,7 +17,8 @@ export class PersianDatePickerComponent implements OnChanges {
 
   readonly weekdays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
   readonly monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
-  readonly digits = new Intl.NumberFormat('fa-IR');
+  // در نمایش اجزای تاریخ جداکننده هزارگان نباید درج شود؛ سال ۱۴۰۵ باید بدون ویرگول باشد.
+  readonly digits = new Intl.NumberFormat('fa-IR', { useGrouping: false });
   readonly partsFormatter = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
     year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC'
   });
