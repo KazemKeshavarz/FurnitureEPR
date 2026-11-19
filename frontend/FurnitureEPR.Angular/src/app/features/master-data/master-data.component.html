@@ -17,11 +17,11 @@
           <div class="list">@for (item of products; track item.id) {<mat-card class="row"><mat-icon>chair</mat-icon><div><strong>{{item.name}}</strong><small>{{categoryName(item.categoryId)}}</small></div><button mat-icon-button type="button" aria-label="ویرایش محصول" (click)="editProduct(item)"><mat-icon>edit</mat-icon></button></mat-card>} @empty {<div class="empty">هنوز محصولی ثبت نشده است.</div>}</div>
         </div></mat-tab>
         <mat-tab label="اجزای محصول"><div class="tab-content">
-          <mat-card class="form-card"><h2>جزء جدید</h2><form [formGroup]="componentForm" (ngSubmit)="addComponent()">
+          <mat-card class="form-card"><h2>{{editingComponentId ? 'ویرایش جزء' : 'جزء جدید'}}</h2><form [formGroup]="componentForm" (ngSubmit)="addComponent()">
             <mat-form-field appearance="outline"><mat-label>نام جزء</mat-label><input matInput formControlName="name" placeholder="مثلاً پایه مبل"></mat-form-field>
-            <button mat-flat-button type="submit" [disabled]="componentForm.invalid || saving">ثبت جزء</button>
+            <button mat-flat-button type="submit" [disabled]="componentForm.invalid || saving">{{editingComponentId ? 'ذخیره تغییرات' : 'ثبت جزء'}}</button>
           </form></mat-card>
-          <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
+          <div class="list">@for (item of components; track item.id) {<mat-card class="row"><mat-icon>construction</mat-icon><div><strong>{{item.name}}</strong><small>جزء قابل استفاده در محصولات</small></div><button mat-icon-button type="button" aria-label="ویرایش جزء" (click)="editComponent(item)"><mat-icon>edit</mat-icon></button></mat-card>} @empty {<div class="empty">هنوز جزئی ثبت نشده است.</div>}</div>
         </div></mat-tab>
         <mat-tab label="اجزای محصولات"><div class="tab-content">
           <mat-card class="form-card"><h2>{{editingProductComponentId ? 'ویرایش تعداد پیش‌فرض جزء' : 'تعریف اجزای هر محصول'}}</h2>
