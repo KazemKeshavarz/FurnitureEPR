@@ -76,7 +76,9 @@
              </button>
            }
 
-           <button mat-button class="detail" type="button" (click)="details(task.orderId)">مشاهده جزئیات سفارش</button>
+           @if(canViewOrderDetails){
+             <button mat-button class="detail" type="button" (click)="details(task.orderId)">مشاهده جزئیات سفارش</button>
+           }
          </article>
        }
      </div>
